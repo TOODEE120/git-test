@@ -1,0 +1,119 @@
+body {
+  font-family: 'Sarabun', sans-serif;
+  margin: 0;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+header.main-header {
+  background-color: #004080;
+  color: white;
+  padding: 15px;
+}
+
+header.main-header h1 {
+  margin: 0;
+}
+
+header.main-header nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+header.main-header nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.dashboard {
+  padding: 20px;
+}
+
+.welcome {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.features {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  width: 250px;
+  text-align: center;
+}
+
+.card h3 {
+  color: #004080;
+}
+
+.card button {
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.card button:hover {
+  background-color: #0066cc;
+}
+
+footer {
+  background-color: #eee;
+  text-align: center;
+  padding: 10px;
+  margin-top: 30px;
+}
+.exam-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-width: 500px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.exam-form label {
+  font-weight: bold;
+}
+
+.exam-form input, .exam-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.exam-form button {
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.exam-form button:hover {
+  background-color: #0066cc;
+}
+
+.exam-link {
+  margin-top: 20px;
+  text-align: center;
+  background: #e6f2ff;
+  padding: 15px;
+  border-radius: 8px;
+}
