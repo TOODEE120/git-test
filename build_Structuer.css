@@ -1,0 +1,207 @@
+/* --- Global & Anti-Cheat Styles --- */
+body {
+    background-color: #f0edf8;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+    /* ป้องกันการคลุมดำก๊อปปี้ */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+input, textarea {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+/* --- Layout --- */
+.form-container {
+    width: 100%;
+    max-width: 770px;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* --- Header Section --- */
+.header-card {
+     border-top: 10px solid #0c23a5;
+}
+
+.header-card input[type="text"] {
+    width: 100%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+}
+
+.header-card .form-title {
+    font-size: 32px;
+    padding-bottom: 8px;
+}
+
+.header-card .form-desc {
+    font-size: 14px;
+    color: #5f6368;
+    padding-bottom: 4px;
+}
+
+/* --- Question Card (Creator View) --- */
+.question-card {
+    border-left: 6px solid #4285f4;
+    padding-top: 5px;
+}
+
+.drag-handle {
+    text-align: center;
+    cursor: grab;
+    margin-bottom: 10px;
+}
+
+.question-header-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.question-title-input {
+    flex-grow: 1;
+    font-size: 16px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: none;
+    border-bottom: 1px solid #80868b;
+    border-radius: 4px 4px 0 0;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.question-title-input:focus {
+    background-color: #f1f3f4;
+    border-bottom: 2px solid #673ab7;
+}
+
+/* --- Options & Choices --- */
+.option-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Custom UI แทน Radio เดิม */
+.fake-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dadce0;
+    border-radius: 50%;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.option-input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    flex-grow: 1;
+    padding: 8px 0;
+    color: #202124;
+    border-bottom: 1px solid transparent;
+    background-color: transparent;
+    transition: border-bottom 0.2s;
+}
+
+.option-input:focus {
+    border-bottom: 1px solid #dadce0;
+}
+
+.add-input {
+    color: #70757a;
+    flex-grow: 0;
+    width: 80px;
+    cursor: pointer;
+}
+
+.add-other-link {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* --- Submit Button --- */
+.submit-container {
+    margin-top: 15px;
+    margin-bottom: 40px;
+}
+
+.submit-btn {
+    background-color: #673ab7;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- Anti-Cheat Overlay --- */
+#black-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: #000;
+    color: white;
+    z-index: 9999;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#black-screen h1 {
+    color: #ff4d4d;
+}
+
+.watermark {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><text x="10" y="150" font-size="20" fill="black" opacity="0.08" transform="rotate(-30 150 150)">ห้ามเผยแพร่ - ผู้สอบ: 660123</text></svg>');
+    pointer-events: none;
+    z-index: 9998;
+}
+
+.delete-btn{
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity 0.2s , background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-row:hover .delete-btn{
+    opacity: 1;
+}
+
+.delete-btn:hover{
+    background-color: #f1f3f4;
+}
+
+.option-row:first-child:nth-last-child(2) .delete-btn{
+    display: none !important;
+}
