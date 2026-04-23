@@ -1,119 +1,86 @@
+/* ตั้งค่าพื้นฐานของหน้าเว็บ */
 body {
-  font-family: 'Sarabun', sans-serif;
-  margin: 0;
-  background-color: #f9f9f9;
-  color: #333;
+  font-family: 'Sarabun', sans-serif; /* ฟอนต์หลัก */
+  margin: 0;                          /* ลบระยะขอบรอบหน้า */
+  background-color: #f9f9f9;          /* สีพื้นหลังอ่อน */
+  color: #333;                        /* สีตัวอักษรหลัก */
 }
 
+/* ส่วนหัว (Header) */
 header.main-header {
-  background-color: #004080;
-  color: white;
-  padding: 15px;
+  background-color: #004080; /* พื้นหลังสีน้ำเงินเข้ม */
+  color: white;              /* ตัวอักษรสีขาว */
+  padding: 15px;             /* ระยะห่างด้านใน */
 }
 
 header.main-header h1 {
-  margin: 0;
+  margin: 0; /* ลบช่องว่างรอบหัวข้อ */
 }
 
+/* เมนูนำทาง (Navigation bar) */
 header.main-header nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 20px;
+  list-style: none; /* ลบจุดหน้ารายการ */
+  padding: 0;       /* ลบช่องว่างด้านใน */
+  display: flex;    /* จัดเรียงเป็นแนวนอน */
+  gap: 20px;        /* ระยะห่างระหว่างเมนู */
 }
 
 header.main-header nav ul li a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
+  color: white;           /* สีตัวอักษรเมนู */
+  text-decoration: none;  /* ลบเส้นใต้ */
+  font-weight: bold;      /* ตัวหนา */
 }
 
+/* ส่วนเนื้อหาหลัก (Dashboard) */
 .dashboard {
-  padding: 20px;
+  padding: 20px; /* ระยะห่างด้านใน */
 }
 
+/* ข้อความต้อนรับ */
 .welcome {
-  text-align: center;
-  margin-bottom: 30px;
+  text-align: center;    /* จัดข้อความกลาง */
+  margin-bottom: 30px;   /* ระยะห่างด้านล่าง */
 }
 
+/* ส่วนการ์ดฟีเจอร์ */
 .features {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+  display: flex;          /* จัดเรียงเป็นแนวนอน */
+  justify-content: center;/* จัดให้อยู่ตรงกลาง */
+  gap: 20px;              /* ระยะห่างระหว่างการ์ด */
 }
 
+/* กล่องการ์ดแต่ละอัน */
 .card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  width: 250px;
-  text-align: center;
+  background: white;                        /* พื้นหลังสีขาว */
+  border-radius: 8px;                       /* มุมโค้งมน */
+  padding: 20px;                            /* ระยะห่างด้านใน */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);    /* เงาเบา ๆ */
+  width: 250px;                             /* ความกว้างการ์ด */
+  text-align: center;                       /* จัดข้อความกลาง */
 }
 
 .card h3 {
-  color: #004080;
+  color: #004080; /* หัวข้อการ์ดสีน้ำเงิน */
 }
 
+/* ปุ่มในการ์ด */
 .card button {
-  background-color: #004080;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
+  background-color: #004080; /* พื้นหลังปุ่มสีน้ำเงิน */
+  color: white;              /* ตัวอักษรสีขาว */
+  border: none;              /* ไม่มีเส้นขอบ */
+  padding: 10px 15px;        /* ขนาดปุ่ม */
+  border-radius: 5px;        /* มุมโค้งมน */
+  cursor: pointer;           /* เปลี่ยนเป็นรูปมือเมื่อชี้ */
 }
 
 .card button:hover {
-  background-color: #0066cc;
+  background-color: #0066cc; /* สีเปลี่ยนเมื่อเอาเมาส์ชี้ */
 }
 
+/* ส่วนท้าย (Footer) */
 footer {
-  background-color: #eee;
-  text-align: center;
-  padding: 10px;
-  margin-top: 30px;
-}
-.exam-form {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  max-width: 500px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.exam-form label {
-  font-weight: bold;
-}
-
-.exam-form input, .exam-form textarea {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.exam-form button {
-  background-color: #004080;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.exam-form button:hover {
-  background-color: #0066cc;
-}
-
-.exam-link {
-  margin-top: 20px;
-  text-align: center;
-  background: #e6f2ff;
-  padding: 15px;
-  border-radius: 8px;
+  background-color: #eee; /* พื้นหลังสีเทาอ่อน */
+  text-align: center;     /* จัดข้อความกลาง */
+  padding: 10px;          /* ระยะห่างด้านใน */
+  margin-top: 30px;       /* ระยะห่างจากเนื้อหาด้านบน */
 }
