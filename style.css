@@ -1,86 +1,92 @@
-/* ตั้งค่าพื้นฐานของหน้าเว็บ */
+/* ===========================
+   ตั้งค่าพื้นฐานของหน้าเว็บ
+   =========================== */
 body {
-  font-family: 'Sarabun', sans-serif; /* ฟอนต์หลัก */
-  margin: 0;                          /* ลบระยะขอบรอบหน้า */
-  background-color: #f9f9f9;          /* สีพื้นหลังอ่อน */
-  color: #333;                        /* สีตัวอักษรหลัก */
+  font-family: 'Sarabun', sans-serif;
+  margin: 0;
+  background-color: #fff;
+  color: #000;
 }
 
-/* ส่วนหัว (Header) */
+/* ===========================
+   ส่วนหัว (Header)
+   =========================== */
 header.main-header {
-  background-color: #004080; /* พื้นหลังสีน้ำเงินเข้ม */
-  color: white;              /* ตัวอักษรสีขาว */
-  padding: 15px;             /* ระยะห่างด้านใน */
+  background-color: #004080;
+  color: white;
+  padding: 15px;
 }
 
 header.main-header h1 {
-  margin: 0; /* ลบช่องว่างรอบหัวข้อ */
+  margin: 0;
 }
 
-/* เมนูนำทาง (Navigation bar) */
 header.main-header nav ul {
-  list-style: none; /* ลบจุดหน้ารายการ */
-  padding: 0;       /* ลบช่องว่างด้านใน */
-  display: flex;    /* จัดเรียงเป็นแนวนอน */
-  gap: 20px;        /* ระยะห่างระหว่างเมนู */
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 20px;
 }
 
 header.main-header nav ul li a {
-  color: white;           /* สีตัวอักษรเมนู */
-  text-decoration: none;  /* ลบเส้นใต้ */
-  font-weight: bold;      /* ตัวหนา */
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
 }
 
-/* ส่วนเนื้อหาหลัก (Dashboard) */
+/* ===========================
+   ส่วนเนื้อหาหลัก (Dashboard)
+   =========================== */
 .dashboard {
-  padding: 20px; /* ระยะห่างด้านใน */
+  padding: 20px;
 }
 
-/* ข้อความต้อนรับ */
 .welcome {
-  text-align: center;    /* จัดข้อความกลาง */
-  margin-bottom: 30px;   /* ระยะห่างด้านล่าง */
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-/* ส่วนการ์ดฟีเจอร์ */
+/* ===========================
+   ส่วนการ์ดฟีเจอร์
+   =========================== */
 .features {
-  display: flex;          /* จัดเรียงเป็นแนวนอน */
-  justify-content: center;/* จัดให้อยู่ตรงกลาง */
-  gap: 20px;              /* ระยะห่างระหว่างการ์ด */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
-/* กล่องการ์ดแต่ละอัน */
 .card {
-  background: white;                        /* พื้นหลังสีขาว */
-  border-radius: 8px;                       /* มุมโค้งมน */
-  padding: 20px;                            /* ระยะห่างด้านใน */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);    /* เงาเบา ๆ */
-  width: 250px;                             /* ความกว้างการ์ด */
-  text-align: center;                       /* จัดข้อความกลาง */
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  width: 250px;
+  text-align: center;
 }
 
 .card h3 {
-  color: #004080; /* หัวข้อการ์ดสีน้ำเงิน */
+  color: #004080;
 }
 
-/* ปุ่มในการ์ด */
 .card button {
-  background-color: #004080; /* พื้นหลังปุ่มสีน้ำเงิน */
-  color: white;              /* ตัวอักษรสีขาว */
-  border: none;              /* ไม่มีเส้นขอบ */
-  padding: 10px 15px;        /* ขนาดปุ่ม */
-  border-radius: 5px;        /* มุมโค้งมน */
-  cursor: pointer;           /* เปลี่ยนเป็นรูปมือเมื่อชี้ */
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .card button:hover {
-  background-color: #0066cc; /* สีเปลี่ยนเมื่อเอาเมาส์ชี้ */
+  background-color: #0066cc;
 }
 
-/* ส่วนท้าย (Footer) */
+/* ===========================
+   ส่วนท้าย (Footer)
+   =========================== */
 footer {
-  background-color: #eee; /* พื้นหลังสีเทาอ่อน */
-  text-align: center;     /* จัดข้อความกลาง */
-  padding: 10px;          /* ระยะห่างด้านใน */
-  margin-top: 30px;       /* ระยะห่างจากเนื้อหาด้านบน */
+  background-color: #eee;
+  text-align: center;
+  padding: 10px;
+  margin-top: 30px;
 }
