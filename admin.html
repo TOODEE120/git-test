@@ -83,6 +83,16 @@
       </div>
       
       <div class="answer-box">
+        <strong>ข้อ 1: ประเทศไทยตั้งอยู่บนทวีปใด?</strong>
+        <p id="ans-mcq-1" style="color: #455a7a; font-weight: bold;"></p>
+      </div>
+
+      <div class="answer-box">
+        <strong>ข้อ 2: ผลรวมของ 15 และ 27 เท่ากับเท่าไหร่?</strong>
+        <p id="ans-mcq-2" style="color: #455a7a; font-weight: bold;"></p>
+      </div>
+
+      <div class="answer-box">
         <strong>ข้อ 3: อธิบายความสำคัญของการอ่านหนังสือในชีวิตประจำวันสั้น ๆ</strong>
         <p id="ans-essay-1" style="color: #455a7a; font-style: italic; white-space: pre-wrap;"></p>
         <label>ให้คะแนนข้อ 3 (เต็ม 1): </label>
@@ -216,6 +226,11 @@
         alertBox.style.display = "none";
       }
 
+      // แสดงข้อกา
+      const choiceMap = { a: 'ก', b: 'ข', c: 'ค', d: 'ง' };
+      document.getElementById("ans-mcq-1").textContent = choiceMap[student.mcqAnswers[0]] || '(ไม่ได้ตอบ)';
+      document.getElementById("ans-mcq-2").textContent = choiceMap[student.mcqAnswers[1]] || '(ไม่ได้ตอบ)';
+
       document.getElementById("ans-essay-1").textContent = student.essayAnswers[0] || "(ยังไม่ได้พิมพ์คำตอบ)";
       document.getElementById("ans-essay-2").textContent = student.essayAnswers[1] || "(ยังไม่ได้พิมพ์คำตอบ)";
 
@@ -244,6 +259,7 @@
       let studentIndex = students.findIndex(s => s.id === currentEditingId);
       if (studentIndex !== -1) {
         students[studentIndex].essayScore = score1 + score2;
+        students[studentIndex].totalScore = students[studentIndex].mcqScore + (score1 + score2);
         students[studentIndex].feedback = feedbackText;
         students[studentIndex].isGraded = true;
       }

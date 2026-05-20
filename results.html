@@ -254,7 +254,7 @@
     }
 
     function displayScore(results) {
-      const { score, total, percentage, timestamp } = results;
+      const { score, total, percentage, timestamp, studentId, studentName } = results;
       
       // อัปเดตสกอร์
       document.getElementById('scoreCircle').textContent = score + '/' + total;
