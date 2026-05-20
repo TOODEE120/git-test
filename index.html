@@ -1,11 +1,246 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เว็บข้อสอบ - ข้อกาและข้อเขียน</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Sarabun", sans-serif;
+      background: #f0f4ff;
+      color: #1a1a1a;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      text-align: center;
+      padding: 24px 0;
+    }
+    header h1 {
+      margin: 0;
+      color: #0b3d91;
+    }
+    header p {
+      margin: 8px 0 0;
+      color: #455a7a;
+    }
+    section.card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
+      margin-bottom: 20px;
+      padding: 24px;
+    }
+    section.card h2 {
+      margin-top: 0;
+      color: #102a58;
+    }
+    .question {
+      margin-bottom: 22px;
+    }
+    .question p {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .choices label,
+    .essay textarea {
+      display: block;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .choices input[type="radio"] {
+      margin-right: 10px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 1px solid #cfd8e4;
+      border-radius: 10px;
+      padding: 12px;
+      resize: vertical;
+      font-size: 1rem;
+      line-height: 1.5;
+      font-family: inherit;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    button {
+      background: #0b3d91;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 22px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+    button:hover {
+      background: #0f4dab;
+      transform: translateY(-1px);
+    }
+    .result {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 14px;
+      background: #eef4ff;
+      border: 1px solid #b8d2ff;
+    }
+    .result strong {
+      display: block;
+      margin-bottom: 10px;
+      color: #0b3d91;
+    }
+    .hint {
+      color: #334155;
+      font-size: 0.98rem;
+      margin-top: 6px;
+    }
+    @media (max-width: 640px) {
+      .container {
+        padding: 16px;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>hahaha</h1>
+  <div class="container">
+    <header>
+      <h1>เว็บข้อสอบออนไลน์</h1>
+      <p>ประกอบด้วยทั้งข้อกา (ปรนัย) และข้อเขียน (อัตนัย) เพื่อฝึกทักษะการตอบอย่างครบถ้วน</p>
+    </header>
+
+    <section class="card">
+      <h2>คำแนะนำ</h2>
+      <p>กรุณาเลือกคำตอบที่ถูกต้องในข้อกามีเพียงหนึ่งคำตอบ และตอบคำถามข้อเขียนด้วยข้อความที่ชัดเจนหรือคำอธิบายสั้น ๆ</p>
+    </section>
+
+    <section class="card" id="multiple-choice-section">
+      <h2>ข้อกา (Multiple Choice)</h2>
+
+      <div class="question" id="mcq1">
+        <p>1. ประเทศไทยตั้งอยู่บนทวีปใด?</p>
+        <div class="choices">
+          <label><input type="radio" name="q1" value="a"> ก. ยุโรป</label>
+          <label><input type="radio" name="q1" value="b"> ข. เอเชีย</label>
+          <label><input type="radio" name="q1" value="c"> ค. แอฟริกา</label>
+          <label><input type="radio" name="q1" value="d"> ง. อเมริกาใต้</label>
+        </div>
+      </div>
+
+      <div class="question" id="mcq2">
+        <p>2. ผลรวมของ 15 และ 27 เท่ากับเท่าไหร่?</p>
+        <div class="choices">
+          <label><input type="radio" name="q2" value="a"> ก. 32</label>
+          <label><input type="radio" name="q2" value="b"> ข. 42</label>
+          <label><input type="radio" name="q2" value="c"> ค. 52</label>
+          <label><input type="radio" name="q2" value="d"> ง. 62</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="written-section">
+      <h2>ข้อเขียน (Short Answer)</h2>
+
+      <div class="question essay" id="essay1">
+        <p>3. อธิบายความสำคัญของการอ่านหนังสือในชีวิตประจำวันสั้น ๆ</p>
+        <textarea id="a3" placeholder="พิมพ์คำตอบของคุณที่นี่"></textarea>
+      </div>
+
+      <div class="question essay" id="essay2">
+        <p>4. คุณจะจัดการเวลาอย่างไรเมื่อต้องทำงานและเรียนพร้อมกัน?</p>
+        <textarea id="a4" placeholder="พิมพ์คำตอบของคุณที่นี่"></textarea>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" onclick="gradeExam()">ส่งคำตอบ</button>
+      <button type="button" onclick="resetExam()">ล้างคำตอบ</button>
+    </div>
+
+    <div class="result" id="resultBox">
+      <strong>ผลการทำข้อสอบ</strong>
+      <div id="summary"></div>
+      <div id="feedback" class="hint"></div>
+    </div>
+  </div>
+
+  <script>
+    function gradeExam() {
+      const answers = {
+        q1: 'b',
+        q2: 'b'
+      };
+
+      const selectedQ1 = document.querySelector('input[name="q1"]:checked');
+      const selectedQ2 = document.querySelector('input[name="q2"]:checked');
+      const essay1 = document.getElementById('a3').value.trim();
+      const essay2 = document.getElementById('a4').value.trim();
+
+      let score = 0;
+      let total = 4;
+      let message = [];
+
+      if (!selectedQ1 || !selectedQ2) {
+        alert('กรุณาตอบข้อกาทั้งหมดก่อนส่งคำตอบ');
+        return;
+      }
+
+      if (selectedQ1.value === answers.q1) score += 1;
+      if (selectedQ2.value === answers.q2) score += 1;
+      if (essay1.length >= 10) score += 1;
+      if (essay2.length >= 10) score += 1;
+
+      const summary = document.getElementById('summary');
+      const feedback = document.getElementById('feedback');
+      const resultBox = document.getElementById('resultBox');
+
+      summary.innerHTML = 'คุณได้คะแนน ' + score + ' จาก ' + total + ' คะแนน.';
+
+      message = [];
+      if (selectedQ1.value !== answers.q1) {
+        message.push('ข้อ 1: คำตอบที่ถูกต้องคือ ข. เอเชีย');
+      }
+      if (selectedQ2.value !== answers.q2) {
+        message.push('ข้อ 2: คำตอบที่ถูกต้องคือ ข. 42');
+      }
+      if (essay1.length < 10) {
+        message.push('ข้อ 3: กรุณาเขียนคำตอบให้ยาวขึ้นและชัดเจนกว่าเดิม');
+      }
+      if (essay2.length < 10) {
+        message.push('ข้อ 4: กรุณาเขียนคำตอบให้ยาวขึ้นและชัดเจนกว่าเดิม');
+      }
+
+      if (message.length === 0) {
+        feedback.textContent = 'ทำได้ดีมาก! คุณตอบครบถ้วนทั้งข้อกาและข้อเขียนแล้ว';
+      } else {
+        feedback.innerHTML = message.join('<br>');
+      }
+
+      resultBox.style.display = 'block';
+      resultBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetExam() {
+      document.querySelectorAll('input[name="q1"], input[name="q2"]').forEach(input => input.checked = false);
+      document.getElementById('a3').value = '';
+      document.getElementById('a4').value = '';
+      document.getElementById('resultBox').style.display = 'none';
+      document.getElementById('summary').textContent = '';
+      document.getElementById('feedback').textContent = '';
+    }
+  </script>
 </body>
 </html>
