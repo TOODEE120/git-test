@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผลการทำข้อสอบ</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Sarabun", sans-serif;
+      background: #f0f4ff;
+      color: #1a1a1a;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      text-align: center;
+      padding: 24px 0;
+    }
+    header h1 {
+      margin: 0;
+      color: #0b3d91;
+      font-size: 2rem;
+    }
+    header p {
+      margin: 8px 0 0;
+      color: #455a7a;
+    }
+    .score-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
+      margin-bottom: 24px;
+      padding: 40px;
+      text-align: center;
+    }
+    .score-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .score-number {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #0b3d91;
+    }
+    .score-circle {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0b3d91 0%, #0f4dab 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+    .score-percentage {
+      font-size: 1.5rem;
+      color: #455a7a;
+      margin-top: 12px;
+    }
+    .feedback {
+      font-size: 1.1rem;
+      margin: 16px 0;
+      padding: 16px;
+      border-radius: 10px;
+      background: #eef4ff;
+      border-left: 4px solid #0b3d91;
+    }
+    .feedback.excellent {
+      background: #d4edda;
+      border-left-color: #28a745;
+      color: #155724;
+    }
+    .feedback.good {
+      background: #cce5ff;
+      border-left-color: #0066cc;
+      color: #003366;
+    }
+    .feedback.fair {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+      color: #856404;
+    }
+    .details-section {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
+      margin-bottom: 24px;
+      padding: 24px;
+    }
+    .details-section h2 {
+      margin-top: 0;
+      color: #102a58;
+    }
+    .answer-item {
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #f8f9fa;
+      border-left: 4px solid #cfd8e4;
+    }
+    .answer-item.correct {
+      background: #d4edda;
+      border-left-color: #28a745;
+    }
+    .answer-item.incorrect {
+      background: #f8d7da;
+      border-left-color: #dc3545;
+    }
+    .answer-item .question-text {
+      font-weight: bold;
+      color: #102a58;
+      margin-bottom: 8px;
+    }
+    .answer-item .type-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .answer-item .type-badge.mcq {
+      background: #e7f3ff;
+      color: #0066cc;
+    }
+    .answer-item .type-badge.essay {
+      background: #f0e6ff;
+      color: #6600cc;
+    }
+    .answer-content {
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+    .answer-content strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #333;
+    }
+    .correct-icon::before {
+      content: "✓ ";
+      color: #28a745;
+      font-weight: bold;
+    }
+    .incorrect-icon::before {
+      content: "✗ ";
+      color: #dc3545;
+      font-weight: bold;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0b3d91;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 24px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+    button:hover {
+      background: #0f4dab;
+      transform: translateY(-1px);
+    }
+    button.secondary {
+      background: #667085;
+    }
+    button.secondary:hover {
+      background: #495057;
+    }
+    .timestamp {
+      text-align: center;
+      color: #667085;
+      font-size: 0.9rem;
+      margin-top: 16px;
+    }
+    @media (max-width: 640px) {
+      .container {
+        padding: 16px;
+      }
+      .score-card {
+        padding: 24px;
+      }
+      .score-number {
+        font-size: 2.5rem;
+      }
+      .score-circle {
+        width: 120px;
+        height: 120px;
+        font-size: 1.8rem;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ผลการทำข้อสอบของคุณ</h1>
+      <p>ตรวจสอบคะแนนและรายละเอียดการตอบคำถาม</p>
+    </header>
+
+    <section class="score-card">
+      <h2 style="margin-top: 0; color: #102a58;">สรุปคะแนน</h2>
+      <div class="score-display">
+        <div class="score-circle" id="scoreCircle">0/4</div>
+        <div>
+          <div class="score-number" id="scoreText">0 จาก 4</div>
+          <div class="score-percentage" id="percentageText">0%</div>
+        </div>
+      </div>
+      <div class="feedback" id="feedbackBox"></div>
+      <div class="timestamp" id="timestamp"></div>
+    </section>
+
+    <section class="details-section" style="display: none;">
+      <h2>รายละเอียดการตอบคำถาม</h2>
+      <div id="answersDetail"></div>
+    </section>
+
+    <div class="actions">
+      <button class="secondary" onclick="downloadResults()">ดาวน์โหลดผลลัพธ์</button>
+    </div>
+  </div>
+
+  <script>
+    function loadResults() {
+      const resultsData = localStorage.getItem('examResults');
+      
+      if (!resultsData) {
+        document.body.innerHTML = '<div class="container"><div class="score-card"><h2>ไม่พบข้อมูลการสอบ</h2><p>กรุณากลับไปทำข้อสอบ</p><button onclick="window.location.href=\'index.html\'">กลับไปที่หน้าสอบ</button></div></div>';
+        return;
+      }
+
+      const results = JSON.parse(resultsData);
+      displayScore(results);
+      displayDetails(results);
+    }
+
+    function displayScore(results) {
+      const { score, total, percentage, timestamp } = results;
+      
+      // อัปเดตสกอร์
+      document.getElementById('scoreCircle').textContent = score + '/' + total;
+      document.getElementById('scoreText').textContent = score + ' จาก ' + total;
+      document.getElementById('percentageText').textContent = percentage + '%';
+      document.getElementById('timestamp').textContent = 'เวลา: ' + timestamp;
+
+      // เลือก feedback และสี
+      let feedbackClass = '';
+      let feedbackText = '';
+
+      if (percentage >= 80) {
+        feedbackClass = 'excellent';
+        feedbackText = '🎉 ยอดเยี่ยม! คุณทำได้ดีมากครับ ติดตามเรียนต่อไปนะ';
+      } else if (percentage >= 60) {
+        feedbackClass = 'good';
+        feedbackText = '👍 ดีครับ! คุณมีความเข้าใจพอสมควร ลองทำข้อสอบอีกครั้งเพื่อให้ดียิ่งขึ้น';
+      } else if (percentage >= 40) {
+        feedbackClass = 'fair';
+        feedbackText = '📚 ยังต้องทำความเข้าใจเพิ่มเติม ลองทบทวนหนังสือและทำข้อสอบใหม่';
+      } else {
+        feedbackClass = 'fair';
+        feedbackText = '💪 ตั้งใจเรียนเพิ่มเติมให้มากขึ้นนะครับ ลองทำข้อสอบใหม่อีกครั้ง';
+      }
+
+      const feedbackBox = document.getElementById('feedbackBox');
+      feedbackBox.className = 'feedback ' + feedbackClass;
+      feedbackBox.textContent = feedbackText;
+    }
+
+    function displayDetails(results) {
+      const detailsContainer = document.getElementById('answersDetail');
+      const questionTitles = {
+        1: 'ประเทศไทยตั้งอยู่บนทวีปใด?',
+        2: 'ผลรวมของ 15 และ 27 เท่ากับเท่าไหร่?',
+        3: 'อธิบายความสำคัญของการอ่านหนังสือในชีวิตประจำวันสั้น ๆ',
+        4: 'คุณจะจัดการเวลาอย่างไรเมื่อต้องทำงานและเรียนพร้อมกัน?'
+      };
+
+      let html = '';
+      results.details.forEach(detail => {
+        const isCorrect = detail.correct;
+        const itemClass = isCorrect ? 'correct' : 'incorrect';
+        const icon = isCorrect ? 'correct-icon' : 'incorrect-icon';
+        const typeDisplay = detail.type === 'mcq' ? 'ข้อกา' : 'ข้อเขียน';
+        const typeBadgeClass = detail.type === 'mcq' ? 'mcq' : 'essay';
+
+        html += '<div class="answer-item ' + itemClass + '">';
+        html += '<div class="question-text"><span class="' + icon + '">ข้อ ' + detail.question + '. ' + questionTitles[detail.question] + '</span></div>';
+        html += '<span class="type-badge ' + typeBadgeClass + '">' + typeDisplay + '</span>';
+
+        if (detail.type === 'mcq') {
+          const choiceMap = { a: 'ก', b: 'ข', c: 'ค', d: 'ง' };
+          html += '<div class="answer-content"><strong>คำตอบของคุณ:</strong> ' + choiceMap[detail.userAnswer] + '</div>';
+        } else {
+          html += '<div class="answer-content"><strong>คำตอบของคุณ:</strong> "' + (detail.userAnswer || '(ว่างเปล่า)') + '"</div>';
+        }
+
+        html += '</div>';
+      });
+
+      detailsContainer.innerHTML = html;
+    }
+
+    function goBackToExam() {
+      localStorage.removeItem('examResults');
+      window.location.href = 'index.html';
+    }
+
+    function downloadResults() {
+      const resultsData = localStorage.getItem('examResults');
+      const results = JSON.parse(resultsData);
+      
+      let text = 'ผลการทำข้อสอบ\n';
+      text += '==================\n';
+      text += 'คะแนน: ' + results.score + ' จาก ' + results.total + '\n';
+      text += 'เปอร์เซ็นต์: ' + results.percentage + '%\n';
+      text += 'เวลา: ' + results.timestamp + '\n\n';
+      text += 'รายละเอียด:\n';
+      
+      results.details.forEach(detail => {
+        text += '\nข้อ ' + detail.question + ' (' + (detail.type === 'mcq' ? 'ข้อกา' : 'ข้อเขียน') + ')\n';
+        text += 'ผลลัพธ์: ' + (detail.correct ? 'ถูกต้อง' : 'ไม่ถูกต้อง') + '\n';
+      });
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'exam_results_' + new Date().getTime() + '.txt');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // โหลดข้อมูลเมื่อหน้าเปิด
+    window.addEventListener('load', loadResults);
+  </script>
+</body>
+</html>
