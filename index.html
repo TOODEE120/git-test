@@ -1,301 +1,308 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>เว็บข้อสอบ - ข้อกาและข้อเขียน</title>
+  <title>เว็บข้อสอบ - Silent Proctoring (Mouse Track)</title>
   <style>
     body {
-      margin: 0;
-      font-family: "Sarabun", sans-serif;
-      background: #f0f4ff;
+      margin: 0; 
+      font-family: "Sarabun", sans-serif; 
+      background: #f0f4ff; 
       color: #1a1a1a;
+      user-select: none; 
     }
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px;
+    .container { 
+      max-width: 960px; 
+      margin: 0 auto; 
+      padding: 24px; 
+      position: relative; 
     }
-    header {
-      text-align: center;
-      padding: 24px 0;
+    
+    header { text-align: center; padding: 24px 0; }
+    header h1 { margin: 0; color: #0b3d91; }
+    header p { margin: 8px 0 0; color: #455a7a; }
+    
+    section.card { 
+      background: #ffffff; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08); 
+      margin-bottom: 20px; 
+      padding: 24px; 
     }
-    header h1 {
-      margin: 0;
-      color: #0b3d91;
+    section.card h2 { margin-top: 0; color: #102a58; }
+    
+    .question { margin-bottom: 22px; }
+    .question p { margin: 0 0 12px; font-size: 1rem; line-height: 1.6; }
+    
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #102a58; }
+    .input-group input[type="text"] { 
+      width: 100%; 
+      box-sizing: border-box; 
+      padding: 10px 14px; 
+      border: 1px solid #cfd8e4; 
+      border-radius: 8px; 
+      font-size: 1rem; 
+      font-family: inherit; 
     }
-    header p {
-      margin: 8px 0 0;
-      color: #455a7a;
+    
+    .choices label, .essay textarea { display: block; margin-bottom: 10px; cursor: pointer; }
+    .choices input[type="radio"] { margin-right: 10px; }
+    textarea { 
+      width: 100%; 
+      box-sizing: border-box; 
+      min-height: 120px; 
+      border: 1px solid #cfd8e4; 
+      border-radius: 10px; 
+      padding: 12px; 
+      resize: vertical; 
+      font-size: 1rem; 
+      line-height: 1.5; 
+      font-family: inherit; 
     }
-    section.card {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
-      margin-bottom: 20px;
-      padding: 24px;
+    
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+    button { 
+      background: #0b3d91; 
+      color: #ffffff; 
+      border: none; 
+      border-radius: 10px; 
+      padding: 14px 22px; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      transition: transform 0.16s ease, background 0.16s ease; 
     }
-    section.card h2 {
-      margin-top: 0;
-      color: #102a58;
-    }
-    .question {
-      margin-bottom: 22px;
-    }
-    .question p {
-      margin: 0 0 12px;
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-    .choices label,
-    .essay textarea {
-      display: block;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-    .choices input[type="radio"] {
-      margin-right: 10px;
-    }
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      border: 1px solid #cfd8e4;
-      border-radius: 10px;
-      padding: 12px;
-      resize: vertical;
-      font-size: 1rem;
-      line-height: 1.5;
-      font-family: inherit;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 16px;
-    }
-    button {
-      background: #0b3d91;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      padding: 14px 22px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: transform 0.16s ease, background 0.16s ease;
-    }
-    button:hover {
-      background: #0f4dab;
-      transform: translateY(-1px);
-    }
-    .result {
-      display: none;
-      margin-top: 18px;
-      padding: 18px;
-      border-radius: 14px;
-      background: #eef4ff;
-      border: 1px solid #b8d2ff;
-    }
-    .result strong {
-      display: block;
-      margin-bottom: 10px;
-      color: #0b3d91;
-    }
-    .hint {
-      color: #334155;
-      font-size: 0.98rem;
-      margin-top: 6px;
-    }
-    @media (max-width: 640px) {
-      .container {
-        padding: 16px;
-      }
-      button {
-        width: 100%;
-      }
-    }
+    button:hover { background: #0f4dab; transform: translateY(-1px); }
   </style>
 </head>
 <body>
+
   <div class="container">
     <header>
       <h1>เว็บข้อสอบออนไลน์</h1>
-      <p>ประกอบด้วยทั้งข้อกา (ปรนัย) และข้อเขียน (อัตนัย) เพื่อฝึกทักษะการตอบอย่างครบถ้วน</p>
+      <p>ระบบตรวจจับการโกงทำงานอยู่เบื้องหลังอย่างเต็มรูปแบบ</p>
     </header>
 
     <section class="card">
-      <h2>ข้อมูลนักเรียน</h2>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: bold;">รหัสนักเรียน</label>
-          <input type="text" id="studentId" placeholder="เช่น 001" style="width: 100%; padding: 10px; border: 1px solid #cfd8e4; border-radius: 8px; font-size: 1rem; font-family: inherit;">
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: bold;">ชื่อ-นามสกุล</label>
-          <input type="text" id="studentName" placeholder="เช่น สมชาย ใจดี" style="width: 100%; padding: 10px; border: 1px solid #cfd8e4; border-radius: 8px; font-size: 1rem; font-family: inherit;">
-        </div>
+      <h2>ข้อมูลผู้สอบ</h2>
+      <div class="input-group">
+        <label for="studentId">รหัสนักเรียน (ID):</label>
+        <input type="text" id="studentId" placeholder="เช่น 66005" oninput="saveProgressRealtime()">
       </div>
-    </section>
-
-    <section class="card">
-      <h2>คำแนะนำ</h2>
-      <p>กรุณาเลือกคำตอบที่ถูกต้องในข้อกามีเพียงหนึ่งคำตอบ และตอบคำถามข้อเขียนด้วยข้อความที่ชัดเจนหรือคำอธิบายสั้น ๆ</p>
+      <div class="input-group">
+        <label for="studentName">ชื่อ-นามสกุล:</label>
+        <input type="text" id="studentName" placeholder="เช่น มานะ อดทน" oninput="saveProgressRealtime()">
+      </div>
     </section>
 
     <section class="card" id="multiple-choice-section">
       <h2>ข้อกา (Multiple Choice)</h2>
-
       <div class="question" id="mcq1">
         <p>1. ประเทศไทยตั้งอยู่บนทวีปใด?</p>
         <div class="choices">
-          <label><input type="radio" name="q1" value="a"> ก. ยุโรป</label>
-          <label><input type="radio" name="q1" value="b"> ข. เอเชีย</label>
-          <label><input type="radio" name="q1" value="c"> ค. แอฟริกา</label>
-          <label><input type="radio" name="q1" value="d"> ง. อเมริกาใต้</label>
+          <label><input type="radio" name="q1" value="a" onchange="saveProgressRealtime()"> ก. ยุโรป</label>
+          <label><input type="radio" name="q1" value="b" onchange="saveProgressRealtime()"> ข. เอเชีย</label>
+          <label><input type="radio" name="q1" value="c" onchange="saveProgressRealtime()"> ค. แอฟริกา</label>
+          <label><input type="radio" name="q1" value="d" onchange="saveProgressRealtime()"> ง. อเมริกาใต้</label>
         </div>
       </div>
-
       <div class="question" id="mcq2">
         <p>2. ผลรวมของ 15 และ 27 เท่ากับเท่าไหร่?</p>
         <div class="choices">
-          <label><input type="radio" name="q2" value="a"> ก. 32</label>
-          <label><input type="radio" name="q2" value="b"> ข. 42</label>
-          <label><input type="radio" name="q2" value="c"> ค. 52</label>
-          <label><input type="radio" name="q2" value="d"> ง. 62</label>
+          <label><input type="radio" name="q2" value="a" onchange="saveProgressRealtime()"> ก. 32</label>
+          <label><input type="radio" name="q2" value="b" onchange="saveProgressRealtime()"> ข. 42</label>
+          <label><input type="radio" name="q2" value="c" onchange="saveProgressRealtime()"> ค. 52</label>
+          <label><input type="radio" name="q2" value="d" onchange="saveProgressRealtime()"> ง. 62</label>
         </div>
       </div>
     </section>
 
     <section class="card" id="written-section">
       <h2>ข้อเขียน (Short Answer)</h2>
-
       <div class="question essay" id="essay1">
         <p>3. อธิบายความสำคัญของการอ่านหนังสือในชีวิตประจำวันสั้น ๆ</p>
-        <textarea id="a3" placeholder="พิมพ์คำตอบของคุณที่นี่"></textarea>
+        <textarea id="a3" class="exam-textarea" placeholder="พิมพ์คำตอบของคุณที่นี่" oninput="saveProgressRealtime()"></textarea>
       </div>
-
       <div class="question essay" id="essay2">
         <p>4. คุณจะจัดการเวลาอย่างไรเมื่อต้องทำงานและเรียนพร้อมกัน?</p>
-        <textarea id="a4" placeholder="พิมพ์คำตอบของคุณที่นี่"></textarea>
+        <textarea id="a4" class="exam-textarea" placeholder="พิมพ์คำตอบของคุณที่นี่" oninput="saveProgressRealtime()"></textarea>
       </div>
     </section>
 
     <div class="actions">
       <button type="button" onclick="gradeExam()">ส่งคำตอบ</button>
-      <button type="button" onclick="resetExam()">ล้างคำตอบ</button>
+      <button type="button" onclick="resetExam()" style="background: #ef4444;">ล้างคำตอบ</button>
     </div>
   </div>
 
   <script>
+    let suspicionScore = 0;
+    let suspicionReasons = new Set(); 
+
+    // ฟังก์ชันแอบจดพฤติกรรมน่าสงสัย (Silent Observer)
+    function recordSuspicionSilent(score, reason) {
+      suspicionScore += score;
+      if (suspicionScore > 100) suspicionScore = 100;
+      suspicionReasons.add(reason);
+      saveProgressRealtime(); 
+    }
+
+    // ==========================================
+    // 🔴 ด่านที่ 1: ตรวจจับหน้าจอ (Visibility, Blur, Resize)
+    // ==========================================
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) recordSuspicionSilent(20, "สลับแท็บไปยังเว็บไซต์อื่น");
+    });
+
+    window.addEventListener("blur", () => {
+      recordSuspicionSilent(15, "คลิกออกนอกหน้าต่าง (หลุดโฟกัสไปโปรแกรมอื่น)");
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth < screen.width * 0.7) {
+        recordSuspicionSilent(10, "ย่อขนาดหน้าต่าง (สงสัยว่าแบ่งจอเปิดโพย)");
+      }
+    });
+
+    // ==========================================
+    // 🔴 ด่านที่ 2: ตรวจจับเมาส์ออกนอกขอบจอ (Mouse Leave)
+    // ==========================================
+    document.addEventListener("mouseleave", (e) => {
+      // ถ้าพิกัดเมาส์ (clientY หรือ clientX) หลุดออกนอกขอบเขตหน้าเว็บ
+      if (e.clientY <= 0 || e.clientX <= 0 || (e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)) {
+        recordSuspicionSilent(10, "เลื่อนเมาส์ออกนอกเขตหน้าต่างเว็บ (สงสัยว่าค้นหาข้อมูลหรือใช้งานหน้าจออื่น)");
+      }
+    });
+
+    // ==========================================
+    // 🔴 ด่านที่ 3: ตรวจจับบอทพิมพ์และคัดลอก (Keystroke & Drop)
+    // ==========================================
+    const textareas = document.querySelectorAll('.exam-textarea');
+    textareas.forEach(ta => {
+      ta.addEventListener('paste', (e) => {
+        e.preventDefault();
+        recordSuspicionSilent(25, "พยายามใช้คำสั่ง Copy/Paste");
+      });
+      ta.addEventListener('drop', (e) => { 
+        e.preventDefault(); 
+        recordSuspicionSilent(25, "พยายามลากข้อความมาวาง (Drag & Drop)");
+      });
+
+      let lastLength = 0;
+      let lastTime = Date.now();
+      ta.addEventListener('input', (e) => {
+        let currentLength = ta.value.length;
+        let currentTime = Date.now();
+        
+        if ((currentLength - lastLength) > 15 && (currentTime - lastTime) < 50) {
+          ta.value = ta.value.substring(0, lastLength); 
+          recordSuspicionSilent(40, "ความเร็วการพิมพ์ผิดปกติ (สงสัยว่าใช้ Auto-Typer)");
+        } else {
+          lastLength = ta.value.length;
+          lastTime = currentTime;
+        }
+      });
+    });
+
+    // ==========================================
+    // 🔴 ด่านที่ 4: บล็อกหน้าต่างนักพัฒนา (F12, Context Menu)
+    // ==========================================
+    window.addEventListener("contextmenu", (e) => { 
+      e.preventDefault(); 
+      recordSuspicionSilent(5, "คลิกขวาบนหน้าจอ");
+    });
+    
+    window.addEventListener("keydown", (e) => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'j')) || (e.ctrlKey && 'ucvp'.includes(e.key.toLowerCase()))) {
+        e.preventDefault();
+        recordSuspicionSilent(30, "พยายามเปิด Developer Tools หรือกดปุ่มลัดต้องห้าม");
+      }
+    });
+
+    // ==========================================
+    // 🔄 ระบบส่งข้อมูล (Real-time + Grade)
+    // ==========================================
+    function saveProgressRealtime() {
+      const studentId = document.getElementById('studentId').value.trim();
+      const studentName = document.getElementById('studentName').value.trim();
+      if (!studentId || !studentName) return;
+
+      const selectedQ1 = document.querySelector('input[name="q1"]:checked');
+      const selectedQ2 = document.querySelector('input[name="q2"]:checked');
+      let mcqScore = 0;
+      if (selectedQ1 && selectedQ1.value === 'b') mcqScore += 1;
+      if (selectedQ2 && selectedQ2.value === 'b') mcqScore += 1;
+
+      let reasonText = suspicionReasons.size > 0 ? Array.from(suspicionReasons).join(", ") : "พฤติกรรมปกติ";
+      let examData = JSON.parse(localStorage.getItem('examData')) || [];
+      const existing = examData.find(s => s.id === studentId);
+      
+      const currentProgress = {
+        id: studentId,
+        name: studentName,
+        mcqScore: mcqScore,
+        essayScore: existing ? existing.essayScore : 0,
+        essayAnswers: [document.getElementById('a3').value.trim(), document.getElementById('a4').value.trim()],
+        isGraded: existing ? existing.isGraded : false,
+        suspicionScore: suspicionScore, 
+        suspicionReason: reasonText,    
+        feedback: existing ? existing.feedback : ""
+      };
+
+      const existingIndex = examData.findIndex(s => s.id === studentId);
+      if (existingIndex >= 0) examData[existingIndex] = currentProgress;
+      else examData.push(currentProgress);
+
+      localStorage.setItem('examData', JSON.stringify(examData));
+    }
+
     function gradeExam() {
       const studentId = document.getElementById('studentId').value.trim();
       const studentName = document.getElementById('studentName').value.trim();
-
       if (!studentId || !studentName) {
-        alert('กรุณากรอกรหัสและชื่อ-นามสกุล');
-        return;
+        alert('กรุณากรอกรหัสนักเรียนและชื่อ-นามสกุลก่อนส่งคำตอบครับ'); return;
       }
 
-      const answers = {
-        q1: 'b',
-        q2: 'b'
-      };
-
+      const answers = { q1: 'b', q2: 'b' };
       const selectedQ1 = document.querySelector('input[name="q1"]:checked');
       const selectedQ2 = document.querySelector('input[name="q2"]:checked');
       const essay1 = document.getElementById('a3').value.trim();
       const essay2 = document.getElementById('a4').value.trim();
 
-      if (!selectedQ1 || !selectedQ2) {
-        alert('กรุณาตอบข้อกาทั้งหมดก่อนส่งคำตอบ');
-        return;
-      }
+      if (!selectedQ1 || !selectedQ2) { alert('กรุณาตอบข้อกาทั้งหมดก่อนส่งคำตอบ'); return; }
 
-      let mcqScore = 0;
-      let mcqCorrect = [];
+      let score = 0; let total = 4;
+      if (selectedQ1.value === answers.q1) score += 1;
+      if (selectedQ2.value === answers.q2) score += 1;
+      if (essay1.length >= 10) score += 1;
+      if (essay2.length >= 10) score += 1;
 
-      // ตรวจข้อกา
-      if (selectedQ1.value === answers.q1) {
-        mcqScore += 1;
-        mcqCorrect.push(true);
-      } else {
-        mcqCorrect.push(false);
-      }
+      saveProgressRealtime();
 
-      if (selectedQ2.value === answers.q2) {
-        mcqScore += 1;
-        mcqCorrect.push(true);
-      } else {
-        mcqCorrect.push(false);
-      }
-
-      // ตรวจเบื้องต้นข้อเขียน (ยังไม่ให้คะแนนเต็ม เพราะต้องให้ admin ตรวจ)
-      let essayScore = 0;
-      if (essay1.length >= 10) essayScore += 0.5;
-      if (essay2.length >= 10) essayScore += 0.5;
-
-      // คำนวณความเสี่ยง (suspicion score)
-      let suspicionScore = 0;
-      let suspicionReason = '';
-
-      // ตรวจสอบความผิดปกติ
-      if (essay1.split(' ').length > 100 || essay2.split(' ').length > 100) {
-        suspicionScore += 30;
-        suspicionReason = 'ข้อเขียนยาวมาก ';
-      }
-      if (essay1.includes('http') || essay2.includes('http') || essay1.includes('copy') || essay2.includes('copy')) {
-        suspicionScore += 20;
-        suspicionReason += '| อาจมีการคัดลอก ';
-      }
-
-      // บันทึกข้อมูลผู้สอบ
-      let examData = JSON.parse(localStorage.getItem('examData')) || [];
-      let studentIndex = examData.findIndex(s => s.id === studentId);
-
-      const studentData = {
-        id: studentId,
-        name: studentName,
-        mcqAnswers: [selectedQ1.value, selectedQ2.value],
-        mcqScore: mcqScore,
-        essayAnswers: [essay1, essay2],
-        essayScore: essayScore,
-        totalScore: mcqScore + essayScore,
-        suspicionScore: Math.min(suspicionScore, 100),
-        suspicionReason: suspicionReason || 'ปกติ',
-        isGraded: false,
-        feedback: '',
-        timestamp: new Date().toLocaleString('th-TH')
+      const resultsData = {
+        score: score, total: total, percentage: (score / total) * 100,
+        timestamp: new Date().toLocaleString('th-TH'), studentId: studentId, studentName: studentName,
+        details: [
+          { question: 1, type: 'mcq', correct: selectedQ1.value === answers.q1, userAnswer: selectedQ1.value },
+          { question: 2, type: 'mcq', correct: selectedQ2.value === answers.q2, userAnswer: selectedQ2.value },
+          { question: 3, type: 'essay', correct: essay1.length >= 10, userAnswer: essay1 },
+          { question: 4, type: 'essay', correct: essay2.length >= 10, userAnswer: essay2 }
+        ]
       };
 
-      if (studentIndex !== -1) {
-        examData[studentIndex] = studentData;
-      } else {
-        examData.push(studentData);
-      }
-
-      localStorage.setItem('examData', JSON.stringify(examData));
-
-      // บันทึกผลลัพธ์สำหรับหน้า results
-      const results = {
-        studentId: studentId,
-        studentName: studentName,
-        score: mcqScore,
-        total: 4,
-        percentage: Math.round((mcqScore / 2) * 100),
-        timestamp: new Date().toLocaleString('th-TH')
-      };
-
-      localStorage.setItem('examResults', JSON.stringify(results));
-
-      // เปลี่ยนไปหน้าผลลัพธ์
+      localStorage.setItem('examResults', JSON.stringify(resultsData));
       window.location.href = 'results.html';
     }
 
     function resetExam() {
-      document.getElementById('studentId').value = '';
-      document.getElementById('studentName').value = '';
-      document.querySelectorAll('input[name="q1"], input[name="q2"]').forEach(input => input.checked = false);
-      document.getElementById('a3').value = '';
-      document.getElementById('a4').value = '';
+      if(confirm('คุณต้องการล้างคำตอบทั้งหมดใช่หรือไม่?')) {
+        document.getElementById('studentId').value = '';
+        document.getElementById('studentName').value = '';
+        document.querySelectorAll('input[name="q1"], input[name="q2"]').forEach(input => input.checked = false);
+        document.getElementById('a3').value = '';
+        document.getElementById('a4').value = '';
+      }
     }
   </script>
 </body>
