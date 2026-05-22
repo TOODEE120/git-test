@@ -1,358 +1,338 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ผลการทำข้อสอบ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ผลการทดสอบ - MATTEP</title>
+
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
     body {
-      margin: 0;
-      font-family: "Sarabun", sans-serif;
-      background: #f0f4ff;
-      color: #1a1a1a;
+      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+      min-height: 100vh;
+      color: #1e293b;
+      padding: 40px 20px;
     }
+
     .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px;
+      max-width: 950px;
+      margin: auto;
     }
-    header {
-      text-align: center;
-      padding: 24px 0;
-    }
-    header h1 {
-      margin: 0;
-      color: #0b3d91;
-      font-size: 2rem;
-    }
-    header p {
-      margin: 8px 0 0;
-      color: #455a7a;
-    }
-    .score-card {
+
+    .header {
+      position: relative;
+      overflow: hidden;
       background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
-      margin-bottom: 24px;
-      padding: 40px;
-      text-align: center;
+      backdrop-filter: blur(14px);
+      border: 1px solid #f3d7e6;
+      border-radius: 28px;
+      padding: 35px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
     }
-    .score-display {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .score-number {
-      font-size: 4rem;
-      font-weight: bold;
-      color: #0b3d91;
-    }
-    .score-circle {
-      width: 150px;
-      height: 150px;
+
+    .header::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      background: rgba(244, 63, 94, 0.10);
       border-radius: 50%;
-      background: linear-gradient(135deg, #0b3d91 0%, #0f4dab 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 2.5rem;
-      font-weight: bold;
+      top: -80px;
+      right: -80px;
     }
-    .score-percentage {
-      font-size: 1.5rem;
-      color: #455a7a;
-      margin-top: 12px;
+
+    .header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
     }
-    .feedback {
-      font-size: 1.1rem;
-      margin: 16px 0;
-      padding: 16px;
-      border-radius: 10px;
-      background: #eef4ff;
-      border-left: 4px solid #0b3d91;
-    }
-    .feedback.excellent {
-      background: #d4edda;
-      border-left-color: #28a745;
-      color: #155724;
-    }
-    .feedback.good {
-      background: #cce5ff;
-      border-left-color: #0066cc;
-      color: #003366;
-    }
-    .feedback.fair {
-      background: #fff3cd;
-      border-left-color: #ffc107;
-      color: #856404;
-    }
-    .details-section {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(8, 35, 83, 0.08);
-      margin-bottom: 24px;
-      padding: 24px;
-    }
-    .details-section h2 {
-      margin-top: 0;
-      color: #102a58;
-    }
-    .answer-item {
-      margin-bottom: 20px;
-      padding: 16px;
-      border-radius: 10px;
-      background: #f8f9fa;
-      border-left: 4px solid #cfd8e4;
-    }
-    .answer-item.correct {
-      background: #d4edda;
-      border-left-color: #28a745;
-    }
-    .answer-item.incorrect {
-      background: #f8d7da;
-      border-left-color: #dc3545;
-    }
-    .answer-item .question-text {
-      font-weight: bold;
-      color: #102a58;
-      margin-bottom: 8px;
-    }
-    .answer-item .type-badge {
+
+    .header p {
+      color: #475569;
+      font-size: 18px;
+      position: relative;
+      z-index: 1;
       display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      margin-bottom: 8px;
+      padding: 8px 24px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 2px solid #e9d5ff;
+      border-radius: 999px;
+      box-shadow: 0 0 15px rgba(233, 213, 255, 0.6);
+      font-weight: 500;
+      margin-bottom: 5px;
     }
-    .answer-item .type-badge.mcq {
-      background: #e7f3ff;
-      color: #0066cc;
+
+    .result {
+      background: #ffffff;
+      backdrop-filter: blur(12px);
+      border: 1px solid #f3d7e6;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      animation: slideIn 0.5s ease;
     }
-    .answer-item .type-badge.essay {
-      background: #f0e6ff;
-      color: #6600cc;
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .answer-content {
-      margin: 8px 0;
-      font-size: 0.95rem;
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 2px solid #f3d7e6;
     }
-    .answer-content strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #333;
+
+    .result-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 15px;
     }
-    .correct-icon::before {
-      content: "✓ ";
-      color: #28a745;
-      font-weight: bold;
+
+    .student-info {
+      background: #fffafc;
+      border: 1px solid #f3d7e6;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+      font-size: 15px;
+      color: #475569;
+      line-height: 1.8;
     }
-    .incorrect-icon::before {
-      content: "✗ ";
-      color: #dc3545;
-      font-weight: bold;
+
+    .student-info strong {
+      color: #1e293b;
+      font-weight: 600;
     }
-    .actions {
+
+    .score-section {
+      text-align: center;
+      margin: 30px 0;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(251, 113, 133, 0.08) 100%);
+      border-radius: 20px;
+      border: 2px solid rgba(244, 63, 94, 0.2);
+    }
+
+    .score-label {
+      font-size: 16px;
+      color: #64748b;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .score-value {
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #f43f5e, #fb7185);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .essay-section {
+      margin-top: 30px;
+    }
+
+    .essay-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 20px;
+      margin-top: 30px;
+    }
+
+    .essay-box {
+      background: #fffafc;
+      border: 1px solid #f3d7e6;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      line-height: 1.8;
+      color: #475569;
+    }
+
+    .essay-question {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .essay-answer {
+      color: #475569;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .submit-time {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .action-buttons {
       display: flex;
-      gap: 12px;
+      gap: 15px;
       justify-content: center;
-      margin-top: 24px;
+      margin-top: 30px;
       flex-wrap: wrap;
     }
-    button {
-      background: #0b3d91;
-      color: #ffffff;
+
+    .btn {
+      padding: 12px 28px;
       border: none;
-      border-radius: 10px;
-      padding: 14px 24px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 1rem;
-      transition: transform 0.16s ease, background 0.16s ease;
+      transition: 0.25s;
     }
-    button:hover {
-      background: #0f4dab;
-      transform: translateY(-1px);
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      color: white;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
     }
-    button.secondary {
-      background: #667085;
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
     }
-    button.secondary:hover {
-      background: #495057;
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
     }
-    .timestamp {
-      text-align: center;
-      color: #667085;
-      font-size: 0.9rem;
-      margin-top: 16px;
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
     }
-    @media (max-width: 640px) {
-      .container {
-        padding: 16px;
+
+    hr {
+      border: none;
+      height: 1px;
+      background: #f1f5f9;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 30px;
       }
-      .score-card {
-        padding: 24px;
+
+      .result {
+        padding: 25px;
       }
-      .score-number {
-        font-size: 2.5rem;
+
+      .score-value {
+        font-size: 36px;
       }
-      .score-circle {
-        width: 120px;
-        height: 120px;
-        font-size: 1.8rem;
-      }
-      button {
-        width: 100%;
+
+      .result-title {
+        font-size: 22px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>ผลการทำข้อสอบของคุณ</h1>
-      <p>ตรวจสอบคะแนนและรายละเอียดการตอบคำถาม</p>
-    </header>
+    <div class="header">
+      <h1>MATTEP</h1>
+      <p>ระบบทำข้อสอบออนไลน์</p>
+    </div>
 
-    <section class="score-card">
-      <h2 style="margin-top: 0; color: #102a58;">สรุปคะแนน</h2>
-      <div class="score-display">
-        <div class="score-circle" id="scoreCircle">0/4</div>
-        <div>
-          <div class="score-number" id="scoreText">0 จาก 4</div>
-          <div class="score-percentage" id="percentageText">0%</div>
+    <div class="result">
+      <div class="result-header">
+        <div class="result-title">ผลการทดสอบ</div>
+      </div>
+
+      <div class="student-info">
+        <strong>ชื่อ - นามสกุล:</strong> <span id="displayName">-</span><br>
+        <strong>เลขที่:</strong> <span id="displayNo">-</span><br>
+        <strong>ชั้นเรียน:</strong> <span id="displayClass">-</span>
+      </div>
+
+      <div class="score-section">
+        <div class="score-label">คะแนนข้อปรนัย</div>
+        <div class="score-value"><span id="displayScore">0</span> / 8</div>
+      </div>
+
+      <div class="essay-section">
+        <div class="essay-title">คำตอบข้อเขียน</div>
+        
+        <div class="essay-box">
+          <div class="essay-question">ข้อ 9: อธิบายว่า JavaScript ใช้ทำอะไร</div>
+          <div class="essay-answer" id="displayEssay1">- ไม่ได้ตอบ -</div>
+        </div>
+
+        <div class="essay-box">
+          <div class="essay-question">ข้อ 10: ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
+          <div class="essay-answer" id="displayEssay2">- ไม่ได้ตอบ -</div>
         </div>
       </div>
-      <div class="feedback" id="feedbackBox"></div>
-      <div class="timestamp" id="timestamp"></div>
-    </section>
 
-    <section class="details-section" style="display: none;">
-      <h2>รายละเอียดการตอบคำถาม</h2>
-      <div id="answersDetail"></div>
-    </section>
+      <div class="submit-time">
+        <p>ส่งข้อสอบเรียบร้อยแล้ว เวลา: <strong id="displayTime">-</strong></p>
+      </div>
 
-    <div class="actions">
-      <button class="secondary" onclick="downloadResults()">ดาวน์โหลดผลลัพธ์</button>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="goHome()">ส่งเรียบร้อย</button>
+        <button class="btn btn-secondary" onclick="printResult()">พิมพ์ผลลัพธ์</button>
+      </div>
     </div>
   </div>
 
   <script>
-    function loadResults() {
-      const resultsData = localStorage.getItem('examResults');
-      
-      if (!resultsData) {
-        document.body.innerHTML = '<div class="container"><div class="score-card"><h2>ไม่พบข้อมูลการสอบ</h2><p>กรุณากลับไปทำข้อสอบ</p><button onclick="window.location.href=\'index.html\'">กลับไปที่หน้าสอบ</button></div></div>';
-        return;
-      }
+    // โหลดข้อมูลจาก sessionStorage
+    window.addEventListener('load', () => {
+      const studentName = sessionStorage.getItem('studentName') || 'ไม่ระบุชื่อ';
+      const studentNo = sessionStorage.getItem('studentNo') || '-';
+      const studentClass = sessionStorage.getItem('studentClass') || '-';
+      const score = sessionStorage.getItem('score') || '0';
+      const essay1 = sessionStorage.getItem('essay1') || '- ไม่ได้ตอบ -';
+      const essay2 = sessionStorage.getItem('essay2') || '- ไม่ได้ตอบ -';
+      const submitTime = sessionStorage.getItem('submitTime') || '-';
 
-      const results = JSON.parse(resultsData);
-      displayScore(results);
-      displayDetails(results);
+      // แสดงข้อมูลลงในหน้าเว็บ
+      document.getElementById('displayName').innerText = studentName;
+      document.getElementById('displayNo').innerText = studentNo;
+      document.getElementById('displayClass').innerText = studentClass;
+      document.getElementById('displayScore').innerText = score;
+      document.getElementById('displayEssay1').innerText = essay1 || '- ไม่ได้ตอบ -';
+      document.getElementById('displayEssay2').innerText = essay2 || '- ไม่ได้ตอบ -';
+      document.getElementById('displayTime').innerText = submitTime;
+    });
+
+    function goHome() {
+      // ล้างข้อมูล session และกลับหน้าแรก
+      sessionStorage.clear();
+      window.location.href = 'home.html';
     }
 
-    function displayScore(results) {
-      const { score, total, percentage, timestamp, studentId, studentName } = results;
-      
-      // อัปเดตสกอร์
-      document.getElementById('scoreCircle').textContent = score + '/' + total;
-      document.getElementById('scoreText').textContent = score + ' จาก ' + total;
-      document.getElementById('percentageText').textContent = percentage + '%';
-      document.getElementById('timestamp').textContent = 'เวลา: ' + timestamp;
-
-      // เลือก feedback และสี
-      let feedbackClass = '';
-      let feedbackText = '';
-
-      if (percentage >= 80) {
-        feedbackClass = 'excellent';
-        feedbackText = '🎉 ยอดเยี่ยม! คุณทำได้ดีมากครับ ติดตามเรียนต่อไปนะ';
-      } else if (percentage >= 60) {
-        feedbackClass = 'good';
-        feedbackText = '👍 ดีครับ! คุณมีความเข้าใจพอสมควร ลองทำข้อสอบอีกครั้งเพื่อให้ดียิ่งขึ้น';
-      } else if (percentage >= 40) {
-        feedbackClass = 'fair';
-        feedbackText = '📚 ยังต้องทำความเข้าใจเพิ่มเติม ลองทบทวนหนังสือและทำข้อสอบใหม่';
-      } else {
-        feedbackClass = 'fair';
-        feedbackText = '💪 ตั้งใจเรียนเพิ่มเติมให้มากขึ้นนะครับ ลองทำข้อสอบใหม่อีกครั้ง';
-      }
-
-      const feedbackBox = document.getElementById('feedbackBox');
-      feedbackBox.className = 'feedback ' + feedbackClass;
-      feedbackBox.textContent = feedbackText;
+    function printResult() {
+      window.print();
     }
-
-    function displayDetails(results) {
-      const detailsContainer = document.getElementById('answersDetail');
-      const questionTitles = {
-        1: 'ประเทศไทยตั้งอยู่บนทวีปใด?',
-        2: 'ผลรวมของ 15 และ 27 เท่ากับเท่าไหร่?',
-        3: 'อธิบายความสำคัญของการอ่านหนังสือในชีวิตประจำวันสั้น ๆ',
-        4: 'คุณจะจัดการเวลาอย่างไรเมื่อต้องทำงานและเรียนพร้อมกัน?'
-      };
-
-      let html = '';
-      results.details.forEach(detail => {
-        const isCorrect = detail.correct;
-        const itemClass = isCorrect ? 'correct' : 'incorrect';
-        const icon = isCorrect ? 'correct-icon' : 'incorrect-icon';
-        const typeDisplay = detail.type === 'mcq' ? 'ข้อกา' : 'ข้อเขียน';
-        const typeBadgeClass = detail.type === 'mcq' ? 'mcq' : 'essay';
-
-        html += '<div class="answer-item ' + itemClass + '">';
-        html += '<div class="question-text"><span class="' + icon + '">ข้อ ' + detail.question + '. ' + questionTitles[detail.question] + '</span></div>';
-        html += '<span class="type-badge ' + typeBadgeClass + '">' + typeDisplay + '</span>';
-
-        if (detail.type === 'mcq') {
-          const choiceMap = { a: 'ก', b: 'ข', c: 'ค', d: 'ง' };
-          html += '<div class="answer-content"><strong>คำตอบของคุณ:</strong> ' + choiceMap[detail.userAnswer] + '</div>';
-        } else {
-          html += '<div class="answer-content"><strong>คำตอบของคุณ:</strong> "' + (detail.userAnswer || '(ว่างเปล่า)') + '"</div>';
-        }
-
-        html += '</div>';
-      });
-
-      detailsContainer.innerHTML = html;
-    }
-
-    function goBackToExam() {
-      localStorage.removeItem('examResults');
-      window.location.href = 'index.html';
-    }
-
-    function downloadResults() {
-      const resultsData = localStorage.getItem('examResults');
-      const results = JSON.parse(resultsData);
-      
-      let text = 'ผลการทำข้อสอบ\n';
-      text += '==================\n';
-      text += 'คะแนน: ' + results.score + ' จาก ' + results.total + '\n';
-      text += 'เปอร์เซ็นต์: ' + results.percentage + '%\n';
-      text += 'เวลา: ' + results.timestamp + '\n\n';
-      text += 'รายละเอียด:\n';
-      
-      results.details.forEach(detail => {
-        text += '\nข้อ ' + detail.question + ' (' + (detail.type === 'mcq' ? 'ข้อกา' : 'ข้อเขียน') + ')\n';
-        text += 'ผลลัพธ์: ' + (detail.correct ? 'ถูกต้อง' : 'ไม่ถูกต้อง') + '\n';
-      });
-
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', 'exam_results_' + new Date().getTime() + '.txt');
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // โหลดข้อมูลเมื่อหน้าเปิด
-    window.addEventListener('load', loadResults);
   </script>
 </body>
 </html>
