@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Proctor Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slatePrimary: '#1e293b',
+                        slateSecondary: '#475569',
+                        brandPink: '#f43f5e',
+                        brandPinkLight: '#f3d7e6',
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Tahoma', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, rgba(244, 114, 182, 0.18) 0%, transparent 30%),
+                        radial-gradient(circle at bottom right, rgba(251, 207, 232, 0.5) 0%, transparent 28%),
+                        linear-gradient(180deg, #fff1f2 0%, #fffbff 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            line-height: 1.65;
+            font-feature-settings: "rlig" 1, "calt" 1;
+        }
+
+        /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* สไตล์หลักของการ์ดแบบ MATTEP */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(22px);
+            border: 1px solid rgba(251, 207, 232, 0.7);
+            border-radius: 28px;
+            box-shadow: 0 24px 60px rgba(244, 114, 182, 0.12);
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 70px rgba(244, 114, 182, 0.16);
+        }
+
+        .student-item {
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(251, 207, 232, 0.95);
+            border-radius: 22px;
+            transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+        }
+        .student-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(244, 114, 182, 0.35);
+            box-shadow: 0 18px 40px rgba(244, 114, 182, 0.12);
+        }
+        .student-item.active {
+            border-color: #ec4899;
+            background: #fff0f6;
+            box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.14);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.45s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Input */
+        .search-input {
+            border: 1px solid rgba(244, 114, 182, 0.4);
+            background: rgba(255, 245, 249, 0.95);
+            box-shadow: inset 0 0 0 1px rgba(244, 114, 182, 0.12);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .search-input:focus {
+            border-color: #ec4899;
+            box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.12);
+            outline: none;
+        }
+
+        /* Filter Pills */
+        .filter-btn {
+            border: 1px solid rgba(226, 232, 240, 1);
+            background: rgba(255,255,255,0.95);
+            color: #475569;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+        .filter-btn:hover {
+            border-color: rgba(203, 213, 225, 1);
+            background: #f8fafc;
+        }
+        .filter-btn.active-all { background: #fdf2f8; color: #831843; border-color: #fbcfe8; }
+        .filter-btn.active-high { background: #fce7f3; color: #be185d; border-color: #f9a8d4; font-weight: 700; }
+        .filter-btn.active-medium { background: #fdf2f8; color: #9d174d; border-color: #fbcfe8; font-weight: 700; }
+        .filter-btn.active-low { background: #ffe7f3; color: #9d174d; border-color: #f9a8d4; font-weight: 700; }
+
+        /* Recording Dot Animation */
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .rec-dot { animation: blink 1.5s infinite; }
+        
+        /* Flashing alert for high risk students */
+        @keyframes flashBorder {
+            0% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+            50% { box-shadow: 0 0 18px 8px rgba(244,63,94,0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+        }
+        .flash-alert { animation: flashBorder 1.2s ease-in-out infinite; border-color: #f43f5e !important; }
+
+        /* Custom Context Menu */
+        .context-menu { position: absolute; z-index: 9999; min-width: 210px; background: rgba(255,255,255,0.98); border-radius: 16px; box-shadow: 0 20px 60px rgba(15,23,42,0.12); padding:8px; border:1px solid rgba(15,23,42,0.08); }
+        .context-menu button { display:block; width:100%; text-align:left; padding:10px 12px; border-radius:12px; background:transparent; border:none; color:#0f172a; font-weight:700; cursor:pointer; transition: background 0.2s ease; }
+        .context-menu button:hover { background:#f8fafc; }
+
+        /* CCTV confidence badge */
+        .conf-badge { position:absolute; left:10px; bottom:10px; background:rgba(15,23,42,0.76); color:white; padding:4px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+
+        /* Incident Sidebar */
+        #incidentSidebar { position: fixed; right: 18px; top: 106px; width: 320px; max-height: 72vh; overflow-y: auto; z-index:60; border-radius:22px; padding:16px; background: rgba(255,245,249,0.96); border: 1px solid rgba(251, 207, 232, 0.95); box-shadow: 0 24px 70px rgba(244, 114, 182, 0.12); }
+        #incidentSidebar .item { display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:16px; background:rgba(255,255,255,0.98); border:1px solid rgba(251, 207, 232, 0.5); margin-bottom:10px; transition: transform 0.22s ease, box-shadow 0.22s ease; }
+        #incidentSidebar .item:hover { transform: translateY(-1px); box-shadow: 0 20px 40px rgba(244, 114, 182, 0.14); }
+        #incidentSidebar .sev-high { border-left:4px solid #ef4444; }
+        #incidentSidebar .sev-med { border-left:4px solid #f59e0b; }
+        #incidentSidebar .sev-low { border-left:4px solid #10b981; }
+        #incidentSidebar .meta { font-size:12px; color:#64748b; }
+        #incidentSidebar .title { font-weight:700; color:#0f172a; }
+
+        /* Quick Action Buttons in Detail */
+        .quick-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .quick-actions button { background:#fff5f8; border:1px solid rgba(251, 207, 232, 0.85); padding:10px 14px; border-radius:16px; font-weight:700; cursor:pointer; transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease; }
+        .quick-actions button:hover { transform:translateY(-2px); background:#fee2ef; box-shadow:0 20px 45px rgba(244, 114, 182, 0.12); }
+
+        /* Gauge small */
+        .gauge { width:56px; height:56px; display:inline-block; }
+    </style>
+</head>
+<body class="font-sans flex flex-col h-screen overflow-hidden p-4 gap-4 selection:bg-rose-200 selection:text-rose-900">
+
+    <!-- Header -->
+    <header class="glass-card flex flex-col md:flex-row items-start md:items-center justify-between px-6 py-4 shrink-0 z-10 relative overflow-hidden gap-4">
+        <!-- เอฟเฟกต์วงกลมตกแต่งมุมขวาบน -->
+        <div class="absolute w-32 h-32 bg-rose-500/10 rounded-full -top-10 -right-10 pointer-events-none"></div>
+        
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="bg-gradient-to-br from-rose-400 to-rose-500 text-white p-2.5 rounded-xl shadow-lg shadow-rose-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slatePrimary">ระบบตรวจสอบการสอบ AI</h1>
+                <p class="text-xs md:text-sm text-slateSecondary">MATTEP Monitoring System</p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons & Toggle View -->
+        <div class="flex items-center gap-3 relative z-10 flex-wrap w-full md:w-auto justify-end">
+            <!-- Toggle View Mode (Individual vs CCTV) -->
+            <div class="bg-slate-100/80 p-1 rounded-xl flex gap-1 border border-slate-200 backdrop-blur-sm mr-2 shadow-inner">
+                <button id="btnViewIndiv" onclick="setViewMode('individual')" class="px-4 py-2 rounded-lg text-sm font-bold transition-all bg-white text-slatePrimary shadow-sm flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.121 17.804z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    รายบุคคล
+                </button>
+                <button id="btnViewGrid" onclick="setViewMode('grid')" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 transition-all hover:text-slatePrimary flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+                    </svg>
+                    เฝ้าระวัง
+                </button>
+            </div>
+
+            <!-- เปลี่ยนจากเปิด Modal เป็นสลับหน้า View -->
+            <button onclick="setViewMode('overview')" class="flex items-center gap-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2 rounded-xl shadow-sm transition-all text-sm font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l4-4 4 4m0-5V3" />
+                    </svg>
+                    ภาพรวม
+            </button>
+            
+            <button onclick="exportReport()" class="flex items-center gap-2 bg-slate-800 text-white hover:bg-slate-700 hover:shadow-lg px-4 py-2 rounded-xl shadow-sm transition-all text-sm font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-5-5l5 5 5-5M4 5h16" />
+                    </svg>
+                    ส่งออก
+            </button>
+
+            <button id="btnToggleIncident" onclick="toggleIncidentSidebar()" class="flex items-center gap-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 px-4 py-2 rounded-xl shadow-sm transition-all text-sm font-bold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    Live Alerts
+            </button>
+
+            <div class="flex items-center gap-2 bg-[#fee2e2] border border-[#fca5a5] px-5 py-2 rounded-xl shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-red-600 font-bold tracking-wide" id="examTimer">01:13:25</span>
+            </div>
+        </div>
+    </header>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden relative">
+        
+        <!-- ฝั่งซ้าย: รายชื่อนักเรียน (30%) พร้อมระบบ Filter อัจฉริยะ -->
+        <section class="w-full lg:w-[30%] glass-card flex flex-col h-full z-0 p-4">
+            <div class="mb-2">
+                <h2 class="text-lg font-bold text-slatePrimary mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                    รายชื่อผู้เข้าสอบ
+                </h2>
+                <!-- Search Box -->
+                <div class="relative mb-3">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ค้นหาชื่อ หรือ เลขที่..." class="search-input w-full bg-white text-slatePrimary rounded-xl px-4 py-2.5 pl-10 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                
+                <!-- Smart Filters -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                    <button id="filter-all" onclick="setFilter('all')" class="filter-btn active-all px-3 py-1.5 rounded-full text-xs font-medium shrink-0">ทั้งหมด</button>
+                    <button id="filter-high" onclick="setFilter('high')" class="filter-btn px-3 py-1.5 rounded-full text-xs font-medium shrink-0">เสี่ยงสูง</button>
+                    <button id="filter-medium" onclick="setFilter('medium')" class="filter-btn px-3 py-1.5 rounded-full text-xs font-medium shrink-0">ปานกลาง</button>
+                    <button id="filter-low" onclick="setFilter('low')" class="filter-btn px-3 py-1.5 rounded-full text-xs font-medium shrink-0">ปกติ</button>
+                </div>
+            </div>
+            
+            <!-- List Container -->
+            <div class="flex-1 overflow-y-auto hide-scrollbar space-y-3 pb-4 pt-1" id="studentListContainer">
+                <!-- นักเรียนจะถูก Render ด้วย JavaScript ที่นี่ -->
+            </div>
+        </section>
+
+        <!-- ฝั่งขวา: พื้นที่แสดงผล (70%) -->
+        <section class="w-full lg:w-[70%] h-full relative">
+            
+            <!-- (A) หน้าภาพรวม (Overview View) แทนที่ Empty State เดิม -->
+            <div id="overviewContent" class="absolute inset-0 z-10 h-full overflow-y-auto hide-scrollbar fade-in pb-8 pr-2">
+                <div class="glass-card p-6 md:p-8 h-full">
+                    <!-- Header ของ Overview -->
+                    <div class="flex justify-between items-center mb-8 border-b border-rose-100 pb-4">
+                        <h2 class="text-2xl font-bold text-slatePrimary flex items-center gap-3">
+                            <span class="p-2.5 bg-gradient-to-br from-rose-100 to-rose-200 rounded-xl text-rose-600 shadow-sm border border-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </span>
+                            ภาพรวมการสอบ
+                        </h2>
+                        <div class="text-sm font-medium text-slateSecondary bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            เลือกนักเรียนด้านซ้ายเพื่อดูรายละเอียด
+                        </div>
+                    </div>
+
+                    <!-- แถบสถิติหลัก 3 กล่อง -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                        <div class="bg-white p-5 rounded-2xl flex items-center gap-4 border border-slate-100 shadow-sm border-l-4 border-l-blue-400 hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center shadow-inner border border-rose-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5c1.95 0 3.75.78 5.06 2.06A7.2 7.2 0 0119.5 12c0 1.95-.78 3.75-2.06 5.06A7.2 7.2 0 0112 19.5c-1.95 0-3.75-.78-5.06-2.06A7.2 7.2 0 014.5 12c0-1.95.78-3.75 2.06-5.06A7.2 7.2 0 0112 4.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
+                            </svg>
+                        </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">จำนวนผู้เข้าสอบ</p>
+                                <p class="text-3xl font-bold text-slatePrimary" id="ovTotalStudents">- <span class="text-sm font-normal text-slate-400">คน</span></p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl flex items-center gap-4 border border-slate-100 shadow-sm border-l-4 border-l-emerald-400 hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center shadow-inner border border-rose-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 8-8" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">คะแนนสอบเฉลี่ย</p>
+                                <p class="text-3xl font-bold text-slatePrimary" id="ovAvgScore">-<span class="text-sm font-normal text-slate-400">/100</span></p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl flex items-center gap-4 border border-slate-100 shadow-sm border-l-4 border-l-amber-400 hover:-translate-y-1 transition-transform">
+                            <div class="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center shadow-inner border border-rose-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.29 3.86L1.82 18a2.25 2.25 0 001.94 3.38h16.48a2.25 2.25 0 001.94-3.38L13.71 3.86a2.25 2.25 0 00-3.42 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">ความเสี่ยงทุจริตเฉลี่ย</p>
+                                <p class="text-3xl font-bold text-slatePrimary" id="ovAvgRisk">-<span class="text-sm font-normal text-slate-400">/100</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- แถบสถิติรายข้อ (วิเคราะห์ข้อสอบ) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm relative overflow-hidden group">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-emerald-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+                            <h3 class="text-lg font-bold text-slatePrimary mb-4 flex items-center gap-2 relative z-10">
+                                <span class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-sm shadow-inner">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                ข้อที่ตอบถูกมากที่สุด
+                            </h3>
+                            <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-100 relative z-10">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-xs font-bold border border-emerald-200">ข้อ 3</span>
+                                    <span class="text-emerald-600 font-bold text-sm bg-white px-2 py-0.5 rounded shadow-sm border border-emerald-50">ถูก 95%</span>
+                                </div>
+                                <p class="text-slatePrimary font-medium leading-relaxed">"JavaScript ใช้ในการทำอะไรในหน้าเว็บไซต์?"</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden group">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-rose-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
+                            <h3 class="text-lg font-bold text-slatePrimary mb-4 flex items-center gap-2 relative z-10">
+                                <span class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-sm shadow-inner">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </span>
+                                ข้อที่ตอบผิดมากที่สุด
+                            </h3>
+                            <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-100 relative z-10">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-md text-xs font-bold border border-rose-200">ข้อ 8</span>
+                                    <span class="text-rose-600 font-bold text-sm bg-white px-2 py-0.5 rounded shadow-sm border border-rose-50">ผิด 75%</span>
+                                </div>
+                                <p class="text-slatePrimary font-medium leading-relaxed">"API ในการเขียนโปรแกรมคืออะไร และมีหน้าที่อย่างไร?"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- (B) หน้าโหมดเฝ้าระวัง CCTV (Grid View) ซ่อนโดยค่าเริ่มต้น -->
+            <div id="gridViewContainer" class="hidden absolute inset-0 z-20 h-full overflow-y-auto hide-scrollbar fade-in pb-8">
+                <h2 class="text-xl font-bold text-slatePrimary mb-4 flex items-center gap-2 px-1">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                    Live Security Feed (กลุ่มเฝ้าระวังพิเศษ)
+                </h2>
+                <!-- Grid Cards จะถูกสร้างโดย JS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4" id="cctvGrid"></div>
+            </div>
+
+            <!-- (C) หน้าเนื้อหารายละเอียดบุคคล (Individual View) ซ่อนไว้เป็นค่าเริ่มต้น -->
+            <div id="detailContent" class="hidden absolute inset-0 z-30 h-full overflow-y-auto hide-scrollbar space-y-5 pb-8 pr-2">
+                
+                <!-- ปุ่มย้อนกลับมาที่หน้าภาพรวม -->
+                <div class="mb-2 fade-in">
+                    <button onclick="setViewMode('overview')" class="flex items-center gap-2 text-slate-500 hover:text-rose-600 font-bold transition-colors bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl shadow-sm border border-slate-100 hover:border-rose-200 hover:-translate-y-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        ย้อนกลับไปหน้าภาพรวม
+                    </button>
+                </div>
+
+                <!-- ข้อมูลส่วนบน Profile -->
+                <div class="glass-card p-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 fade-in">
+                    <div class="flex items-center gap-5">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-100 to-rose-200 flex items-center justify-center border-2 border-white shadow-sm" id="detailAvatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 14a4 4 0 00-8 0m8 0v1a2 2 0 01-2 2H10a2 2 0 01-2-2v-1" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11a4 4 0 100-8 4 4 0 000 8z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slatePrimary" id="detailName">ชื่อนักเรียน</h2>
+                            <p class="text-slateSecondary font-medium mt-1" id="detailInfo">เลขที่: - | ชั้น: -</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                        <div class="bg-white border border-slate-100 px-5 py-3 rounded-2xl shadow-sm text-center flex-1 xl:flex-none min-w-[120px]">
+                            <p class="text-xs text-slateSecondary font-medium mb-1">ความเสี่ยง</p>
+                            <p class="text-2xl font-bold" id="detailRiskScore">0/100</p>
+                        </div>
+                        <div class="bg-white border border-slate-100 px-5 py-3 rounded-2xl shadow-sm text-center flex-1 xl:flex-none min-w-[120px]">
+                            <p class="text-xs text-slateSecondary font-medium mb-1">คะแนนสอบ</p>
+                            <p class="text-2xl font-bold text-slatePrimary" id="detailExamScore">0/100</p>
+                        </div>
+                        <div class="bg-white border border-slate-100 px-5 py-3 rounded-2xl shadow-sm text-center flex-1 xl:flex-none min-w-[120px]">
+                            <p class="text-xs text-slateSecondary font-medium mb-1">เวลาที่บันทึก</p>
+                            <p class="text-xl font-bold text-rose-500" id="detailCurrentTime">00:00:00</p>
+                        </div>
+                        
+                        <!-- Quick Action Shortcuts -->
+                        <div class="w-full mt-3 xl:mt-0 xl:w-auto">
+                            <div class="quick-actions">
+                                <button onclick="promptMessage()" class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.96 9.96 0 01-5.37-1.53L3 19l1.53-3.63A9.96 9.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    ส่งข้อความเตือน
+                                </button>
+                                <button onclick="requestScreenShare()" class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    ขอแชร์หน้าจอ
+                                </button>
+                                <button onclick="startRetroRecording()" class="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14.5l6-4.5-6-4.5v9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    บันทึกย้อนหลัง 30s
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- แบ่ง 2 Card (สรุปกิจกรรม & สถานะ AI) -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                    <!-- Card 1: สรุปกิจกรรม -->
+                    <div class="glass-card p-6 fade-in" style="animation-delay: 0.1s;">
+                        <h3 class="text-lg font-bold text-slatePrimary mb-4 flex items-center gap-2 border-b border-rose-100 pb-3">
+                            <span class="p-1.5 bg-rose-50 rounded-lg text-rose-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </span>
+                            สรุปกิจกรรม
+                        </h3>
+                        <ul class="space-y-3" id="summaryList">
+                            <!-- จะถูกเติมด้วย JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: สถานะ AI -->
+                    <div class="glass-card p-6 fade-in" style="animation-delay: 0.2s;">
+                        <h3 class="text-lg font-bold text-slatePrimary mb-4 flex items-center gap-2 border-b border-rose-100 pb-3">
+                            <span class="p-1.5 bg-rose-50 rounded-lg text-rose-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </span>
+                            สถานะ AI วิเคราะห์
+                        </h3>
+                        <div class="mb-3">
+                            <div id="aiConfidenceGauge" style="display:inline-block; vertical-align:middle;"></div>
+                        </div>
+                        <ul class="space-y-3" id="aiStatusList">
+                             <!-- จะถูกเติมด้วย JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ลำดับเหตุการณ์ (รวมภาพหลักฐาน) -->
+                <div class="glass-card p-6 fade-in" style="animation-delay: 0.3s;">
+                    <h3 class="text-lg font-bold text-slatePrimary mb-5 flex items-center gap-2">
+                        <span class="p-1.5 bg-rose-50 rounded-lg text-rose-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </span>
+                        ลำดับเหตุการณ์ และ หลักฐาน
+                    </h3>
+                    <div class="relative pl-5 border-l-2 border-slate-200 space-y-2 ml-3" id="timelineContainer">
+                        <!-- จะถูกเติมด้วย JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ข้อมูลจำลอง (Mock Data) — เพิ่มค่า aiConfidence เพื่อแสดงใน Grid
+        const mockData = [
+            {
+                id: 'std_01', name: 'สมชาย', studentId: '661001', grade: 'ม.6/1',
+                riskScore: 12, examScore: 92, aiConfidence: 88,
+                summary: [
+                    { label: 'สลับแท็บ', value: '0 ครั้ง', warn: false },
+                    { label: 'วางข้อความ', value: '0 ครั้ง', warn: false },
+                    { label: 'เวลาตอบเฉลี่ย', value: '45 วินาที', warn: false },
+                    { label: 'ตอบเร็วผิดปกติ', value: '0 ข้อ', warn: false },
+                    { label: 'การเคลื่อนเมาส์', value: 'ปกติ', warn: false },
+                    { label: 'หันหน้า', value: '2 ครั้ง', warn: false }
+                ],
+                aiStatus: [
+                    { label: 'พบใบหน้า', status: 'ok' },
+                    { label: 'พบผู้สอบ 1 คน', status: 'ok' },
+                    { label: 'มองหน้าจอ', status: 'ok' }
+                ],
+                timeline: [
+                    { time: '09:00', event: 'เข้าสู่ระบบสอบ', type: 'info' },
+                    { time: '09:05', event: 'เริ่มทำข้อสอบ', type: 'info' },
+                    { time: '09:30', event: 'ทำข้อสอบไปแล้ว 50%', type: 'info' }
+                ],
+                evidences: []
+            },
+            {
+                id: 'std_02', name: 'อารีน่า', studentId: '661042', grade: 'ม.6/1',
+                riskScore: 48, examScore: 75, aiConfidence: 62,
+                summary: [
+                    { label: 'สลับแท็บ', value: '2 ครั้ง', warn: true },
+                    { label: 'วางข้อความ', value: '0 ครั้ง', warn: false },
+                    { label: 'เวลาตอบเฉลี่ย', value: '30 วินาที', warn: false },
+                    { label: 'ตอบเร็วผิดปกติ', value: '1 ข้อ', warn: false },
+                    { label: 'การเคลื่อนเมาส์', value: 'เร็วเป็นบางช่วง', warn: true },
+                    { label: 'หันหน้า', value: '5 ครั้ง', warn: true }
+                ],
+                aiStatus: [
+                    { label: 'พบใบหน้า', status: 'ok' },
+                    { label: 'พบผู้สอบ 1 คน', status: 'ok' },
+                    { label: 'ละสายตาบ่อย', status: 'warning' }
+                ],
+                timeline: [
+                    { time: '09:02', event: 'เริ่มทำข้อสอบ', type: 'info' },
+                    { time: '09:25', event: 'สลับแท็บไปหน้าอื่น', type: 'warning' },
+                    { time: '09:40', event: 'สลับแท็บไปหน้าอื่น', type: 'warning' }
+                ],
+                evidences: [
+                    { time: '09:25', caption: 'สลับแท็บ', imgColor: 'fef08a', txtColor: '854d0e' }
+                ]
+            },
+            {
+                id: 'std_03', name: 'จอห์น', studentId: '661088', grade: 'ม.6/2',
+                riskScore: 82, examScore: 98, aiConfidence: 92,
+                summary: [
+                    { label: 'สลับแท็บ', value: '8 ครั้ง', warn: true },
+                    { label: 'วางข้อความ', value: '3 ครั้ง', warn: true },
+                    { label: 'เวลาตอบเฉลี่ย', value: '2.1 วินาที', warn: true },
+                    { label: 'ตอบเร็วผิดปกติ', value: '4 ข้อ', warn: true },
+                    { label: 'การเคลื่อนเมาส์', value: 'ผิดปกติ', warn: true },
+                    { label: 'หันหน้า', value: '15 ครั้ง', warn: true }
+                ],
+                aiStatus: [
+                    { label: 'พบใบหน้า', status: 'ok' },
+                    { label: 'พบผู้สอบ 1 คน', status: 'ok' },
+                    { label: 'พบโทรศัพท์', status: 'danger' },
+                    { label: 'ก้มหน้าบ่อย', status: 'danger' }
+                ],
+                timeline: [
+                    { time: '10:01', event: 'สลับแท็บ', type: 'warning' },
+                    { time: '10:02', event: 'พบโทรศัพท์', type: 'danger' },
+                    { time: '10:03', event: 'ก้มหน้า', type: 'danger' },
+                    { time: '10:04', event: 'วางข้อความ', type: 'danger' },
+                    { time: '10:06', event: 'ตอบข้อ 15 ภายใน 1.1 วินาที', type: 'warning' }
+                ],
+                evidences: [
+                    { time: '10:02', caption: 'พบโทรศัพท์', imgColor: 'fecaca', txtColor: '991b1b' },
+                    { time: '10:03', caption: 'ก้มหน้า', imgColor: 'fecaca', txtColor: '991b1b' }
+                ]
+            },
+            {
+                id: 'std_04', name: 'ไมค์', studentId: '661015', grade: 'ม.6/3',
+                riskScore: 15, examScore: 60, aiConfidence: 78,
+                summary: [
+                    { label: 'สลับแท็บ', value: '0 ครั้ง', warn: false },
+                    { label: 'วางข้อความ', value: '0 ครั้ง', warn: false },
+                    { label: 'เวลาตอบเฉลี่ย', value: '60 วินาที', warn: false },
+                    { label: 'ตอบเร็วผิดปกติ', value: '0 ข้อ', warn: false },
+                    { label: 'การเคลื่อนเมาส์', value: 'ปกติ', warn: false },
+                    { label: 'หันหน้า', value: '1 ครั้ง', warn: false }
+                ],
+                aiStatus: [
+                    { label: 'พบใบหน้า', status: 'ok' },
+                    { label: 'พบผู้สอบ 1 คน', status: 'ok' }
+                ],
+                timeline: [
+                    { time: '09:05', event: 'เริ่มทำข้อสอบ', type: 'info' }
+                ],
+                evidences: []
+            },
+            {
+                id: 'std_05', name: 'นที', studentId: '661055', grade: 'ม.6/2',
+                riskScore: 75, examScore: 88, aiConfidence: 65,
+                summary: [], aiStatus: [], timeline: [], evidences: [] // ข้อมูลดัมมี่เพื่อให้มีหลายรายการใน Grid
+            },
+            {
+                id: 'std_06', name: 'สุดา', studentId: '661066', grade: 'ม.6/3',
+                riskScore: 68, examScore: 72, aiConfidence: 48,
+                summary: [], aiStatus: [], timeline: [], evidences: [] // ข้อมูลดัมมี่
+            }
+        ];
+
+        // สถานะ Global
+        let selectedStudentId = null;
+        let currentFilter = 'all'; // all, high, medium, low
+        let searchQuery = '';
+        let currentViewMode = 'overview'; // เริ่มต้นที่หน้า overview
+
+        const listContainer = document.getElementById('studentListContainer');
+
+        // แจ้งเตือนที่เล่นแล้ว (เพื่อไม่ให้เล่นซ้ำ)
+        const alertedSet = new Set();
+
+        // สร้าง Context Menu element
+        const contextMenuEl = (function createContextMenu(){
+            const el = document.createElement('div');
+            el.style.display = 'none';
+            el.className = 'context-menu';
+            el.id = 'contextMenu';
+            document.body.appendChild(el);
+            return el;
+        })();
+
+        // เล่นเสียงแจ้งเตือนสั้นๆ โดยใช้ WebAudio API
+        function playAlertSound(){
+            try{
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine'; o.frequency.value = 880;
+                g.gain.value = 0.02; // เบา
+                o.connect(g); g.connect(ctx.destination);
+                o.start();
+                setTimeout(()=>{ o.stop(); ctx.close(); }, 220);
+            }catch(e){ console.warn('Audio not available', e); }
+        }
+
+        // --- Helper & Utility ---
+
+        function getRiskStyles(score) {
+            if (score >= 70) return { text: 'text-rose-600', badge: 'bg-rose-100 text-rose-700 border-rose-200' };
+            if (score >= 40) return { text: 'text-amber-500', badge: 'bg-amber-100 text-amber-700 border-amber-200' };
+            return { text: 'text-emerald-500', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+        }
+
+        function updateOverviewDashboard() {
+            const totalStudents = mockData.length;
+            let totalScore = 0, totalRisk = 0;
+            mockData.forEach(s => {
+                totalScore += s.examScore;
+                totalRisk += s.riskScore;
+            });
+            document.getElementById('ovTotalStudents').innerHTML = `${totalStudents} <span class="text-sm font-normal text-slate-400">คน</span>`;
+            document.getElementById('ovAvgScore').innerHTML = `${Math.round(totalScore / totalStudents)}<span class="text-sm font-normal text-slate-400">/100</span>`;
+            document.getElementById('ovAvgRisk').innerHTML = `${Math.round(totalRisk / totalStudents)}<span class="text-sm font-normal text-slate-400">/100</span>`;
+        }
+
+        // --- Context Menu ---
+        function showContextMenu(x, y, studentId){
+            contextMenuEl.innerHTML = '';
+            const btn1 = document.createElement('button'); btn1.className = 'flex items-center gap-2'; btn1.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.96 9.96 0 01-5.37-1.53L3 19l1.53-3.63A9.96 9.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> ส่งข้อความเตือน'; btn1.onclick = ()=>{ sendWarning(studentId); hideContextMenu(); };
+            const btn2 = document.createElement('button'); btn2.className = 'flex items-center gap-2'; btn2.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3" /></svg> ดูภาพจากกล้องปัจจุบัน'; btn2.onclick = ()=>{ viewCamera(studentId); hideContextMenu(); };
+            const btn3 = document.createElement('button'); btn3.className = 'flex items-center gap-2'; btn3.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.657 0 3-1.343 3-3S13.657 2 12 2 9 3.343 9 5s1.343 3 3 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20c0-2.21 1.79-4 4-4h4c2.21 0 4 1.79 4 4" /></svg> พิมพ์บันทึกพฤติกรรม'; btn3.onclick = ()=>{ logNote(studentId); hideContextMenu(); };
+            contextMenuEl.appendChild(btn1); contextMenuEl.appendChild(btn2); contextMenuEl.appendChild(btn3);
+            contextMenuEl.style.left = `${x}px`;
+            contextMenuEl.style.top = `${y}px`;
+            contextMenuEl.style.display = 'block';
+        }
+        function hideContextMenu(){ contextMenuEl.style.display = 'none'; }
+        document.addEventListener('click', (e)=>{ if(!contextMenuEl.contains(e.target)) hideContextMenu(); });
+        document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hideContextMenu(); });
+
+        // Quick actions
+        function sendWarning(id){
+            const s = mockData.find(x=>x.id===id);
+            if(!s) return;
+            s.timeline = s.timeline || [];
+            const time = new Date().toLocaleTimeString('th-TH');
+            s.timeline.push({ time, event: 'อาจารย์ส่งข้อความเตือน', type: 'info' });
+            alert(`ส่งข้อความเตือนไปยัง ${s.name}`);
+            renderStudentList();
+            if(selectedStudentId === id) populateStudentDetail(id);
+        }
+
+        function viewCamera(id){
+            setViewMode('grid');
+            // หลัง render เล็กน้อย ให้เน้นการ์ดกล้อง
+            setTimeout(()=>{
+                const el = document.querySelector(`.card-${id}`);
+                if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.style.outline = '3px solid rgba(244,63,94,0.18)'; setTimeout(()=>el.style.outline='none',1600); }
+            }, 250);
+        }
+
+        function logNote(id){
+            const note = prompt('พิมพ์บันทึกพฤติกรรมสำหรับนักเรียนนี้:');
+            if(!note) return;
+            const s = mockData.find(x=>x.id===id);
+            const time = new Date().toLocaleTimeString('th-TH');
+            s.timeline = s.timeline || [];
+            s.timeline.push({ time, event: `บันทึก: ${note}`, type: 'info' });
+            if(selectedStudentId === id) populateStudentDetail(id);
+            renderStudentList();
+        }
+
+        // --- UI Interactions ---
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            
+            // สลับสถานะปุ่ม Header (รายบุคคล vs เฝ้าระวัง)
+            const btnIndiv = document.getElementById('btnViewIndiv');
+            const btnGrid = document.getElementById('btnViewGrid');
+            
+            btnIndiv.className = (mode === 'individual') ? "px-4 py-2 rounded-lg text-sm font-bold transition-all bg-white text-slatePrimary shadow-sm" : "px-4 py-2 rounded-lg text-sm font-bold text-slate-500 transition-all hover:text-slatePrimary";
+            btnGrid.className = (mode === 'grid') ? "px-4 py-2 rounded-lg text-sm font-bold transition-all bg-white text-slatePrimary shadow-sm" : "px-4 py-2 rounded-lg text-sm font-bold text-slate-500 transition-all hover:text-slatePrimary";
+
+            // ซ่อนพื้นที่แสดงผลทั้งหมดก่อน
+            document.getElementById('overviewContent').classList.add('hidden');
+            document.getElementById('gridViewContainer').classList.add('hidden');
+            document.getElementById('detailContent').classList.add('hidden');
+
+            if (mode === 'overview') {
+                selectedStudentId = null;
+                renderStudentList();
+                document.getElementById('overviewContent').classList.remove('hidden');
+            } else if (mode === 'individual') {
+                if (!selectedStudentId && mockData.length > 0) {
+                    selectedStudentId = mockData[0].id;
+                    renderStudentList();
+                    populateStudentDetail(selectedStudentId);
+                }
+                document.getElementById('detailContent').classList.remove('hidden');
+            } else if (mode === 'grid') {
+                selectedStudentId = null;
+                renderStudentList();
+                document.getElementById('gridViewContainer').classList.remove('hidden');
+                renderGridView();
+            }
+        }
+
+        function setFilter(type) {
+            currentFilter = type;
+            // สลับ Class ปุ่ม Filter
+            ['all', 'high', 'medium', 'low'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                btn.className = `filter-btn px-3 py-1.5 rounded-full text-xs font-medium shrink-0 ${f === type ? 'active-' + f : ''}`;
+            });
+            renderStudentList();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            renderStudentList();
+        }
+
+        function exportReport() {
+            // สร้างข้อมูล CSV สมมติ
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // ใส่ BOM เพื่อให้ Excel อ่านภาษาไทยได้
+            csvContent += "ชื่อ-นามสกุล,เลขที่,ชั้น,คะแนนความเสี่ยง,คะแนนสอบ\r\n";
+            mockData.forEach(s => {
+                csvContent += `${s.name},${s.studentId},${s.grade},${s.riskScore},${s.examScore}\r\n`;
+            });
+            
+            // โหลดไฟล์
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "รายงานพฤติกรรมการสอบ_MATTEP.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- Render Functions ---
+
+        function renderStudentList() {
+            listContainer.innerHTML = '';
+            
+            // กรองข้อมูล
+            const filteredData = mockData.filter(s => {
+                const matchSearch = s.name.toLowerCase().includes(searchQuery) || s.studentId.includes(searchQuery);
+                let matchFilter = true;
+                if (currentFilter === 'high') matchFilter = s.riskScore >= 70;
+                else if (currentFilter === 'medium') matchFilter = s.riskScore >= 40 && s.riskScore < 70;
+                else if (currentFilter === 'low') matchFilter = s.riskScore < 40;
+                
+                return matchSearch && matchFilter;
+            });
+
+            if (filteredData.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-slate-400 text-sm mt-5">ไม่พบรายชื่อที่ค้นหา</p>';
+                return;
+            }
+
+            filteredData.forEach(student => {
+                const styles = getRiskStyles(student.riskScore);
+                const isActive = student.id === selectedStudentId;
+                
+                const item = document.createElement('div');
+                item.className = `cursor-pointer p-3.5 flex justify-between items-center student-item ${isActive ? 'active' : ''}`;
+                item.onclick = () => selectStudent(student.id);
+                item.dataset.id = student.id;
+                // เมนูคลิกขวา
+                item.oncontextmenu = (e) => { e.preventDefault(); showContextMenu(e.pageX, e.pageY, student.id); };
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+                            ${student.name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="font-bold text-slatePrimary">${student.name}</p>
+                            <p class="text-xs text-slateSecondary">เลขที่: ${student.studentId}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-1">ความเสี่ยง</span>
+                        <div class="px-2 py-0.5 rounded-md border text-sm font-bold ${styles.badge}">
+                            ${student.riskScore}
+                        </div>
+                    </div>
+                `;
+
+                // ถ้าเสี่ยงสูง ให้เพิ่มคลาสกระพริบและเล่นเสียงเตือน (ครั้งเดียว)
+                if (student.riskScore >= 70) {
+                    item.classList.add('flash-alert');
+                    if (!alertedSet.has(student.id)) { playAlertSound(); alertedSet.add(student.id); }
+                }
+
+                listContainer.appendChild(item);
+            });
+        }
+
+        function renderGridView() {
+            const gridContainer = document.getElementById('cctvGrid');
+            gridContainer.innerHTML = '';
+
+            // ดึงคนที่เสี่ยงสุด 4 อันดับ
+            const sortedByRisk = [...mockData].sort((a, b) => b.riskScore - a.riskScore).slice(0, 4);
+
+            sortedByRisk.forEach(student => {
+                const isHighRisk = student.riskScore >= 70;
+                const borderClass = isHighRisk ? 'border-rose-400 shadow-rose-200 shadow-lg' : 'border-slate-200';
+                
+                // หา event ล่าสุด (ถ้ามี)
+                const latestEvent = student.timeline && student.timeline.length > 0 
+                    ? student.timeline[student.timeline.length-1].event 
+                    : 'กำลังสอบปกติ';
+
+                gridContainer.innerHTML += `
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden border-2 ${borderClass} relative group cursor-pointer cctv-card card-${student.id}" onclick="selectStudent('${student.id}')">
+                        <!-- Simulated Webcam Image -->
+                        <div class="aspect-video bg-slate-800 relative">
+                            <img src="https://placehold.co/600x400/1e293b/94a3b8?text=CCTV+Feed%5Cn${student.name}" class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity">
+                            
+                            <!-- REC overlay -->
+                            <div class="absolute top-3 left-3 flex items-center gap-2 bg-black/50 px-2 py-1 rounded text-xs text-white font-mono">
+                                <div class="w-2 h-2 rounded-full bg-red-500 rec-dot"></div> REC
+                            </div>
+                            <!-- Risk Overlay -->
+                            <div class="absolute top-3 right-3 bg-black/60 px-2 py-1 rounded text-xs text-white font-mono font-bold">
+                                Risk: <span class="${isHighRisk ? 'text-red-400' : 'text-amber-400'}">${student.riskScore}</span>
+                            </div>
+                            ${student.aiConfidence ? `<div class="conf-badge">Conf: ${student.aiConfidence}%</div>` : ''}
+                        </div>
+                        
+                        <!-- Info Bottom -->
+                        <div class="bg-white p-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <h3 class="font-bold text-slatePrimary">${student.name} <span class="text-sm font-normal text-slate-500">(${student.grade})</span></h3>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">กล้อง 0${sortedByRisk.indexOf(student)+1}</span>
+                            </div>
+                            <p class="text-sm ${isHighRisk ? 'text-red-600 font-medium' : 'text-slate-500'} flex items-center gap-1 truncate">
+                                ↳ ล่าสุด: ${latestEvent}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectStudent(id) {
+            selectedStudentId = id;
+            renderStudentList();
+            populateStudentDetail(id);
+            setViewMode('individual');
+        }
+
+        function populateStudentDetail(id) {
+            const student = mockData.find(s => s.id === id);
+            if (!student) return;
+            
+            const detailPanel = document.getElementById('detailContent');
+            // รีเซ็ต Animation ของ Card ทั้งหมดให้เล่นใหม่ทุกครั้งที่สลับรายชื่อ
+            const animatedCards = detailPanel.querySelectorAll('.fade-in');
+            animatedCards.forEach(card => {
+                card.classList.remove('fade-in');
+                void card.offsetWidth; 
+                card.classList.add('fade-in');
+            });
+
+            // อัปเดตข้อมูลทั่วไป
+            document.getElementById('detailName').innerText = student.name;
+            document.getElementById('detailInfo').innerText = `เลขที่: ${student.studentId} | ชั้น: ${student.grade}`;
+            
+            const riskStyles = getRiskStyles(student.riskScore);
+            const riskEl = document.getElementById('detailRiskScore');
+            riskEl.innerText = `${student.riskScore}/100`;
+            riskEl.className = `text-2xl font-bold ${riskStyles.text}`;
+            
+            document.getElementById('detailExamScore').innerText = `${student.examScore}/100`;
+            document.getElementById('aiConfidenceGauge').innerHTML = createGaugeSvg(student.aiConfidence ?? 0, 70);
+            updateCurrentTime();
+
+            // อัปเดต Card สรุปกิจกรรม
+            document.getElementById('summaryList').innerHTML = (student.summary || []).map(item => `
+                <li class="flex justify-between items-center py-2.5 border-b border-slate-100 last:border-0">
+                    <span class="text-slateSecondary font-medium">${item.label}</span>
+                    <span class="font-bold px-2 py-1 rounded-md text-sm ${item.warn ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'text-slatePrimary'}">${item.value}</span>
+                </li>
+            `).join('');
+
+            // อัปเดต Card สถานะ AI (เพิ่ม Confidence ถ้ามี)
+            const aiList = [];
+            if (student.aiConfidence != null) {
+                aiList.push({ label: `AI Confidence: ${student.aiConfidence}%`, status: 'ok' });
+            }
+            (student.aiStatus || []).forEach(i => aiList.push(i));
+
+            document.getElementById('aiStatusList').innerHTML = aiList.map(item => {
+                let iconHtml = '', bgClass = '', textClass = '';
+                if (item.status === 'ok') {
+                    iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                    bgClass = 'bg-emerald-100'; textClass = 'text-emerald-600';
+                } else if (item.status === 'warning') {
+                    iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14A2.0 2.0 0 0021 17.07L17.07 5.93A2 2 0 0015.07 4H8.93a2 2 0 00-1.95 1.93L3 17.07A2 2 0 004.93 19z" /></svg>';
+                    bgClass = 'bg-amber-100'; textClass = 'text-amber-600';
+                } else if (item.status === 'danger') {
+                    iconHtml = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 19h14.14A2.0 2.0 0 0021 17.07L17.07 5.93A2 2 0 0015.07 4H8.93a2 2 0 00-1.95 1.93L3 17.07A2 2 0 004.93 19z" /></svg>';
+                    bgClass = 'bg-rose-100'; textClass = 'text-rose-600';
+                }
+                return `
+                    <li class="flex items-center gap-3 p-3.5 bg-white/90 border-2 border-[#e9d5ff] rounded-2xl shadow-[0_0_15px_rgba(233,213,255,0.6)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(233,213,255,0.9)] cursor-default">
+                        <span class="${bgClass} ${textClass} w-8 h-8 rounded-full flex items-center justify-center shadow-sm shrink-0">${iconHtml}</span>
+                        <span class="font-semibold text-slatePrimary">${item.label}</span>
+                    </li>
+                `;
+            }).join('');
+
+            // อัปเดต Timeline
+            document.getElementById('timelineContainer').innerHTML = (student.timeline || []).map(item => {
+                let dotColor = 'bg-slate-300';
+                let textColor = 'text-slatePrimary';
+                if (item.type === 'warning') { dotColor = 'bg-amber-400'; textColor = 'text-amber-600 font-medium'; }
+                if (item.type === 'danger') { dotColor = 'bg-rose-500'; textColor = 'text-rose-600 font-bold'; }
+
+                const evidence = (student.evidences || []).find(e => e.time === item.time);
+                let evidenceHtml = '';
+                
+                if (evidence) {
+                    evidenceHtml = `
+                        <div class="ml-[60px] mt-2 mb-2">
+                            <div class="bg-white rounded-xl overflow-hidden border border-rose-100 shadow-sm hover:shadow-md transition-all duration-300 inline-block w-48 sm:w-64 group relative">
+                                <div class="h-32 sm:h-40 bg-slate-100 relative overflow-hidden">
+                                    <img src="https://placehold.co/400x250/${evidence.imgColor}/${evidence.txtColor}?text=Snapshot%5Cn${evidence.time}" alt="${evidence.caption}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300">
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-2 border-t border-rose-50 text-xs font-bold text-slatePrimary truncate">
+                                    <div class="flex items-center gap-2 text-xs font-bold text-slatePrimary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v11H3V7z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8" />
+                                        </svg>
+                                        ${evidence.caption}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="relative pb-4 last:pb-0">
+                        <div class="absolute -left-[27px] top-1.5 w-3 h-3 rounded-full ${dotColor} ring-4 ring-white shadow-sm z-10"></div>
+                        <div class="flex flex-col">
+                            <p class="text-sm flex items-start gap-3">
+                                <span class="text-slate-400 font-bold w-12 shrink-0 pt-0.5">${item.time}</span>
+                                <span class="${textColor} pt-0.5">${item.event}</span>
+                            </p>
+                            ${evidenceHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCurrentTime() {
+            const timeStr = new Date().toLocaleTimeString('th-TH');
+            document.getElementById('detailCurrentTime').innerText = timeStr;
+        }
+
+        let examSeconds = 4405; // 01:13:25
+        function tickExamTimer() {
+            examSeconds--;
+            if(examSeconds < 0) examSeconds = 0;
+            const h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
+            const m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
+            const s = String(examSeconds % 60).padStart(2, '0');
+            document.getElementById('examTimer').innerText = `${h}:${m}:${s}`;
+        }
+
+        window.onload = () => {
+            updateOverviewDashboard(); 
+            setViewMode('overview'); // เปลี่ยนให้เริ่มต้นโหลดขึ้นมาเป็นหน้าภาพรวมทันที
+            setInterval(tickExamTimer, 1000);
+            // init incidents from existing data
+            buildInitialIncidents();
+            // simulate monitoring: check for new high risk entries every 5s
+            setInterval(checkForNewAlerts, 5000);
+        };
+
+        /* ------------------ Incident Sidebar & Real-time logic ------------------ */
+        const incidents = [];
+
+        function buildInitialIncidents(){
+            mockData.forEach(s=>{
+                (s.timeline||[]).forEach(t=>{
+                    if(t.type && t.type !== 'info') addIncident(s.id, t.time, t.event, t.type);
+                });
+                // if very high risk, add a summary incident
+                if(s.riskScore >= 70) addIncident(s.id, new Date().toLocaleTimeString('th-TH'), 'Risk score elevated', 'danger');
+            });
+            renderIncidents();
+        }
+
+        function addIncident(studentId, time, event, type){
+            const s = mockData.find(x=>x.id===studentId);
+            if(!s) return;
+            const sev = (type==='danger')? 'high' : (type==='warning')? 'med' : 'low';
+            incidents.push({ id: studentId, time, event, type, sev, name: s.name, risk: s.riskScore, aiConfidence: s.aiConfidence || null, ts: Date.now() });
+            renderIncidents();
+        }
+
+        let incidentSidebarVisible = true;
+
+        function toggleIncidentSidebar() {
+            let sb = document.getElementById('incidentSidebar');
+            if (!sb) {
+                renderIncidents();
+                sb = document.getElementById('incidentSidebar');
+            }
+            if (!sb) return;
+            incidentSidebarVisible = sb.style.display !== 'none';
+            sb.style.display = incidentSidebarVisible ? 'none' : 'block';
+            updateIncidentToggleButton(!incidentSidebarVisible);
+        }
+
+        function updateIncidentToggleButton(isVisible) {
+            const btn = document.getElementById('btnToggleIncident');
+            if (!btn) return;
+            btn.innerHTML = isVisible
+                ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg> Live Alerts`
+                : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg> ปิด Feed`;
+        }
+
+        function renderIncidents(){
+            // ensure sidebar exists
+            let sb = document.getElementById('incidentSidebar');
+            if(!sb){
+                sb = document.createElement('aside'); sb.id='incidentSidebar'; sb.className='glass-card';
+                sb.innerHTML = `<div class="flex justify-between items-center mb-3"><h4 class="font-bold">Live Feed of Incidents</h4><button onclick="toggleIncidentSidebar()" class="text-sm rounded-full px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100">✕</button></div><div id='incidentList'></div>`;
+                document.body.appendChild(sb);
+            }
+            sb.style.display = 'block';
+            updateIncidentToggleButton(true);
+            const list = document.getElementById('incidentList');
+            if(!list) return;
+            // sort by severity (high -> med -> low), then risk desc, then recent
+            const order = { high: 0, med: 1, low: 2 };
+            const sorted = [...incidents].sort((a,b)=> order[a.sev]-order[b.sev] || b.risk - a.risk || b.ts - a.ts).slice(0, 30);
+            list.innerHTML = sorted.map(it=>{
+                const cls = it.sev==='high' ? 'sev-high' : (it.sev==='med' ? 'sev-med' : 'sev-low');
+                const ai = it.aiConfidence ? `<div class="meta">AI ${it.aiConfidence}%</div>` : '';
+                return `<div class="item ${cls}" onclick="selectStudent('${it.id}')"><div style='flex:1'><div class='title'>${it.name}</div><div class='meta'>${it.event} · ${it.time}</div>${ai}</div><div style='margin-left:6px;font-weight:700;color:#0f172a'>${it.risk}</div></div>`;
+            }).join('');
+        }
+
+        // Called periodically to detect newly elevated risks
+        function checkForNewAlerts(){
+            mockData.forEach(s=>{
+                if(s.riskScore >= 70 && !alertedSet.has(s.id)){
+                    addIncident(s.id, new Date().toLocaleTimeString('th-TH'), 'Auto-detected high risk', 'danger');
+                    alertedSet.add(s.id);
+                    playAlertSound();
+                }
+            });
+        }
+
+        /* ------------------ Quick Action handlers ------------------ */
+        function promptMessage(){
+            if(!selectedStudentId) return alert('กรุณาเลือกนักเรียนก่อน');
+            const msg = prompt('ข้อความเตือน (ตัวอย่าง: กรุณากลับมาที่ข้อสอบ)');
+            if(!msg) return;
+            const s = mockData.find(x=>x.id===selectedStudentId);
+            s.timeline = s.timeline || [];
+            s.timeline.push({ time: new Date().toLocaleTimeString('th-TH'), event: `อาจารย์ส่งข้อความ: ${msg}`, type: 'info' });
+            addIncident(selectedStudentId, new Date().toLocaleTimeString('th-TH'), `Message sent: ${msg}`, 'warning');
+            alert('ส่งข้อความเรียบร้อย');
+            populateStudentDetail(selectedStudentId);
+        }
+
+        function requestScreenShare(){
+            if(!selectedStudentId) return alert('กรุณาเลือกนักเรียนก่อน');
+            // simulate request
+            addIncident(selectedStudentId, new Date().toLocaleTimeString('th-TH'), 'Screen share requested', 'warning');
+            alert('ขอแชร์หน้าจอแล้ว (จำลอง)');
+        }
+
+        function startRetroRecording(){
+            if(!selectedStudentId) return alert('กรุณาเลือกนักเรียนก่อน');
+            addIncident(selectedStudentId, new Date().toLocaleTimeString('th-TH'), 'Started retro recording 30s', 'warning');
+            alert('บันทึกย้อนหลัง 30 วินาทีเริ่มแล้ว (จำลอง)');
+        }
+
+        /* ------------------ Gauge helper ------------------ */
+        function createGaugeSvg(percent, size=56){
+            const r = (size/2)-6; const c = 2*Math.PI*r; const dash = (percent/100)*c; const remainder = c - dash;
+            return `
+                <svg class='gauge' viewBox='0 0 ${size} ${size}' xmlns='http://www.w3.org/2000/svg'>
+                    <defs>
+                        <linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='0%'>
+                            <stop offset='0%' stop-color='#10b981'/>
+                            <stop offset='100%' stop-color='#ef4444'/>
+                        </linearGradient>
+                    </defs>
+                    <g transform='translate(${size/2},${size/2})'>
+                        <circle r='${r}' cx='0' cy='0' fill='none' stroke='#f1f5f9' stroke-width='6'></circle>
+                        <circle r='${r}' cx='0' cy='0' fill='none' stroke='url(#g1)' stroke-width='6' stroke-dasharray='${dash} ${remainder}' stroke-linecap='round' transform='rotate(-90)'></circle>
+                        <text x='0' y='4' text-anchor='middle' font-size='12' font-weight='700' fill='#0f172a'>${percent}%</text>
+                    </g>
+                </svg>
+            `;
+        }
+
+        const socket = io();
+        socket.on('connect', () => {
+            console.log('Connected to proctor server via Socket.io');
+        });
+        socket.on('riskUpdate', (update) => {
+            if (!update || !update.studentId) return;
+            handleRemoteRiskUpdate(update);
+        });
+        socket.on('incident', (update) => {
+            if (!update || !update.studentId) return;
+            addIncident(update.studentId, update.timestamp || new Date().toLocaleTimeString('th-TH'), update.message || 'AI event', update.eventType || 'warning');
+        });
+        socket.on('disconnect', () => {
+            console.log('Disconnected from proctor server');
+        });
+
+        function handleRemoteRiskUpdate(update) {
+            const student = mockData.find(s => s.id === update.studentId);
+            if (!student) return;
+
+            student.riskScore = update.riskScore ?? student.riskScore;
+            student.aiConfidence = update.confidence ?? student.aiConfidence;
+            student.timeline = student.timeline || [];
+            student.timeline.push({
+                time: update.timestamp || new Date().toLocaleTimeString('th-TH'),
+                event: update.message || 'AI รายงานสถานะ',
+                type: update.eventType === 'danger' ? 'danger' : update.eventType === 'warning' ? 'warning' : 'info'
+            });
+
+            if (update.snapshotUrl) {
+                student.evidences = student.evidences || [];
+                student.evidences.push({
+                    time: update.timestamp || new Date().toLocaleTimeString('th-TH'),
+                    caption: update.message || 'Snapshot',
+                    imgColor: 'fcd34d',
+                    txtColor: 'b45309',
+                    snapshot: update.snapshotUrl
+                });
+            }
+
+            updateOverviewDashboard();
+            renderStudentList();
+            if (selectedStudentId === student.id) populateStudentDetail(student.id);
+            addIncident(student.id, update.timestamp || new Date().toLocaleTimeString('th-TH'), update.message || 'AI real-time event', update.eventType || 'warning');
+        }
+
+    </script>
+</body>
+</html>
