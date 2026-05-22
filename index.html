@@ -6,124 +6,101 @@
   <title>MATTEP - ระบบทดสอบออนไลน์</title>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%); min-height: 100vh; color: #1e293b; padding: 40px 20px; }
+    .container { max-width: 950px; margin: auto; }
 
-    body {
-      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
-      min-height: 100vh;
-      color: #1e293b;
-      padding: 40px 20px;
+    /* --- หน้าเริ่มต้น (Start Screen) --- */
+    #startScreen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 80vh; text-align: center; animation: fade 0.6s ease;
     }
+    .welcome-card {
+      background: #ffffff; padding: 50px; border-radius: 32px; border: 1px solid #f3d7e6;
+      box-shadow: 0 20px 50px rgba(244,63,94,0.1); max-width: 600px;
+    }
+    .start-icon { font-size: 60px; margin-bottom: 20px; }
+    .start-btn {
+      margin-top: 30px; padding: 18px 50px; font-size: 22px; font-weight: bold;
+      color: white; border: none; border-radius: 999px; cursor: pointer;
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      box-shadow: 0 10px 20px rgba(244,63,94,0.3); transition: 0.3s;
+    }
+    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(244,63,94,0.4); }
 
-    .container {
-      max-width: 950px;
-      margin: auto;
-    }
+    /* --- ส่วนประกอบเดิม (ซ่อนไว้ก่อนเริ่ม) --- */
+    #examContent { display: none; }
 
     /* --- Header & Badges --- */
-    .header {
-      position: relative;
-      overflow: hidden;
-      background: #ffffff;
-      backdrop-filter: blur(14px);
-      border: 1px solid #f3d7e6;
-      border-radius: 28px;
-      padding: 35px;
-      margin-bottom: 30px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    }
+    .header { position: relative; overflow: hidden; background: #ffffff; border: 1px solid #f3d7e6; border-radius: 28px; padding: 35px; margin-bottom: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+    .header h1 { font-size: 42px; margin-bottom: 10px; }
+    .header p { color: #475569; font-size: 18px; padding: 8px 24px; background: rgba(255, 255, 255, 0.7); border: 2px solid #e9d5ff; border-radius: 999px; display: inline-block; }
+    .top-info { display: flex; gap: 15px; margin-top: 20px; }
+    .badge { background: #fff1f2; border: 1px solid #fecdd3; padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+    .timer-badge { background: #fee2e2; color: #dc2626; }
 
-    .header h1 { font-size: 42px; margin-bottom: 10px; position: relative; z-index: 1; }
-    .header p { 
-      color: #475569; font-size: 18px; position: relative; z-index: 1; 
-      display: inline-block; padding: 8px 24px; background: rgba(255, 255, 255, 0.7); 
-      border: 2px solid #e9d5ff; border-radius: 999px; font-weight: 500;
-    }
-
-    .top-info { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
-    .badge { background: #fff1f2; border: 1px solid #fecdd3; padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; }
-    .timer-badge { background: #fee2e2; color: #dc2626; border-color: #fca5a5; font-weight: bold; }
-
-    /* --- Form & Questions --- */
-    .student-form {
-      background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 28px; margin-bottom: 24px;
-    }
+    /* --- Question Cards --- */
+    .student-form, .question-card { background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 28px; margin-bottom: 24px; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
-    .input-group label { font-size: 15px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px; }
-    .input-group input { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #cbd5e1; outline: none; }
+    .input-group label { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 8px; display: block; }
+    .input-group input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #cbd5e1; outline: none; }
+    .question-number { width: 40px; height: 40px; border-radius: 10px; background: #f43f5e; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 15px; }
+    .choices label { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 15px; border: 1px solid #dbe4ee; cursor: pointer; margin-bottom: 10px; }
+    textarea { width: 100%; min-height: 100px; border-radius: 15px; border: 1px solid #cbd5e1; padding: 15px; outline: none; font-size: 16px; }
 
-    .question-card {
-      background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 28px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-    .question-number {
-      width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #f43f5e, #fb7185); color: white; font-weight: bold; margin-bottom: 18px;
-    }
-    .choices label {
-      display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 16px; 
-      background: #fffafc; border: 1px solid #dbe4ee; cursor: pointer; margin-bottom: 10px;
-    }
-    textarea { width: 100%; min-height: 120px; border-radius: 18px; border: 1px solid #cbd5e1; padding: 18px; font-size: 16px; outline: none; }
+    /* --- Buttons --- */
+    .submit-btn { width: 100%; padding: 20px; border: none; border-radius: 20px; background: #0f172a; color: white; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .submit-btn:hover { background: #334155; }
 
-    .submit-btn {
-      width: 100%; padding: 18px; border: none; border-radius: 20px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185); color: white;
-      font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 10px 25px rgba(236,72,153,0.25);
-    }
-
-    /* --- Custom Modal (Theme-Based) --- */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
-      display: none; justify-content: center; align-items: center; z-index: 1000;
-    }
-    .modal-card {
-      background: white; padding: 35px; border-radius: 24px; max-width: 450px; width: 90%; text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    }
-    .modal-title { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 12px; }
-    .modal-text { color: #64748b; margin-bottom: 25px; line-height: 1.6; }
-    .modal-footer { display: flex; gap: 12px; }
-    .m-btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
-    .btn-cancel { background: #f1f5f9; color: #64748b; }
+    /* --- Modal --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-card { background: white; padding: 35px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+    .m-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
     .btn-confirm { background: #f43f5e; color: white; }
 
-    /* --- Result View --- */
-    .result {
-      display: none; background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 40px; animation: fade 0.5s ease;
-    }
-    .score { font-size: 38px; font-weight: 800; margin-bottom: 10px; color: #f43f5e; }
-    .essay-box { margin-top: 18px; padding: 18px; border-radius: 18px; background: #fffafc; border-left: 5px solid #f43f5e; }
+    /* --- Result --- */
+    .result { display: none; background: white; border-radius: 24px; padding: 40px; border: 1px solid #f3d7e6; }
+    .score { font-size: 40px; font-weight: 800; color: #f43f5e; margin: 20px 0; }
 
-    @keyframes fade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
   <div class="modal-overlay" id="customModal">
     <div class="modal-card">
-      <div class="modal-title" id="modalTitle">ยืนยันการดำเนินการ</div>
-      <div class="modal-text" id="modalText">รายละเอียด</div>
+      <h3 id="modalTitle">หัวข้อ</h3>
+      <p id="modalText" style="margin-top:10px; color:#64748b;"></p>
       <div class="modal-footer">
-        <button class="m-btn btn-cancel" id="modalCancelBtn" onclick="closeModal()">ยกเลิก</button>
-        <button class="m-btn btn-confirm" id="modalConfirmBtn">ยืนยันนำส่งคำตอบ</button>
+        <button class="m-btn" style="background:#f1f5f9;" id="modalCancelBtn" onclick="closeModal()">ยกเลิก</button>
+        <button class="m-btn btn-confirm" id="modalConfirmBtn">ตกลง</button>
       </div>
     </div>
   </div>
 
   <div class="container">
-    <div id="examContainer">
+    
+    <div id="startScreen">
+      <div class="welcome-card">
+        <div class="start-icon">📝</div>
+        <h1 style="font-size: 32px; margin-bottom: 10px;">แบบทดสอบออนไลน์ MATTEP</h1>
+        <p style="color: #64748b; line-height: 1.6;">
+          วิชาเทคโนโลยีเว็บ (Web Technology)<br>
+          จำนวนข้อสอบ: 4 ข้อ | เวลาที่ใช้: 60 นาที<br>
+          <span style="color: #f43f5e; font-weight: 600;">* เมื่อกดเริ่มสอบ ระบบจะเริ่มจับเวลาทันที</span>
+        </p>
+        <button class="start-btn" onclick="startExam()">เริ่มทำข้อสอบ</button>
+      </div>
+    </div>
+
+    <div id="examContent">
       <div class="student-form">
-        <div class="input-group" style="margin-bottom: 15px;"><label style="font-size: 18px;">ข้อมูลผู้เข้าทดสอบ</label></div>
+        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 15px;">ข้อมูลผู้เข้าทดสอบ</label>
         <div class="form-grid">
           <div class="input-group">
             <label>ชื่อ-นามสกุล</label>
-            <input type="text" id="studentName" placeholder="กรอกชื่อ-นามสกุล">
+            <input type="text" id="studentName" placeholder="ระบุชื่อของคุณ">
           </div>
           <div class="input-group">
             <label>เลขที่</label>
@@ -131,138 +108,130 @@
           </div>
           <div class="input-group">
             <label>ระดับชั้น</label>
-            <input type="text" id="studentClass" placeholder="ระบุระดับชั้น">
+            <input type="text" id="studentClass" placeholder="ระบุชั้นเรียน">
           </div>
         </div>
       </div>
 
       <div class="header">
         <h1>MATTEP</h1>
-        <p>แบบทดสอบออนไลน์วิชาเทคโนโลยีเว็บ</p>
+        <p>หน่วยการเรียนรู้ที่ 1: พื้นฐานเว็บไซต์</p>
         <div class="top-info">
-          <div class="badge">จำนวน 4 ข้อสอบ</div>
           <div class="badge timer-badge" id="timerDisplay">เวลาคงเหลือ: 60:00</div>
         </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">1</div>
-        <div class="question-title">ภาษา HTML มีจุดประสงค์หลักเพื่อสิ่งใด?</div>
+        <div class="question-title">ภาษา HTML มีหน้าที่หลักอย่างไร?</div>
         <div class="choices">
-          <label><input type="radio" name="q1" value="0"> พัฒนาระบบฐานข้อมูล</label>
-          <label><input type="radio" name="q1" value="1"> กำหนดโครงสร้างและเนื้อหาของหน้าเว็บ</label>
-          <label><input type="radio" name="q1" value="0"> ออกแบบกราฟิกความละเอียดสูง</label>
+          <label><input type="radio" name="q1" value="1"> กำหนดโครงสร้างข้อมูลหน้าเว็บ</label>
+          <label><input type="radio" name="q1" value="0"> ตกแต่งสีสันและรูปแบบ</label>
         </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">2</div>
-        <div class="question-title">บทบาทหน้าที่หลักของ CSS ในเว็บไซต์คืออะไร?</div>
+        <div class="question-title">ภาษา CSS ใช้สำหรับสิ่งใด?</div>
         <div class="choices">
-          <label><input type="radio" name="q2" value="1"> ตกแต่งและจัดการรูปแบบการแสดงผล</label>
-          <label><input type="radio" name="q2" value="0"> ประมวลผลคำสั่งฝั่งเซิร์ฟเวอร์</label>
-          <label><input type="radio" name="q2" value="0"> ใช้ส่งอีเมลผ่านหน้าเว็บ</label>
+          <label><input type="radio" name="q2" value="1"> จัดรูปแบบและการแสดงผล</label>
+          <label><input type="radio" name="q2" value="0"> คำนวณตรรกะทางคณิตศาสตร์</label>
         </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">3</div>
-        <div class="question-title">จงอธิบายความสำคัญของ JavaScript ในการพัฒนาเว็บ (อัตนัย)</div>
-        <textarea id="essay1" placeholder="พิมพ์คำตอบเชิงบรรยาย..."></textarea>
+        <div class="question-title">จงอธิบายความสำคัญของ JavaScript (อัตนัย)</div>
+        <textarea id="essay1" placeholder="พิมพ์คำตอบที่นี่..."></textarea>
       </div>
 
       <div class="question-card">
         <div class="question-number">4</div>
-        <div class="question-title">ท่านมีแนวคิดอย่างไรในการป้องกันการทุจริตสอบออนไลน์?</div>
-        <textarea id="essay2" placeholder="พิมพ์คำตอบเชิงบรรยาย..."></textarea>
+        <div class="question-title">แนวทางป้องกันการโกงสอบออนไลน์ที่ท่านแนะนำคืออะไร?</div>
+        <textarea id="essay2" placeholder="พิมพ์คำตอบที่นี่..."></textarea>
       </div>
 
-      <button class="submit-btn" onclick="validateExam()">บันทึกและนำส่งคำตอบ</button>
+      <button class="submit-btn" onclick="validateAndConfirm()">บันทึกและนำส่งคำตอบ</button>
     </div>
 
     <div class="result" id="resultView">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h2 style="color: #64748b;">รายงานสรุปผลคะแนน</h2>
-        <div class="score" id="scoreDisplay">0 / 2</div>
-        <p id="infoDisplay" style="font-weight: 600; font-size: 18px;"></p>
-        <p id="timeDisplay" style="font-size: 14px; color: #94a3b8; margin-top: 10px;"></p>
+      <div style="text-align: center;">
+        <h2 style="color: #64748b;">รายงานสรุปผลการทดสอบ</h2>
+        <div class="score" id="scoreValue">0 / 2</div>
+        <p id="resStudentInfo" style="font-weight: 600; font-size: 18px;"></p>
+        <p id="resTime" style="color: #94a3b8; font-size: 14px; margin-top: 8px;"></p>
       </div>
-      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 25px 0;">
-      <h3>ผลการตอบส่วนอัตนัย</h3>
-      <div class="essay-box"><strong>ข้อที่ 3:</strong><p id="resEssay1" style="margin-top:8px;"></p></div>
-      <div class="essay-box"><strong>ข้อที่ 4:</strong><p id="resEssay2" style="margin-top:8px;"></p></div>
+      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+      <div style="background: #fffafc; padding: 20px; border-radius: 15px;">
+        <strong>คำตอบส่วนอัตนัย:</strong>
+        <p id="resEssay1" style="margin-top: 10px; color: #475569;"></p>
+        <p id="resEssay2" style="margin-top: 10px; color: #475569;"></p>
+      </div>
     </div>
+
   </div>
 
   <script>
     let timeLeft = 3600;
-    const timerElem = document.getElementById('timerDisplay');
+    let timerInterval;
 
-    function startTimer() {
-      const interval = setInterval(() => {
+    function startExam() {
+      // ซ่อนหน้าเริ่ม และแสดงหน้าข้อสอบ
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('examContent').style.display = 'block';
+      window.scrollTo(0,0);
+
+      // เริ่มจับเวลา
+      timerInterval = setInterval(() => {
         timeLeft--;
-        const min = Math.floor(timeLeft / 60);
-        const sec = timeLeft % 60;
-        timerElem.innerText = `เวลาคงเหลือ: ${min}:${sec < 10 ? '0'+sec : sec}`;
-        if (timeLeft <= 0) {
-          clearInterval(interval);
-          showModal("หมดเวลาการทดสอบ", "ระบบดำเนินการบันทึกคำตอบอัตโนมัติ", false, submitFinal);
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = `เวลาคงเหลือ: ${m}:${s < 10 ? '0'+s : s}`;
+        if(timeLeft <= 0) {
+          clearInterval(timerInterval);
+          showModal("หมดเวลาการทดสอบ", "ระบบกำลังนำส่งคำตอบอัตโนมัติ...", false, submitExam);
         }
       }, 1000);
     }
-    window.onload = startTimer;
 
     function showModal(title, text, showCancel, onConfirm) {
       document.getElementById('modalTitle').innerText = title;
       document.getElementById('modalText').innerText = text;
-      document.getElementById('modalCancelBtn').style.display = showCancel ? "block" : "none";
-      document.getElementById('customModal').style.display = "flex";
+      document.getElementById('modalCancelBtn').style.display = showCancel ? 'block' : 'none';
+      document.getElementById('customModal').style.display = 'flex';
       
-      const confirmBtn = document.getElementById('modalConfirmBtn');
-      const newConfirmBtn = confirmBtn.cloneNode(true);
-      confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-      newConfirmBtn.onclick = () => { closeModal(); onConfirm(); };
+      const btn = document.getElementById('modalConfirmBtn');
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.onclick = () => { closeModal(); onConfirm(); };
     }
 
-    function closeModal() { document.getElementById('customModal').style.display = "none"; }
+    function closeModal() { document.getElementById('customModal').style.display = 'none'; }
 
-    function validateExam() {
-      const name = document.getElementById('studentName').value.trim();
-      const no = document.getElementById('studentNo').value.trim();
-      const cls = document.getElementById('studentClass').value.trim();
-      const q1 = document.querySelector('input[name="q1"]:checked');
-      const q2 = document.querySelector('input[name="q2"]:checked');
-
-      if (!name || !no || !cls) {
-        showModal("ข้อมูลไม่ครบถ้วน", "กรุณาระบุข้อมูลผู้เข้าทดสอบให้ครบถ้วนก่อนส่ง", false, () => {});
-        return;
-      }
-      if (!q1 || !q2) {
-        showModal("ยังไม่ได้เลือกคำตอบ", "กรุณาทำแบบทดสอบส่วนปรนัยให้ครบทุกข้อ", false, () => {});
-        return;
-      }
-
-      showModal("ยืนยันการนำส่งคำตอบ", "ท่านยืนยันที่จะส่งผลการทดสอบนี้หรือไม่? เมื่อส่งแล้วจะไม่สามารถแก้ไขได้", true, submitFinal);
+    function validateAndConfirm() {
+      const name = document.getElementById('studentName').value;
+      if(!name) { showModal("ข้อมูลไม่ครบ", "กรุณาระบุชื่อ-นามสกุลก่อนส่ง", false, () => {}); return; }
+      
+      showModal("ยืนยันการส่ง", "ท่านยืนยันที่จะนำส่งคำตอบและสิ้นสุดการทดสอบหรือไม่?", true, submitExam);
     }
 
-    function submitFinal() {
+    function submitExam() {
+      clearInterval(timerInterval);
       let score = 0;
       const q1 = document.querySelector('input[name="q1"]:checked');
       const q2 = document.querySelector('input[name="q2"]:checked');
-      if (q1) score += parseInt(q1.value);
-      if (q2) score += parseInt(q2.value);
+      if(q1) score += parseInt(q1.value);
+      if(q2) score += parseInt(q2.value);
 
-      document.getElementById('scoreDisplay').innerText = `${score} / 2 คะแนน`;
-      document.getElementById('infoDisplay').innerText = 
-        `${document.getElementById('studentName').value} | เลขที่ ${document.getElementById('studentNo').value} | ชั้น ${document.getElementById('studentClass').value}`;
-      document.getElementById('timeDisplay').innerText = `บันทึกข้อมูลเมื่อ: ${new Date().toLocaleString('th-TH')}`;
-      
-      document.getElementById('resEssay1').innerText = document.getElementById('essay1').value || "(ไม่มีคำตอบ)";
-      document.getElementById('resEssay2').innerText = document.getElementById('essay2').value || "(ไม่มีคำตอบ)";
+      document.getElementById('scoreValue').innerText = `${score} / 2 คะแนน`;
+      document.getElementById('resStudentInfo').innerText = document.getElementById('studentName').value;
+      document.getElementById('resTime').innerText = `นำส่งเมื่อ: ${new Date().toLocaleString('th-TH')}`;
+      document.getElementById('resEssay1').innerText = "ข้อ 3: " + (document.getElementById('essay1').value || "-");
+      document.getElementById('resEssay2').innerText = "ข้อ 4: " + (document.getElementById('essay2').value || "-");
 
-      document.getElementById('examContainer').style.display = 'none';
+      document.getElementById('examContent').style.display = 'none';
       document.getElementById('resultView').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo(0,0);
     }
   </script>
 </body>
