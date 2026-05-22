@@ -1,238 +1,687 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MATTEP - ระบบทดสอบออนไลน์</title>
+  <title>MATTEP</title>
 
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%); min-height: 100vh; color: #1e293b; padding: 40px 20px; }
-    .container { max-width: 950px; margin: auto; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
 
-    /* --- หน้าเริ่มต้น (Start Screen) --- */
-    #startScreen {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 80vh; text-align: center; animation: fade 0.6s ease;
+    body {
+      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+      min-height: 100vh;
+      color: #1e293b;
+      padding: 40px 20px;
     }
-    .welcome-card {
-      background: #ffffff; padding: 50px; border-radius: 32px; border: 1px solid #f3d7e6;
-      box-shadow: 0 20px 50px rgba(244,63,94,0.1); max-width: 600px;
+
+    .container {
+      max-width: 950px;
+      margin: auto;
     }
-    .start-icon { font-size: 60px; margin-bottom: 20px; }
-    .start-btn {
-      margin-top: 30px; padding: 18px 50px; font-size: 22px; font-weight: bold;
-      color: white; border: none; border-radius: 999px; cursor: pointer;
+
+    .header {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      backdrop-filter: blur(14px);
+      border: 1px solid #f3d7e6;
+      border-radius: 28px;
+      padding: 35px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      background: rgba(244,63,94,0.10);
+      border-radius: 50%;
+      top: -80px;
+      right: -80px;
+    }
+
+    .header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header p {
+      color: #475569;
+      font-size: 18px;
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      padding: 8px 24px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 2px solid #e9d5ff; /* ขอบสีม่วงอ่อน */
+      border-radius: 999px;
+      box-shadow: 0 0 15px rgba(233, 213, 255, 0.6); /* เอฟเฟกต์เรืองแสง */
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .top-info {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .timer-badge {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #fca5a5;
+      font-weight: bold;
+    }
+
+    .student-form {
+      background: #ffffff;
+      border: 1px solid #f3d7e6;
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 25px rgba(244,63,94,0.08);
+    }
+
+    .form-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 18px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 15px;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .input-group input {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: #f43f5e;
+      box-shadow: 0 0 0 4px rgba(244,63,94,0.12);
+    }
+
+    .question-card {
+      background: #ffffff;
+      border: 1px solid #f3d7e6;
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      transition: 0.25s ease;
+    }
+
+    .question-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(236,72,153,0.35);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .question-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: linear-gradient(135deg, #f43f5e, #fb7185);
-      box-shadow: 0 10px 20px rgba(244,63,94,0.3); transition: 0.3s;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 18px;
+      font-size: 18px;
     }
-    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(244,63,94,0.4); }
 
-    /* --- ส่วนประกอบเดิม (ซ่อนไว้ก่อนเริ่ม) --- */
-    #examContent { display: none; }
+    .question-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
 
-    /* --- Header & Badges --- */
-    .header { position: relative; overflow: hidden; background: #ffffff; border: 1px solid #f3d7e6; border-radius: 28px; padding: 35px; margin-bottom: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
-    .header h1 { font-size: 42px; margin-bottom: 10px; }
-    .header p { color: #475569; font-size: 18px; padding: 8px 24px; background: rgba(255, 255, 255, 0.7); border: 2px solid #e9d5ff; border-radius: 999px; display: inline-block; }
-    .top-info { display: flex; gap: 15px; margin-top: 20px; }
-    .badge { background: #fff1f2; border: 1px solid #fecdd3; padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; }
-    .timer-badge { background: #fee2e2; color: #dc2626; }
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-    /* --- Question Cards --- */
-    .student-form, .question-card { background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 28px; margin-bottom: 24px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
-    .input-group label { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 8px; display: block; }
-    .input-group input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #cbd5e1; outline: none; }
-    .question-number { width: 40px; height: 40px; border-radius: 10px; background: #f43f5e; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 15px; }
-    .choices label { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 15px; border: 1px solid #dbe4ee; cursor: pointer; margin-bottom: 10px; }
-    textarea { width: 100%; min-height: 100px; border-radius: 15px; border: 1px solid #cbd5e1; padding: 15px; outline: none; font-size: 16px; }
+    .choices label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #fffafc;
+      border: 1px solid #dbe4ee;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 16px;
+    }
 
-    /* --- Buttons --- */
-    .submit-btn { width: 100%; padding: 20px; border: none; border-radius: 20px; background: #0f172a; color: white; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-    .submit-btn:hover { background: #334155; }
+    .choices label:hover {
+      background: #fff1f2;
+      border-color: rgba(236,72,153,0.35);
+    }
 
-    /* --- Modal --- */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-card { background: white; padding: 35px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center; }
-    .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
-    .m-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-confirm { background: #f43f5e; color: white; }
+    input[type="radio"] {
+      transform: scale(1.2);
+      accent-color: #f43f5e;
+    }
 
-    /* --- Result --- */
-    .result { display: none; background: white; border-radius: 24px; padding: 40px; border: 1px solid #f3d7e6; }
-    .score { font-size: 40px; font-weight: 800; color: #f43f5e; margin: 20px 0; }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      border-radius: 18px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 18px;
+      resize: vertical;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s;
+    }
 
-    @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    textarea:focus {
+      border-color: #f43f5e;
+      box-shadow: 0 0 0 4px rgba(244,63,94,0.15);
+    }
+
+    textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+      box-shadow: 0 10px 25px rgba(236,72,153,0.25);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 35px rgba(244,63,94,0.40);
+    }
+
+    .submit-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .result {
+      margin-top: 30px;
+      background: #ffffff;
+      backdrop-filter: blur(12px);
+      border: 1px solid #f3d7e6;
+      border-radius: 24px;
+      padding: 30px;
+      display: none;
+      animation: fade 0.5s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .score {
+      font-size: 34px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #f43f5e, #fb7185);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .essay-box {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #fffafc;
+      line-height: 1.8;
+      border: 1px solid #fecdd3;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: #f1f5f9;
+      margin: 20px 0;
+    }
+
+    @media(max-width: 768px) {
+      .header h1 { font-size: 30px; }
+      .question-title { font-size: 18px; }
+      .submit-btn { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="modal-overlay" id="customModal">
-    <div class="modal-card">
-      <h3 id="modalTitle">หัวข้อ</h3>
-      <p id="modalText" style="margin-top:10px; color:#64748b;"></p>
-      <div class="modal-footer">
-        <button class="m-btn" style="background:#f1f5f9;" id="modalCancelBtn" onclick="closeModal()">ยกเลิก</button>
-        <button class="m-btn btn-confirm" id="modalConfirmBtn">ตกลง</button>
-      </div>
-    </div>
-  </div>
-
   <div class="container">
-    
-    <div id="startScreen">
-      <div class="welcome-card">
-        <div class="start-icon">📝</div>
-        <h1 style="font-size: 32px; margin-bottom: 10px;">แบบทดสอบออนไลน์ MATTEP</h1>
-        <p style="color: #64748b; line-height: 1.6;">
-          วิชาเทคโนโลยีเว็บ (Web Technology)<br>
-          จำนวนข้อสอบ: 4 ข้อ | เวลาที่ใช้: 60 นาที<br>
-          <span style="color: #f43f5e; font-weight: 600;">* เมื่อกดเริ่มสอบ ระบบจะเริ่มจับเวลาทันที</span>
-        </p>
-        <button class="start-btn" onclick="startExam()">เริ่มทำข้อสอบ</button>
+    <div class="student-form">
+      <div class="form-title">ข้อมูลนักเรียน</div>
+      <div class="form-grid">
+        <div class="input-group">
+          <label>ชื่อ - นามสกุล <span style="color:red">*</span></label>
+          <input type="text" id="studentName" placeholder="กรอกชื่อ - นามสกุล">
+        </div>
+        <div class="input-group">
+          <label>เลขที่ <span style="color:red">*</span></label>
+          <input type="number" id="studentNo" placeholder="กรอกเลขที่">
+        </div>
+        <div class="input-group">
+          <label>ชั้นเรียน <span style="color:red">*</span></label>
+          <input type="text" id="studentClass" placeholder="เช่น ม.5/11">
+        </div>
       </div>
     </div>
 
-    <div id="examContent">
-      <div class="student-form">
-        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 15px;">ข้อมูลผู้เข้าทดสอบ</label>
-        <div class="form-grid">
-          <div class="input-group">
-            <label>ชื่อ-นามสกุล</label>
-            <input type="text" id="studentName" placeholder="ระบุชื่อของคุณ">
-          </div>
-          <div class="input-group">
-            <label>เลขที่</label>
-            <input type="number" id="studentNo" placeholder="ระบุเลขที่">
-          </div>
-          <div class="input-group">
-            <label>ระดับชั้น</label>
-            <input type="text" id="studentClass" placeholder="ระบุชั้นเรียน">
-          </div>
-        </div>
+    <div class="header">
+      <h1>MATTEP</h1>
+      <p>ระบบทำข้อสอบออนไลน์</p>
+      <div class="top-info">
+        <div class="badge">วิชา: Web Technology</div>
+        <div class="badge timer-badge" id="timerDisplay">เวลา: 60:00</div>
       </div>
+    </div>
 
-      <div class="header">
-        <h1>MATTEP</h1>
-        <p>หน่วยการเรียนรู้ที่ 1: พื้นฐานเว็บไซต์</p>
-        <div class="top-info">
-          <div class="badge timer-badge" id="timerDisplay">เวลาคงเหลือ: 60:00</div>
-        </div>
-      </div>
-
+    <div id="examForm">
       <div class="question-card">
         <div class="question-number">1</div>
-        <div class="question-title">ภาษา HTML มีหน้าที่หลักอย่างไร?</div>
+        <div class="question-title">ภาษา HTML ใช้ทำอะไร? <span style="color:red">*</span></div>
         <div class="choices">
-          <label><input type="radio" name="q1" value="1"> กำหนดโครงสร้างข้อมูลหน้าเว็บ</label>
-          <label><input type="radio" name="q1" value="0"> ตกแต่งสีสันและรูปแบบ</label>
+          <label><input type="radio" name="q1" value="0"> ใช้ตัดต่อวิดีโอ</label>
+          <label><input type="radio" name="q1" value="1"> ใช้สร้างหน้าเว็บไซต์</label>
+          <label><input type="radio" name="q1" value="0"> ใช้ทำเพลง</label>
         </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">2</div>
-        <div class="question-title">ภาษา CSS ใช้สำหรับสิ่งใด?</div>
+        <div class="question-title">CSS มีหน้าที่อะไร? <span style="color:red">*</span></div>
         <div class="choices">
-          <label><input type="radio" name="q2" value="1"> จัดรูปแบบและการแสดงผล</label>
-          <label><input type="radio" name="q2" value="0"> คำนวณตรรกะทางคณิตศาสตร์</label>
+          <label><input type="radio" name="q2" value="1"> ตกแต่งเว็บไซต์</label>
+          <label><input type="radio" name="q2" value="0"> เก็บฐานข้อมูล</label>
+          <label><input type="radio" name="q2" value="0"> สร้างไวรัส</label>
         </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">3</div>
-        <div class="question-title">จงอธิบายความสำคัญของ JavaScript (อัตนัย)</div>
-        <textarea id="essay1" placeholder="พิมพ์คำตอบที่นี่..."></textarea>
+        <div class="question-title">JavaScript ใช้ในการทำอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q3" value="1"> ทำให้หน้าเว็บมีความโต้ตอบ</label>
+          <label><input type="radio" name="q3" value="0"> จัดเก็บข้อมูล</label>
+          <label><input type="radio" name="q3" value="0"> ตัดต่อวิดีโอ</label>
+        </div>
       </div>
 
       <div class="question-card">
         <div class="question-number">4</div>
-        <div class="question-title">แนวทางป้องกันการโกงสอบออนไลน์ที่ท่านแนะนำคืออะไร?</div>
-        <textarea id="essay2" placeholder="พิมพ์คำตอบที่นี่..."></textarea>
+        <div class="question-title">ตัวแปร (Variable) คืออะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q4" value="1"> ที่เก็บค่าข้อมูลในโปรแกรม</label>
+          <label><input type="radio" name="q4" value="0"> ชนิดของปุ่มเมาส์</label>
+          <label><input type="radio" name="q4" value="0"> ระบบปฏิบัติการ</label>
+        </div>
       </div>
 
-      <button class="submit-btn" onclick="validateAndConfirm()">บันทึกและนำส่งคำตอบ</button>
+      <div class="question-card">
+        <div class="question-number">5</div>
+        <div class="question-title">Loop ใช้สำหรับการทำอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q5" value="1"> ทำซ้ำรหัสหลายครั้ง</label>
+          <label><input type="radio" name="q5" value="0"> ลบข้อมูล</label>
+          <label><input type="radio" name="q5" value="0"> เปลี่ยนแบบอักษร</label>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">6</div>
+        <div class="question-title">Function มีประโยชน์อะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q6" value="1"> เก็บรหัสและใช้ซ้ำได้</label>
+          <label><input type="radio" name="q6" value="0"> สร้างตารางข้อมูล</label>
+          <label><input type="radio" name="q6" value="0"> เชื่อมต่ออินเทอร์เน็ต</label>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">7</div>
+        <div class="question-title">Database ใช้เพื่อการอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q7" value="0"> วาดรูปภาพ</label>
+          <label><input type="radio" name="q7" value="1"> เก็บและจัดการข้อมูล</label>
+          <label><input type="radio" name="q7" value="0"> สร้างเสียง</label>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">8</div>
+        <div class="question-title">API ในการเขียนโปรแกรมคืออะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q8" value="1"> อินเตอร์เฟซสำหรับเชื่อมต่อซอฟต์แวร์</label>
+          <label><input type="radio" name="q8" value="0"> ชนิดของเกม</label>
+          <label><input type="radio" name="q8" value="0"> อุปกรณ์คอมพิวเตอร์</label>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">9</div>
+        <div class="question-title">อธิบายว่า JavaScript ใช้ทำอะไร</div>
+        <textarea id="essay1" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">10</div>
+        <div class="question-title">ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
+        <textarea id="essay2" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
+      </div>
     </div>
 
-    <div class="result" id="resultView">
-      <div style="text-align: center;">
-        <h2 style="color: #64748b;">รายงานสรุปผลการทดสอบ</h2>
-        <div class="score" id="scoreValue">0 / 2</div>
-        <p id="resStudentInfo" style="font-weight: 600; font-size: 18px;"></p>
-        <p id="resTime" style="color: #94a3b8; font-size: 14px; margin-top: 8px;"></p>
-      </div>
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <div style="background: #fffafc; padding: 20px; border-radius: 15px;">
-        <strong>คำตอบส่วนอัตนัย:</strong>
-        <p id="resEssay1" style="margin-top: 10px; color: #475569;"></p>
-        <p id="resEssay2" style="margin-top: 10px; color: #475569;"></p>
-      </div>
-    </div>
+    <button class="submit-btn" id="submitBtn" onclick="validateAndConfirm()">
+      ส่งข้อสอบ
+    </button>
 
   </div>
 
   <script>
-    let timeLeft = 3600;
+    // --- ระบบจัดการเวลา (Timer) ---
+    let timeInSeconds = 60 * 60; // 60 นาที
     let timerInterval;
 
-    function startExam() {
-      // ซ่อนหน้าเริ่ม และแสดงหน้าข้อสอบ
-      document.getElementById('startScreen').style.display = 'none';
-      document.getElementById('examContent').style.display = 'block';
-      window.scrollTo(0,0);
-
-      // เริ่มจับเวลา
+    function startTimer() {
       timerInterval = setInterval(() => {
-        timeLeft--;
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        document.getElementById('timerDisplay').innerText = `เวลาคงเหลือ: ${m}:${s < 10 ? '0'+s : s}`;
-        if(timeLeft <= 0) {
+        timeInSeconds--;
+        let minutes = Math.floor(timeInSeconds / 60);
+        let seconds = timeInSeconds % 60;
+        
+        // เติมเลข 0 ข้างหน้าถ้าวินาทีน้อยกว่า 10
+        let displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+        document.getElementById('timerDisplay').innerText = `เวลา: ${minutes}:${displaySeconds}`;
+
+        if (timeInSeconds <= 0) {
           clearInterval(timerInterval);
-          showModal("หมดเวลาการทดสอบ", "ระบบกำลังนำส่งคำตอบอัตโนมัติ...", false, submitExam);
+          showModal("หมดเวลา", "หมดเวลาทำข้อสอบ! ระบบจะส่งคำตอบโดยอัตโนมัติ", false, submitExam);
         }
       }, 1000);
     }
 
-    function showModal(title, text, showCancel, onConfirm) {
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalText').innerText = text;
-      document.getElementById('modalCancelBtn').style.display = showCancel ? 'block' : 'none';
-      document.getElementById('customModal').style.display = 'flex';
-      
-      const btn = document.getElementById('modalConfirmBtn');
-      const newBtn = btn.cloneNode(true);
-      btn.parentNode.replaceChild(newBtn, btn);
-      newBtn.onclick = () => { closeModal(); onConfirm(); };
+    // เริ่มจับเวลาทันทีที่เปิดหน้าเว็บ
+    window.onload = startTimer;
+
+
+    // --- ระบบ Modal สำหรับแสดงข้อความ ---
+    function showModal(title, message, isConfirm, callback) {
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+      `;
+
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease;
+      `;
+
+      const titleElement = document.createElement('h2');
+      titleElement.innerText = title;
+      titleElement.style.cssText = `
+        color: #f43f5e;
+        margin-bottom: 15px;
+        font-size: 20px;
+      `;
+
+      const messageElement = document.createElement('p');
+      messageElement.innerText = message;
+      messageElement.style.cssText = `
+        color: #475569;
+        margin-bottom: 25px;
+        line-height: 1.6;
+      `;
+
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.style.cssText = `
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      `;
+
+      if (isConfirm) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.innerText = 'ยกเลิก';
+        cancelBtn.style.cssText = `
+          padding: 10px 24px;
+          border: 1px solid #cbd5e1;
+          background: #f1f5f9;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          color: #475569;
+          transition: 0.2s;
+        `;
+        cancelBtn.onmouseover = () => { cancelBtn.style.background = '#e2e8f0'; };
+        cancelBtn.onmouseout = () => { cancelBtn.style.background = '#f1f5f9'; };
+        cancelBtn.onclick = () => { modal.remove(); };
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.innerText = 'ยืนยัน';
+        confirmBtn.style.cssText = `
+          padding: 10px 24px;
+          background: linear-gradient(135deg, #f43f5e, #fb7185);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: 0.2s;
+          box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        `;
+        confirmBtn.onmouseover = () => { confirmBtn.style.transform = 'translateY(-2px)'; confirmBtn.style.boxShadow = '0 6px 20px rgba(244, 63, 94, 0.4)'; };
+        confirmBtn.onmouseout = () => { confirmBtn.style.transform = 'translateY(0)'; confirmBtn.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.3)'; };
+        confirmBtn.onclick = () => { modal.remove(); callback(); };
+
+        buttonsContainer.appendChild(cancelBtn);
+        buttonsContainer.appendChild(confirmBtn);
+      } else {
+        const okBtn = document.createElement('button');
+        okBtn.innerText = 'ตกลง';
+        okBtn.style.cssText = `
+          padding: 10px 24px;
+          background: linear-gradient(135deg, #f43f5e, #fb7185);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: 0.2s;
+          box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        `;
+        okBtn.onmouseover = () => { okBtn.style.transform = 'translateY(-2px)'; okBtn.style.boxShadow = '0 6px 20px rgba(244, 63, 94, 0.4)'; };
+        okBtn.onmouseout = () => { okBtn.style.transform = 'translateY(0)'; okBtn.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.3)'; };
+        okBtn.onclick = () => { modal.remove(); callback(); };
+
+        buttonsContainer.appendChild(okBtn);
+      }
+
+      modalContent.appendChild(titleElement);
+      modalContent.appendChild(messageElement);
+      modalContent.appendChild(buttonsContainer);
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
     }
 
-    function closeModal() { document.getElementById('customModal').style.display = 'none'; }
-
+    // --- ฟังก์ชันตรวจสอบและยืนยัน ---
     function validateAndConfirm() {
       const name = document.getElementById('studentName').value;
-      if(!name) { showModal("ข้อมูลไม่ครบ", "กรุณาระบุชื่อ-นามสกุลก่อนส่ง", false, () => {}); return; }
-      
-      showModal("ยืนยันการส่ง", "ท่านยืนยันที่จะนำส่งคำตอบและสิ้นสุดการทดสอบหรือไม่?", true, submitExam);
-    }
+      if (!name) {
+        showModal("ข้อมูลไม่ครบ", "กรุณาระบุชื่อ-นามสกุลก่อนส่ง", false, () => {});
+        return;
+      }
 
-    function submitExam() {
-      clearInterval(timerInterval);
-      let score = 0;
+      // ตรวจเวลาและข้อที่ยังไม่ตอบ
       const q1 = document.querySelector('input[name="q1"]:checked');
       const q2 = document.querySelector('input[name="q2"]:checked');
-      if(q1) score += parseInt(q1.value);
-      if(q2) score += parseInt(q2.value);
+      const q3 = document.querySelector('input[name="q3"]:checked');
+      const q4 = document.querySelector('input[name="q4"]:checked');
+      const q5 = document.querySelector('input[name="q5"]:checked');
+      const q6 = document.querySelector('input[name="q6"]:checked');
+      const q7 = document.querySelector('input[name="q7"]:checked');
+      const q8 = document.querySelector('input[name="q8"]:checked');
+      const essay1 = document.getElementById('essay1').value.trim();
+      const essay2 = document.getElementById('essay2').value.trim();
+      
+      const timeMinutes = Math.floor(timeInSeconds / 60);
+      const timeSeconds = timeInSeconds % 60;
+      
+      let uncheckedQuestions = [];
+      if (!q1) uncheckedQuestions.push('ข้อ 1');
+      if (!q2) uncheckedQuestions.push('ข้อ 2');
+      if (!q3) uncheckedQuestions.push('ข้อ 3');
+      if (!q4) uncheckedQuestions.push('ข้อ 4');
+      if (!q5) uncheckedQuestions.push('ข้อ 5');
+      if (!q6) uncheckedQuestions.push('ข้อ 6');
+      if (!q7) uncheckedQuestions.push('ข้อ 7');
+      if (!q8) uncheckedQuestions.push('ข้อ 8');
+      if (!essay1) uncheckedQuestions.push('ข้อ 9');
+      if (!essay2) uncheckedQuestions.push('ข้อ 10');
 
-      document.getElementById('scoreValue').innerText = `${score} / 2 คะแนน`;
-      document.getElementById('resStudentInfo').innerText = document.getElementById('studentName').value;
-      document.getElementById('resTime').innerText = `นำส่งเมื่อ: ${new Date().toLocaleString('th-TH')}`;
-      document.getElementById('resEssay1').innerText = "ข้อ 3: " + (document.getElementById('essay1').value || "-");
-      document.getElementById('resEssay2').innerText = "ข้อ 4: " + (document.getElementById('essay2').value || "-");
+      let warningMessage = `เวลาคงเหลือ: ${timeMinutes}:${timeSeconds < 10 ? '0' + timeSeconds : timeSeconds}`;
+      
+      if (uncheckedQuestions.length > 0) {
+        warningMessage += `\n\nข้อที่ยังไม่ได้ตอบ:\n${uncheckedQuestions.join('\n')}`;
+      }
 
-      document.getElementById('examContent').style.display = 'none';
-      document.getElementById('resultView').style.display = 'block';
-      window.scrollTo(0,0);
+      warningMessage += `\n\nท่านยืนยันที่จะนำส่งคำตอบและสิ้นสุดการทดสอบหรือไม่?`;
+
+      showModal("ยืนยันการส่ง", warningMessage, true, submitExam);
+    }
+
+
+    // --- ระบบตรวจและส่งข้อสอบ ---
+    function submitExam() {
+      const studentName = document.getElementById('studentName').value.trim();
+      const studentNo = document.getElementById('studentNo').value.trim();
+      const studentClass = document.getElementById('studentClass').value.trim();
+
+      const q1 = document.querySelector('input[name="q1"]:checked');
+      const q2 = document.querySelector('input[name="q2"]:checked');
+      const q3 = document.querySelector('input[name="q3"]:checked');
+      const q4 = document.querySelector('input[name="q4"]:checked');
+      const q5 = document.querySelector('input[name="q5"]:checked');
+      const q6 = document.querySelector('input[name="q6"]:checked');
+      const q7 = document.querySelector('input[name="q7"]:checked');
+      const q8 = document.querySelector('input[name="q8"]:checked');
+
+      // ตรวจสอบคำตอบข้อปรนัย
+      if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || !q8) {
+        showModal("ข้อมูลไม่ครบ", "กรุณาตอบคำถามปรนัยให้ครบทุกข้อ", false, () => {});
+        return;
+      }
+
+      // หยุดเวลา
+      clearInterval(timerInterval);
+
+      // คำนวณคะแนน
+      let score = 0;
+      if (q1) score += Number(q1.value);
+      if (q2) score += Number(q2.value);
+      if (q3) score += Number(q3.value);
+      if (q4) score += Number(q4.value);
+      if (q5) score += Number(q5.value);
+      if (q6) score += Number(q6.value);
+      if (q7) score += Number(q7.value);
+      if (q8) score += Number(q8.value);
+
+      const essay1 = document.getElementById('essay1').value.trim();
+      const essay2 = document.getElementById('essay2').value.trim();
+
+      // บันทึกข้อมูลในเวลาปัจจุบัน
+      const now = new Date();
+      const submitTime = now.toLocaleTimeString('th-TH');
+
+      // เก็บข้อมูลผลสอบใน sessionStorage
+      sessionStorage.setItem('studentName', studentName);
+      sessionStorage.setItem('studentNo', studentNo);
+      sessionStorage.setItem('studentClass', studentClass);
+      sessionStorage.setItem('score', score);
+      sessionStorage.setItem('essay1', essay1);
+      sessionStorage.setItem('essay2', essay2);
+      sessionStorage.setItem('submitTime', submitTime);
+
+      // เปลี่ยนไปหน้าแสดงผลลัพธ์
+      window.location.href = 'results.html';
     }
   </script>
+
 </body>
 </html>
