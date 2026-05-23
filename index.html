@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -436,6 +436,7 @@
 
   </div>
 
+  <script src="antiCheat.js"></script>
   <script>
     // --- ระบบจัดการเวลา (Timer) ---
     let timeInSeconds = 60 * 60; // 60 นาที
@@ -582,11 +583,19 @@
 
     // --- ฟังก์ชันตรวจสอบและยืนยัน ---
     function validateAndConfirm() {
-      const name = document.getElementById('studentName').value;
-      if (!name) {
-        showModal("ข้อมูลไม่ครบ", "กรุณาระบุชื่อ-นามสกุลก่อนส่ง", false, () => {});
+      const name = document.getElementById('studentName').value.trim();
+      const studentNo = document.getElementById('studentNo').value.trim();
+      const studentClass = document.getElementById('studentClass').value.trim();
+
+      if (!name || !studentNo || !studentClass) {
+        showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อ เลขที่ และชั้นเรียนก่อนส่งข้อสอบ", false, () => {});
         return;
       }
+
+      const studentId = studentNo + '-' + studentClass;
+
+      // ตั้งรหัสนักเรียนสำหรับระบบ anti-cheat
+      antiCheat.setStudentId(studentId);
 
       // ตรวจเวลาและข้อที่ยังไม่ตอบ
       const q1 = document.querySelector('input[name="q1"]:checked');
@@ -633,6 +642,11 @@
       const studentNo = document.getElementById('studentNo').value.trim();
       const studentClass = document.getElementById('studentClass').value.trim();
 
+      if (!studentName || !studentNo || !studentClass) {
+        showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อ เลขที่ และชั้นเรียนให้ครบก่อนส่งข้อสอบ", false, () => {});
+        return;
+      }
+
       const q1 = document.querySelector('input[name="q1"]:checked');
       const q2 = document.querySelector('input[name="q2"]:checked');
       const q3 = document.querySelector('input[name="q3"]:checked');
@@ -662,6 +676,7 @@
       if (q7) score += Number(q7.value);
       if (q8) score += Number(q8.value);
 
+      const objectiveAnswers = [q1, q2, q3, q4, q5, q6, q7, q8].map((choice) => Number(choice.value));
       const essay1 = document.getElementById('essay1').value.trim();
       const essay2 = document.getElementById('essay2').value.trim();
 
@@ -669,7 +684,28 @@
       const now = new Date();
       const submitTime = now.toLocaleTimeString('th-TH');
 
-      // เก็บข้อมูลผลสอบใน sessionStorage
+      // รับข้อมูล anti-cheat analysis
+      const antiCheatReport = antiCheat.getAnalysisReport();
+
+      const examSubmission = {
+        name: studentName,
+        studentNo: studentNo,
+        studentClass: studentClass,
+        id: studentNo + '-' + studentClass,
+        score: score,
+        scoreMax: 8,
+        objectiveAnswers: objectiveAnswers,
+        essays: {
+          essay1: essay1,
+          essay2: essay2,
+        },
+        submitTime: submitTime,
+        submittedAtISO: now.toISOString(),
+        antiCheatReport: antiCheatReport,
+      };
+
+      // เก็บข้อมูลผลสอบใน sessionStorage (รองรับทั้งรูปแบบใหม่และเดิม)
+      sessionStorage.setItem('examSubmission', JSON.stringify(examSubmission));
       sessionStorage.setItem('studentName', studentName);
       sessionStorage.setItem('studentNo', studentNo);
       sessionStorage.setItem('studentClass', studentClass);
@@ -677,6 +713,35 @@
       sessionStorage.setItem('essay1', essay1);
       sessionStorage.setItem('essay2', essay2);
       sessionStorage.setItem('submitTime', submitTime);
+      sessionStorage.setItem('antiCheatReport', JSON.stringify(antiCheatReport));
+
+      // เก็บข้อมูลลงใน localStorage สำหรับแดชบอร์ด admin
+      const examRecord = {
+        ...examSubmission,
+        suspicionScore: antiCheatReport.suspicionScore,
+        violations: antiCheatReport.violations,
+        totalTabSwitches: antiCheatReport.statistics.tabSwitches,
+        totalPastes: antiCheatReport.statistics.pastes,
+        totalDevtoolsDetections: antiCheatReport.statistics.devtoolsAttempts,
+        timestamp: new Date().toLocaleString('th-TH'),
+      };
+
+      // อ่านข้อมูลผลสอบที่มีอยู่หรือสร้างใหม่
+      let examData = [];
+      const storedData = localStorage.getItem('mattepExamRecords') || localStorage.getItem('examData');
+      if (storedData) {
+        try {
+          const parsed = JSON.parse(storedData);
+          examData = Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+          examData = [];
+        }
+      }
+
+      // เพิ่มบันทึกใหม่
+      examData.push(examRecord);
+      localStorage.setItem('mattepExamRecords', JSON.stringify(examData));
+      localStorage.setItem('examData', JSON.stringify(examData));
 
       // เปลี่ยนไปหน้าแสดงผลลัพธ์
       window.location.href = 'results.html';
