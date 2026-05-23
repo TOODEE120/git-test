@@ -209,9 +209,14 @@
                 <!-- Header and Export Button -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h2 class="text-2xl font-bold text-slate-800">รายละเอียดการสอบ: <span id="detailNameTitle" class="text-rose-600">-</span></h2>
-                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2" style="box-shadow: 0 10px 25px rgba(16,185,129,0.2);" onclick="exportReport()">
-                        <span>📥</span> Export Report (PDF)
-                    </button>
+                    <div class="flex gap-3">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2" style="box-shadow: 0 10px 25px rgba(59,130,246,0.2);" onclick="showQuestionsDetail()">
+                            <span>📄</span> ดูรายละเอียดข้อ
+                        </button>
+                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2" style="box-shadow: 0 10px 25px rgba(16,185,129,0.2);" onclick="exportReport()">
+                            <span>📥</span> Export Report (PDF)
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Core Information Grid -->
@@ -271,6 +276,52 @@
                 </div>
             </section>
 
+            <section id="questionDetailView" class="hidden-view animate-slide-in-up">
+                <!-- Header with Back Button -->
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="showStudentDetail()">
+                        <span>←</span> กลับ
+                    </button>
+                    <h2 class="text-2xl font-bold text-slate-800">รายละเอียดคำตอบ: <span id="qDetailNameTitle" class="text-rose-600">-</span></h2>
+                </div>
+
+                <!-- Questions List -->
+                <div id="questionsContainer" class="space-y-6">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+            </section>
+
+            <section id="questionStatsView" class="hidden-view animate-slide-in-up">
+                <!-- Header with Back Button -->
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="showDashboard()">
+                        <span>←</span> กลับ
+                    </button>
+                    <h2 class="text-2xl font-bold text-slate-800">สถิติข้อ <span id="qStatsNumber" class="text-rose-600">-</span>: <span id="qStatsType" class="text-blue-600">-</span></h2>
+                </div>
+
+                <!-- Info cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <p class="text-sm text-slate-600 mb-2">คำถาม</p>
+                        <p id="qStatsQuestion" class="font-semibold text-slate-800">-</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <p class="text-sm text-slate-600 mb-2">✅ ตอบถูก</p>
+                        <p id="qStatsCorrect" class="text-2xl font-bold text-emerald-600">-</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <p class="text-sm text-slate-600 mb-2">❌ ตอบผิด</p>
+                        <p id="qStatsWrong" class="text-2xl font-bold text-rose-600">-</p>
+                    </div>
+                </div>
+
+                <!-- Student details list -->
+                <div id="qStatsStudentList" class="space-y-4">
+                    <!-- Student list will be dynamically inserted here -->
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -323,8 +374,11 @@
                     { time: '10:00', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 2.1 }, { q: 2, correct: true, time: 1.9 },
-                    { q: 3, correct: true, time: 2.0 }, { q: 4, correct: false, time: 3.5 }, { q: 5, correct: true, time: 1.8 }
+                    { q: 1, correct: true, question: 'ภาษา HTML ใช้ทำอะไร?', studentAnswer: 'ใช้สร้างหน้าเว็บไซต์', correctAnswer: 'ใช้สร้างหน้าเว็บไซต์', timeSpent: 2.1, remarks: 'รวดเร็ว' },
+                    { q: 2, correct: true, question: 'CSS มีหน้าที่อะไร?', studentAnswer: 'ตกแต่งเว็บไซต์', correctAnswer: 'ตกแต่งเว็บไซต์', timeSpent: 1.9, remarks: 'ปกติ' },
+                    { q: 3, correct: true, question: 'JavaScript ใช้ในการทำอะไร?', studentAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', correctAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', timeSpent: 2.0, remarks: 'ปกติ' },
+                    { q: 4, correct: true, question: 'ตัวแปร (Variable) คืออะไร?', studentAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', correctAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', timeSpent: 1.8, remarks: 'ปกติ' },
+                    { q: 5, correct: true, question: 'Loop ใช้สำหรับการทำอะไร?', studentAnswer: 'ทำซ้ำรหัสหลายครั้ง', correctAnswer: 'ทำซ้ำรหัสหลายครั้ง', timeSpent: 2.2, remarks: 'ปกติ' }
                 ]
             },
             {
@@ -345,8 +399,11 @@
                     { time: '10:15', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 2.8 }, { q: 2, correct: false, time: 4.2 },
-                    { q: 3, correct: true, time: 3.0 }, { q: 4, correct: true, time: 3.1 }, { q: 5, correct: false, time: 3.5 }
+                    { q: 1, correct: true, question: 'ภาษา HTML ใช้ทำอะไร?', studentAnswer: 'ใช้สร้างหน้าเว็บไซต์', correctAnswer: 'ใช้สร้างหน้าเว็บไซต์', timeSpent: 2.8, remarks: 'ปกติ' },
+                    { q: 2, correct: false, question: 'CSS มีหน้าที่อะไร?', studentAnswer: 'เก็บฐานข้อมูล', correctAnswer: 'ตกแต่งเว็บไซต์', timeSpent: 4.2, remarks: 'ช้า' },
+                    { q: 3, correct: true, question: 'JavaScript ใช้ในการทำอะไร?', studentAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', correctAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', timeSpent: 3.0, remarks: 'ปกติ' },
+                    { q: 4, correct: true, question: 'ตัวแปร (Variable) คืออะไร?', studentAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', correctAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', timeSpent: 3.1, remarks: 'ปกติ' },
+                    { q: 5, correct: false, question: 'Loop ใช้สำหรับการทำอะไร?', studentAnswer: 'ลบข้อมูล', correctAnswer: 'ทำซ้ำรหัสหลายครั้ง', timeSpent: 3.5, remarks: 'ช้า' }
                 ]
             },
             {
@@ -367,8 +424,11 @@
                     { time: '10:30', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: false, time: 0.5 }, { q: 2, correct: false, time: 0.7 },
-                    { q: 3, correct: false, time: 0.6 }, { q: 4, correct: true, time: 0.9 }, { q: 5, correct: false, time: 0.8 }
+                    { q: 1, correct: false, question: 'ภาษา HTML ใช้ทำอะไร?', studentAnswer: 'ใช้ตัดต่อวิดีโอ', correctAnswer: 'ใช้สร้างหน้าเว็บไซต์', timeSpent: 0.5, remarks: 'รวดเร็วผิดปกติ' },
+                    { q: 2, correct: false, question: 'CSS มีหน้าที่อะไร?', studentAnswer: 'เก็บฐานข้อมูล', correctAnswer: 'ตกแต่งเว็บไซต์', timeSpent: 0.7, remarks: 'รวดเร็วผิดปกติ' },
+                    { q: 3, correct: false, question: 'JavaScript ใช้ในการทำอะไร?', studentAnswer: 'ตัดต่อวิดีโอ', correctAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', timeSpent: 0.6, remarks: 'รวดเร็วผิดปกติ' },
+                    { q: 4, correct: true, question: 'ตัวแปร (Variable) คืออะไร?', studentAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', correctAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', timeSpent: 0.9, remarks: 'รวดเร็ว' },
+                    { q: 5, correct: false, question: 'Loop ใช้สำหรับการทำอะไร?', studentAnswer: 'เปลี่ยนแบบอักษร', correctAnswer: 'ทำซ้ำรหัสหลายครั้ง', timeSpent: 0.8, remarks: 'รวดเร็วผิดปกติ' }
                 ]
             },
             {
@@ -386,8 +446,11 @@
                     { time: '10:20', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 1.9 }, { q: 2, correct: true, time: 2.0 },
-                    { q: 3, correct: true, time: 1.95 }, { q: 4, correct: true, time: 2.1 }, { q: 5, correct: true, time: 2.0 }
+                    { q: 1, correct: true, question: 'ภาษา HTML ใช้ทำอะไร?', studentAnswer: 'ใช้สร้างหน้าเว็บไซต์', correctAnswer: 'ใช้สร้างหน้าเว็บไซต์', timeSpent: 1.9, remarks: 'ปกติ' },
+                    { q: 2, correct: true, question: 'CSS มีหน้าที่อะไร?', studentAnswer: 'ตกแต่งเว็บไซต์', correctAnswer: 'ตกแต่งเว็บไซต์', timeSpent: 2.0, remarks: 'ปกติ' },
+                    { q: 3, correct: true, question: 'JavaScript ใช้ในการทำอะไร?', studentAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', correctAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', timeSpent: 1.95, remarks: 'ปกติ' },
+                    { q: 4, correct: true, question: 'ตัวแปร (Variable) คืออะไร?', studentAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', correctAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', timeSpent: 2.1, remarks: 'ปกติ' },
+                    { q: 5, correct: true, question: 'Loop ใช้สำหรับการทำอะไร?', studentAnswer: 'ทำซ้ำรหัสหลายครั้ง', correctAnswer: 'ทำซ้ำรหัสหลายครั้ง', timeSpent: 2.0, remarks: 'ปกติ' }
                 ]
             },
             {
@@ -405,8 +468,11 @@
                     { time: '10:10', description: 'ส่งข้อสอบ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 2.5 }, { q: 2, correct: true, time: 2.2 },
-                    { q: 3, correct: false, time: 3.8 }, { q: 4, correct: true, time: 2.1 }, { q: 5, correct: true, time: 2.4 }
+                    { q: 1, correct: true, question: 'ภาษา HTML ใช้ทำอะไร?', studentAnswer: 'ใช้สร้างหน้าเว็บไซต์', correctAnswer: 'ใช้สร้างหน้าเว็บไซต์', timeSpent: 2.5, remarks: 'ปกติ' },
+                    { q: 2, correct: true, question: 'CSS มีหน้าที่อะไร?', studentAnswer: 'ตกแต่งเว็บไซต์', correctAnswer: 'ตกแต่งเว็บไซต์', timeSpent: 2.2, remarks: 'ปกติ' },
+                    { q: 3, correct: false, question: 'JavaScript ใช้ในการทำอะไร?', studentAnswer: 'จัดเก็บข้อมูล', correctAnswer: 'ทำให้หน้าเว็บมีความโต้ตอบ', timeSpent: 3.8, remarks: 'ช้า' },
+                    { q: 4, correct: true, question: 'ตัวแปร (Variable) คืออะไร?', studentAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', correctAnswer: 'ที่เก็บค่าข้อมูลในโปรแกรม', timeSpent: 2.1, remarks: 'ปกติ' },
+                    { q: 5, correct: true, question: 'Loop ใช้สำหรับการทำอะไร?', studentAnswer: 'ทำซ้ำรหัสหลายครั้ง', correctAnswer: 'ทำซ้ำรหัสหลายครั้ง', timeSpent: 2.4, remarks: 'ปกติ' }
                 ]
             }
         ];
@@ -414,6 +480,7 @@
         let currentStudent = null;
         let isCCTVMode = false;
         let timerInterval;
+        let globalQStats = {}; // Store question statistics globally
 
         function init() {
             renderStudentList(studentsData);
@@ -495,7 +562,7 @@
         }
 
         function switchMainView(viewId) {
-            ['dashboardView', 'studentDetailView', 'cctvView'].forEach(id => {
+            ['dashboardView', 'studentDetailView', 'cctvView', 'questionDetailView', 'questionStatsView'].forEach(id => {
                 document.getElementById(id).classList.add('hidden-view');
             });
             document.getElementById(viewId).classList.remove('hidden-view');
@@ -560,10 +627,13 @@
                 });
             });
 
+            // Store qStats globally
+            globalQStats = qStats;
+
             // Top Correct
             const topCorrect = Object.entries(qStats).sort((a, b) => b[1].correct - a[1].correct).slice(0, 3);
             const correctHTML = topCorrect.map(([q, stats]) => `
-                <div class="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                <div class="flex justify-between items-center py-2 px-3 border-b border-slate-100 last:border-0 rounded-lg cursor-pointer hover:bg-emerald-50 transition-colors" onclick="showQuestionStats(${q}, 'correct')" style="border: 1px solid transparent;">
                     <span class="text-slate-600 font-medium">ข้อ ${q}</span>
                     <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-sm font-bold">${stats.correct} คน</span>
                 </div>
@@ -573,7 +643,7 @@
             // Top Wrong
             const topWrong = Object.entries(qStats).sort((a, b) => b[1].wrong - a[1].wrong).slice(0, 3);
             const wrongHTML = topWrong.map(([q, stats]) => `
-                <div class="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                <div class="flex justify-between items-center py-2 px-3 border-b border-slate-100 last:border-0 rounded-lg cursor-pointer hover:bg-rose-50 transition-colors" onclick="showQuestionStats(${q}, 'wrong')" style="border: 1px solid transparent;">
                     <span class="text-slate-600 font-medium">ข้อ ${q}</span>
                     <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-md text-sm font-bold">${stats.wrong} คน</span>
                 </div>
@@ -844,6 +914,159 @@
             setTimeout(() => {
                 modal.classList.add('hidden-view');
             }, 300); // Wait for transition to finish
+        }
+
+        function showQuestionStats(questionNumber, type) {
+            const question = Object.values(globalQStats).find(q => q) ? globalQStats[questionNumber] : null;
+            if (!question) return;
+
+            // Set header info
+            document.getElementById('qStatsNumber').textContent = questionNumber;
+            document.getElementById('qStatsType').textContent = type === 'correct' ? '✅ ตอบถูก' : '❌ ตอบผิด';
+            document.getElementById('qStatsCorrect').textContent = question.correct;
+            document.getElementById('qStatsWrong').textContent = question.wrong;
+
+            // Find first student's question data for question text
+            let questionText = 'ข้อ ' + questionNumber;
+            for (let student of studentsData) {
+                const qData = student.questionAnswers.find(qa => qa.q == questionNumber);
+                if (qData) {
+                    questionText = qData.question;
+                    break;
+                }
+            }
+            document.getElementById('qStatsQuestion').textContent = questionText;
+
+            // Build student list
+            const container = document.getElementById('qStatsStudentList');
+            container.innerHTML = '';
+
+            const students = studentsData.filter(student => {
+                const qData = student.questionAnswers.find(qa => qa.q == questionNumber);
+                if (!qData) return false;
+                if (type === 'correct') return qData.correct;
+                else return !qData.correct;
+            });
+
+            if (students.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-8 text-lg">ไม่มีข้อมูล</div>';
+                switchMainView('questionStatsView');
+                return;
+            }
+
+            students.forEach(student => {
+                const qData = student.questionAnswers.find(qa => qa.q == questionNumber);
+                const isCorrect = qData.correct;
+                const bgColor = isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200';
+                const badgeClass = isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+
+                const html = `
+                    <div class="bg-white rounded-2xl p-6 border-2 ${bgColor}" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <p class="font-semibold text-slate-800 mb-1">👤 ${student.name}</p>
+                                <p class="text-sm text-slate-600">${student.studentId} / ${student.className}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold ${badgeClass}">
+                                ${isCorrect ? '✅ ถูก' : '❌ ผิด'}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <p class="text-xs font-medium text-blue-700 mb-1">คำตอบของนักเรียน</p>
+                                <p class="text-slate-700 font-semibold text-sm">${qData.studentAnswer || '-'}</p>
+                            </div>
+                            <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+                                <p class="text-xs font-medium text-emerald-700 mb-1">คำตอบที่ถูกต้อง</p>
+                                <p class="text-slate-700 font-semibold text-sm">${qData.correctAnswer || '-'}</p>
+                            </div>
+                            <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                <p class="text-xs font-medium text-amber-700 mb-1">เวลาที่ใช้</p>
+                                <p class="text-slate-700 font-semibold text-sm">${qData.timeSpent || '-'} วินาที</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            switchMainView('questionStatsView');
+        }
+
+        function showQuestionsDetail() {
+            if (!currentStudent) return;
+
+            document.getElementById('qDetailNameTitle').textContent = currentStudent.name;
+            
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            const questions = currentStudent.questionAnswers || [];
+            
+            if (questions.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-8 text-lg">ไม่มีข้อมูลคำตอบ</div>';
+                switchMainView('questionDetailView');
+                return;
+            }
+
+            questions.forEach((q, index) => {
+                const isCorrect = q.correct;
+                const statusColor = isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200';
+                const statusText = isCorrect ? '✅ ถูกต้อง' : '❌ ผิด';
+                const statusBgBadge = isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+
+                const html = `
+                    <div class="bg-white rounded-2xl p-6 border-2 ${statusColor}" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-lg">
+                                    ข้อ ${q.q}
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-slate-800">คำถาม ${q.q}</h3>
+                                    <p class="text-slate-600 mt-1">${q.question}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusBgBadge}">
+                                ${statusText}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <p class="text-sm font-medium text-blue-700 mb-1">👤 คำตอบของนักเรียน</p>
+                                <p class="text-slate-700 font-semibold">${q.studentAnswer || '-'}</p>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                <p class="text-sm font-medium text-emerald-700 mb-1">✅ คำตอบที่ถูกต้อง</p>
+                                <p class="text-slate-700 font-semibold">${q.correctAnswer || '-'}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-200 flex gap-4">
+                            <div class="flex-1">
+                                <p class="text-sm text-slate-600">⏱ เวลาใช้</p>
+                                <p class="text-lg font-bold text-slate-800">${q.timeSpent || '-'} วินาที</p>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-slate-600">📊 ความคิดเห็น</p>
+                                <p class="text-lg font-bold text-slate-800">${q.remarks || 'ปกติ'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', html);
+            });
+
+            switchMainView('questionDetailView');
+        }
+
+        function showStudentDetail() {
+            if (!currentStudent) return;
+            switchMainView('studentDetailView');
         }
 
         // Initialize App
