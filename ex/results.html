@@ -1,682 +1,453 @@
-<!-- results.html -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ผลการทดสอบ - MATTEP</title>
-
+  <title>MATTEP — ผลการทดสอบ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --rose:   #f43f5e; --rose-l: #fb7185; --rose-xl:#fecdd3;
+      --ink:    #1a1a2e; --muted:  #64748b; --bg: #fff5f6; --card: #ffffff;
     }
+    body { font-family: 'Noto Sans Thai', sans-serif; background: var(--bg); min-height: 100vh; padding: 32px 20px 60px; color: var(--ink); overflow-x: hidden; }
+    .container { max-width: 760px; width: 100%; margin: auto; }
 
-    body {
-      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
-      min-height: 100vh;
-      color: #1e293b;
-      padding: 40px 20px;
-    }
-
-    .container {
-      max-width: 950px;
-      margin: auto;
-    }
-
-    .header {
-      position: relative;
-      overflow: hidden;
-      background: #ffffff;
-      backdrop-filter: blur(14px);
-      border: 1px solid #f3d7e6;
-      border-radius: 28px;
-      padding: 35px;
-      margin-bottom: 30px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .header::before {
-      content: '';
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      background: rgba(244, 63, 94, 0.10);
-      border-radius: 50%;
-      top: -80px;
-      right: -80px;
-    }
-
-    .header h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header p {
-      color: #475569;
-      font-size: 18px;
-      position: relative;
-      z-index: 1;
-      display: inline-block;
-      padding: 8px 24px;
-      background: rgba(255, 255, 255, 0.7);
-      border: 2px solid #e9d5ff;
-      border-radius: 999px;
-      box-shadow: 0 0 15px rgba(233, 213, 255, 0.6);
-      font-weight: 500;
-      margin-bottom: 5px;
-    }
-
-    .result {
-      background: #ffffff;
-      backdrop-filter: blur(12px);
-      border: 1px solid #f3d7e6;
+    /* Banner */
+    .banner {
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
       border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      animation: slideIn 0.5s ease;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      color: #fff;
+      box-shadow: 0 12px 32px rgba(244,63,94,.32);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .banner .brand { font-family: 'DM Serif Display', serif; font-size: 36px; }
+    .banner .sub   { font-size: 13px; opacity: .85; margin-top: 4px; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1.5px solid #f1f5f9;
+      border-radius: 22px;
+      padding: 28px 30px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+    .card:nth-child(2){ animation-delay:.05s; }
+    .card:nth-child(3){ animation-delay:.10s; }
+    .card:nth-child(4){ animation-delay:.15s; }
+    .card:nth-child(5){ animation-delay:.20s; }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--rose);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
     }
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    /* Student info grid */
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; }
+    .info-item { background: #f8fafc; border-radius: 14px; padding: 14px 16px; }
+    .info-item .lbl { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .info-item .val { font-size: 16px; font-weight: 700; color: var(--ink); }
 
-    .result-header {
+    /* Score */
+    .score-ring {
       text-align: center;
-      margin-bottom: 35px;
-      padding-bottom: 25px;
-      border-bottom: 2px solid #f3d7e6;
+      padding: 28px 20px;
+      background: linear-gradient(135deg, rgba(244,63,94,.06), rgba(251,113,133,.06));
+      border-radius: 18px;
+      border: 2px solid rgba(244,63,94,.15);
     }
-
-    .result-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 15px;
+    .score-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 72px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
+    .score-denom { font-size: 22px; color: var(--muted); margin-top: 4px; }
+    .score-pct { margin-top: 10px; font-size: 14px; color: var(--muted); }
 
-    .student-info {
-      background: #fffafc;
-      border: 1px solid #f3d7e6;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 25px;
+    /* Essays */
+    .essay-block { margin-bottom: 16px; }
+    .essay-block:last-child { margin-bottom: 0; }
+    .essay-q { font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 8px; }
+    .essay-a {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
       font-size: 15px;
-      color: #475569;
-      line-height: 1.8;
-    }
-
-    .student-info strong {
-      color: #1e293b;
-      font-weight: 600;
-    }
-
-    .score-section {
-      text-align: center;
-      margin: 30px 0;
-      padding: 30px;
-      background: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(251, 113, 133, 0.08) 100%);
-      border-radius: 20px;
-      border: 2px solid rgba(244, 63, 94, 0.2);
-    }
-
-    .score-label {
-      font-size: 16px;
-      color: #64748b;
-      margin-bottom: 10px;
-      font-weight: 500;
-    }
-
-    .score-value {
-      font-size: 48px;
-      font-weight: 700;
-      background: linear-gradient(90deg, #f43f5e, #fb7185);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .essay-section {
-      margin-top: 30px;
-    }
-
-    .essay-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 20px;
-      margin-top: 30px;
-    }
-
-    .essay-box {
-      background: #fffafc;
-      border: 1px solid #f3d7e6;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      line-height: 1.8;
-      color: #475569;
-    }
-
-    .essay-question {
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 12px;
-      font-size: 15px;
-    }
-
-    .essay-answer {
-      color: #475569;
+      color: var(--muted);
+      line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
+      min-height: 60px;
     }
 
-    .submit-time {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 14px;
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 30px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 12px 28px;
-      border: none;
-      border-radius: 16px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.25s;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      color: white;
-      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #cbd5e1;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    hr {
-      border: none;
-      height: 1px;
-      background: #f1f5f9;
-      margin: 20px 0;
-    }
-
-    @media (max-width: 768px) {
-      .header h1 {
-        font-size: 30px;
-      }
-
-      .result {
-        padding: 25px;
-      }
-
-      .score-value {
-        font-size: 36px;
-      }
-
-      .result-title {
-        font-size: 22px;
-      }
-    }
-
-    /* ===== Anti-Cheat Styling ===== */
-    .anticheat-section {
-      margin-top: 40px;
-      display: none;
-    }
-
-    .anticheat-section.show {
-      display: block;
-    }
-
-    .anticheat-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #f3d7e6;
-    }
-
-    .risk-assessment {
+    /* Anti-Cheat */
+    .risk-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .risk-card {
-      background: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(251, 113, 133, 0.08) 100%);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .risk-label {
-      font-size: 13px;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      margin-bottom: 10px;
-    }
-
-    .risk-score {
-      font-size: 36px;
-      font-weight: 700;
-      background: linear-gradient(90deg, #f43f5e, #fb7185);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-    }
-
-    .risk-level {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .risk-level.safe {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .risk-level.low {
-      background: #cfe2ff;
-      color: #084298;
-    }
-
-    .risk-level.medium {
-      background: #fff3cd;
-      color: #664d03;
-    }
-
-    .risk-level.high {
-      background: #f8d7da;
-      color: #842029;
-    }
-
-    .risk-level.critical {
-      background: #f8d7da;
-      color: #842029;
-      font-weight: bold;
-    }
-
-    .violations-section {
-      margin-top: 25px;
-    }
-
-    .violations-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 15px;
-    }
-
-    .violations-list {
-      max-height: 300px;
-      overflow-y: auto;
-      background: #fffafc;
-      border: 1px solid #f3d7e6;
-      border-radius: 12px;
-      padding: 15px;
-    }
-
-    .violation-item {
-      display: flex;
-      align-items: flex-start;
+      grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
       gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
+      margin-bottom: 20px;
     }
-
-    .violation-item:last-child {
-      border-bottom: none;
-    }
-
-    .violation-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: 600;
-      white-space: nowrap;
-      margin-right: 8px;
-      flex-shrink: 0;
-    }
-
-    .violation-badge.critical {
-      background: #fee2e2;
-      color: #7c2c2c;
-    }
-
-    .violation-badge.warning {
-      background: #fef3c7;
-      color: #78350f;
-    }
-
-    .violation-badge.info {
-      background: #dbeafe;
-      color: #1e3a8a;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .stat-item {
-      background: #fffafc;
-      border: 1px solid #f3d7e6;
-      border-radius: 12px;
-      padding: 15px;
+    .risk-box {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 16px;
       text-align: center;
+      border: 1.5px solid #e2e8f0;
     }
-
-    .stat-item-label {
-      font-size: 12px;
-      color: #64748b;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-
-    .stat-item-value {
-      font-size: 20px;
+    .risk-box .r-lbl { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .risk-box .r-val { font-size: 26px; font-weight: 800; }
+    .risk-box .r-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
       font-weight: 700;
-      color: #1e293b;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .badge-safe     { background:#dcfce7; color:#15803d; }
+    .badge-warning  { background:#fef3c7; color:#b45309; }
+    .badge-high     { background:#ffe4e6; color:#be123c; }
+    .badge-critical { background:#fecaca; color:#991b1b; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px,1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: #f8fafc; border-radius: 14px; padding: 12px; text-align: center;
+      border: 1px solid #e2e8f0;
+    }
+    .stat-box .s-lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .stat-box .s-val { font-size: 20px; font-weight: 800; color: var(--ink); }
+
+    .vio-title { font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 10px; }
+    .vio-list  { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .vio-item  {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #f8fafc; border-radius: 12px; padding: 12px 14px;
+      border: 1px solid #e2e8f0;
+      min-width: 0;
+    }
+    .vio-pts {
+      min-width: 44px; height: 24px;
+      border-radius: 8px;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .pts-crit  { background:#fca5a5; color:#7f1d1d; }
+    .pts-warn  { background:#fde68a; color:#78350f; }
+    .pts-info  { background:#bfdbfe; color:#1e3a8a; }
+    .vio-desc  { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .vio-meta  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* Action Buttons */
+    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+    .btn {
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg, var(--rose), var(--rose-l)); color: #fff; box-shadow: 0 6px 20px rgba(244,63,94,.3); }
+    .btn-ghost   { background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; }
+
+    .pc-only-message {
+      display: none;
+      max-width: 560px;
+      margin: 10vh auto 0;
+      background: #fff;
+      border: 1px solid #fecaca;
+      border-radius: 24px;
+      padding: 34px 26px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(15,23,42,.12);
+    }
+    .pc-only-message h1 { font-size: 24px; color: #dc2626; margin-bottom: 10px; }
+    .pc-only-message p { color: var(--muted); line-height: 1.7; }
+    .pc-only-message a {
+      display: inline-block;
+      margin-top: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-weight: 800;
+    }
+    body.pc-only-blocked .container { display: none !important; }
+    body.pc-only-blocked .pc-only-message { display: block; }
+
+    @media (max-width: 560px) {
+      body { padding: 16px 12px 36px; }
+      .banner { padding: 20px; border-radius: 20px; }
+      .banner .brand { font-size: 30px; }
+      .score-num { font-size: 56px; }
+      .card { padding: 18px; border-radius: 18px; }
+      .info-grid, .risk-strip { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; }
+      .vio-item { gap: 8px; padding: 10px; }
     }
   </style>
 </head>
 <body>
+  <div class="pc-only-message" id="pcOnlyMessage">
+    <h1>หน้านี้ใช้บน PC เท่านั้น</h1>
+    <p>ผลสอบและรายงาน Anti-Cheat ถูกตั้งค่าให้เปิดดูบนคอมพิวเตอร์หรือ Notebook ที่มีหน้าจอกว้างอย่างน้อย 900px</p>
+    <a href="home.html">กลับหน้าหลัก</a>
+  </div>
+
   <div class="container">
-    <div class="header">
-      <h1>MATTEP</h1>
-      <p>ระบบทำข้อสอบออนไลน์</p>
+
+    <div class="banner">
+      <div>
+        <div class="brand">MATTEP</div>
+        <div class="sub">ระบบทำข้อสอบออนไลน์ — ผลการทดสอบ</div>
+      </div>
     </div>
 
-    <div class="result">
-      <div class="result-header">
-        <div class="result-title">ผลการทดสอบ</div>
+    <!-- Student Info -->
+    <div class="card">
+      <div class="card-title">👤 ข้อมูลผู้สอบ</div>
+      <div class="info-grid">
+        <div class="info-item"><div class="lbl">ชื่อ - นามสกุล</div><div class="val" id="dName">-</div></div>
+        <div class="info-item"><div class="lbl">เลขที่</div><div class="val" id="dNo">-</div></div>
+        <div class="info-item"><div class="lbl">ชั้นเรียน</div><div class="val" id="dClass">-</div></div>
+        <div class="info-item"><div class="lbl">เวลาที่ส่ง</div><div class="val" id="dTime">-</div></div>
       </div>
+    </div>
 
-      <div class="student-info">
-        <strong>ชื่อ - นามสกุล:</strong> <span id="displayName">-</span><br>
-        <strong>เลขที่:</strong> <span id="displayNo">-</span><br>
-        <strong>ชั้นเรียน:</strong> <span id="displayClass">-</span>
+    <!-- Score -->
+    <div class="card">
+      <div class="card-title">🎯 คะแนนข้อปรนัย (ข้อ 1–8)</div>
+      <div class="score-ring">
+        <div class="score-num" id="dScore">0</div>
+        <div class="score-denom">จาก 8 คะแนน</div>
+        <div class="score-pct" id="dScorePct"></div>
       </div>
+    </div>
 
-      <div class="score-section">
-        <div class="score-label">คะแนนข้อปรนัย</div>
-        <div class="score-value"><span id="displayScore">0</span> / 8</div>
+    <!-- Essays -->
+    <div class="card">
+      <div class="card-title">✍️ คำตอบข้อเขียน</div>
+      <div class="essay-block">
+        <div class="essay-q">ข้อ 9: อธิบายว่า JavaScript ใช้ทำอะไร</div>
+        <div class="essay-a" id="dEssay1">- ไม่ได้ตอบ -</div>
       </div>
+      <div class="essay-block">
+        <div class="essay-q">ข้อ 10: ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
+        <div class="essay-a" id="dEssay2">- ไม่ได้ตอบ -</div>
+      </div>
+    </div>
 
-      <div class="essay-section">
-        <div class="essay-title">คำตอบข้อเขียน</div>
-        
-        <div class="essay-box">
-          <div class="essay-question">ข้อ 9: อธิบายว่า JavaScript ใช้ทำอะไร</div>
-          <div class="essay-answer" id="displayEssay1">- ไม่ได้ตอบ -</div>
+    <!-- Anti-Cheat Report -->
+    <div class="card" id="acCard">
+      <div class="card-title">🛡️ ผลการวิเคราะห์พฤติกรรม (Anti-Cheat)</div>
+
+      <div class="risk-strip">
+        <div class="risk-box">
+          <div class="r-lbl">Risk Score</div>
+          <div class="r-val" id="acScore" style="color:var(--rose)">0</div>
+          <div class="r-badge badge-safe" id="acLevel">SAFE</div>
         </div>
-
-        <div class="essay-box">
-          <div class="essay-question">ข้อ 10: ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
-          <div class="essay-answer" id="displayEssay2">- ไม่ได้ตอบ -</div>
+        <div class="risk-box">
+          <div class="r-lbl">เหตุการณ์</div>
+          <div class="r-val" id="acCount">0</div>
+          <div class="r-badge badge-info" style="background:#dbeafe;color:#1e3a8a">ครั้ง</div>
         </div>
-      </div>
-
-      <div class="submit-time">
-        <p>ส่งข้อสอบเรียบร้อยแล้ว เวลา: <strong id="displayTime">-</strong></p>
-      </div>
-
-      <!-- Anti-Cheat Section -->
-      <div class="anticheat-section" id="anticheatSection">
-        <div class="anticheat-title">🛡️ ผลการวิเคราะห์พฤติกรรม</div>
-
-        <div class="risk-assessment">
-          <div class="risk-card">
-            <div class="risk-label">Risk Score</div>
-            <div class="risk-score" id="riskScore">-</div>
-            <div class="risk-level" id="riskLevel">-</div>
-          </div>
-          <div class="risk-card">
-            <div class="risk-label">ข้อผิดพลาด</div>
-            <div class="risk-score" id="violationCount">0</div>
-            <div class="risk-level" style="background: #dbeafe; color: #1e3a8a;">ครั้ง</div>
-          </div>
-          <div class="risk-card">
-            <div class="risk-label">เวลาทำสอบ</div>
-            <div class="risk-score" id="runtime">-</div>
-            <div class="risk-level" style="background: #dbeafe; color: #1e3a8a;">นาที:วินาที</div>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-item-label">Tab Switches</div>
-            <div class="stat-item-value" id="statTabSwitches">0</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-item-label">Pastes</div>
-            <div class="stat-item-value" id="statPastes">0</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-item-label">DevTools</div>
-            <div class="stat-item-value" id="statDevtools">0</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-item-label">Critical Events</div>
-            <div class="stat-item-value" id="statCritical">0</div>
-          </div>
-        </div>
-
-        <div class="violations-section">
-          <div class="violations-title">📋 รายละเอียดข้อผิดพลาด</div>
-          <div class="violations-list" id="violationsList">
-            <div style="text-align: center; color: #94a3b8; padding: 20px;">ไม่มีข้อผิดพลาด</div>
-          </div>
+        <div class="risk-box">
+          <div class="r-lbl">เวลาทำสอบ</div>
+          <div class="r-val" id="acRuntime" style="font-size:20px">0:00</div>
+          <div class="r-badge" style="background:#f0fdf4;color:#166534">นาที:วินาที</div>
         </div>
       </div>
 
-      <div class="action-buttons">
-        <button class="btn btn-primary" onclick="goHome()">ส่งเรียบร้อย</button>
-        <button class="btn btn-secondary" onclick="printResult()">พิมพ์ผลลัพธ์</button>
+      <div class="stats-row">
+        <div class="stat-box"><div class="s-lbl">Tab Switch</div><div class="s-val" id="stTab">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Paste</div><div class="s-val" id="stPaste">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Copy</div><div class="s-val" id="stCopy">0</div></div>
+        <div class="stat-box"><div class="s-lbl">DevTools</div><div class="s-val" id="stDev">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Screenshot</div><div class="s-val" id="stShot">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Right Click</div><div class="s-val" id="stRight">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Typing Pattern</div><div class="s-val" id="stTyping">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Mouse Movement</div><div class="s-val" id="stMouse">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Answer Timing</div><div class="s-val" id="stTiming">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Fullscreen</div><div class="s-val" id="stFullscreen">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Print/Save</div><div class="s-val" id="stPrint">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Search</div><div class="s-val" id="stSearch">0</div></div>
+        <div class="stat-box"><div class="s-lbl">Storage Edit</div><div class="s-val" id="stStorage">0</div></div>
       </div>
+
+      <div class="vio-title">📋 รายละเอียดเหตุการณ์</div>
+      <div class="vio-list" id="vioList">
+        <div style="text-align:center;color:#94a3b8;padding:16px">✅ ไม่พบความผิดปกติ</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="goHome()">🏠 กลับหน้าหลัก</button>
+      <button class="btn btn-ghost" onclick="window.print()">🖨️ พิมพ์ผลลัพธ์</button>
     </div>
   </div>
 
   <script>
-    // โหลดผลสอบจากโครงสร้างใหม่ก่อน แล้วค่อย fallback โครงสร้างเดิม
-    window.addEventListener('load', () => {
-      let submission = null;
-      const submissionJson = sessionStorage.getItem('examSubmission');
-      if (submissionJson) {
-        try {
-          submission = JSON.parse(submissionJson);
-        } catch (e) {
-          submission = null;
-        }
-      }
-
-      const studentName = submission?.name || sessionStorage.getItem('studentName') || 'ไม่ระบุชื่อ';
-      const studentNo = submission?.studentNo || sessionStorage.getItem('studentNo') || '-';
-      const studentClass = submission?.studentClass || sessionStorage.getItem('studentClass') || '-';
-      const score = submission?.score ?? sessionStorage.getItem('score') ?? '0';
-      const essay1 = submission?.essays?.essay1 ?? sessionStorage.getItem('essay1') ?? '- ไม่ได้ตอบ -';
-      const essay2 = submission?.essays?.essay2 ?? sessionStorage.getItem('essay2') ?? '- ไม่ได้ตอบ -';
-      const submitTime = submission?.submitTime || sessionStorage.getItem('submitTime') || '-';
-
-      document.getElementById('displayName').innerText = studentName;
-      document.getElementById('displayNo').innerText = studentNo;
-      document.getElementById('displayClass').innerText = studentClass;
-      document.getElementById('displayScore').innerText = String(score);
-      document.getElementById('displayEssay1').innerText = essay1 || '- ไม่ได้ตอบ -';
-      document.getElementById('displayEssay2').innerText = essay2 || '- ไม่ได้ตอบ -';
-      document.getElementById('displayTime').innerText = submitTime;
-
-      let antiCheatReport = submission?.antiCheatReport || null;
-      if (!antiCheatReport) {
-        const antiCheatReportJson = sessionStorage.getItem('antiCheatReport');
-        if (antiCheatReportJson) {
-          try {
-            antiCheatReport = JSON.parse(antiCheatReportJson);
-          } catch (e) {
-            antiCheatReport = null;
-            console.error('Error parsing anti-cheat report:', e);
-          }
-        }
-      }
-
-      if (antiCheatReport) {
-        displayAntiCheatReport(antiCheatReport);
-      }
-    });
-
-    function displayAntiCheatReport(report) {
-      const section = document.getElementById('anticheatSection');
-      
-      if (!report) {
-        section.classList.remove('show');
-        return;
-      }
-
-      section.classList.add('show');
-
-      // Display risk score and level
-      const riskScore = report.suspicionScore || 0;
-      const riskLevel = report.riskLevel || 'SAFE';
-      
-      document.getElementById('riskScore').innerText = Math.round(riskScore);
-      
-      const riskLevelElement = document.getElementById('riskLevel');
-      riskLevelElement.innerText = riskLevel;
-      
-      // Set risk level color class
-      let riskClass = 'safe';
-      if (riskLevel === 'CHEATING') riskClass = 'critical';
-      else if (riskLevel === 'HIGH RISK') riskClass = 'high';
-      else if (riskLevel === 'WARNING') riskClass = 'medium';
-      
-      riskLevelElement.className = 'risk-level ' + riskClass;
-
-      // Display violation count
-      document.getElementById('violationCount').innerText = (report.violationCount || report.violations?.length || 0);
-
-      // Display runtime
-      const runtime = report.runtime || '0:00';
-      document.getElementById('runtime').innerText = runtime;
-
-      // Display statistics
-      document.getElementById('statTabSwitches').innerText = report.statistics?.tabSwitch || 0;
-      document.getElementById('statPastes').innerText = report.statistics?.paste || 0;
-      document.getElementById('statDevtools').innerText = report.statistics?.devtools || 0;
-      
-      // Display other stats
-      if (document.getElementById('statCopy')) {
-        document.getElementById('statCopy').innerText = report.statistics?.copy || 0;
-      }
-      if (document.getElementById('statScreenshot')) {
-        document.getElementById('statScreenshot').innerText = report.statistics?.screenshot || 0;
-      }
-      if (document.getElementById('statCritical')) {
-        const criticalCount = (report.violations || []).filter(v => v.points >= 30).length;
-        document.getElementById('statCritical').innerText = criticalCount;
-      }
-
-      // Display violations sorted by severity
-      displayViolations(report.violations || []);
+    function isPcOnlyAllowed() {
+      const isSmallScreen = window.innerWidth < 900;
+      const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+      const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+      return !isSmallScreen && !isTouchPrimary && !isMobileUA;
     }
 
-    function displayViolations(violations) {
-      const violationsList = document.getElementById('violationsList');
-      
-      if (!violations || violations.length === 0) {
-        violationsList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px;">✅ ไม่พบการกระทำที่สงสัย</div>';
+    function enforcePcOnly() {
+      const allowed = isPcOnlyAllowed();
+      document.body.classList.toggle('pc-only-blocked', !allowed);
+      return allowed;
+    }
+
+    enforcePcOnly();
+    window.addEventListener('resize', enforcePcOnly);
+
+    const ANSWER_KEY_SALT = 'mattep-v4-local-signature';
+
+    function stableStringify(value) {
+      if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+      if (value && typeof value === 'object') {
+        return '{' + Object.keys(value).filter(k => k !== 'integrity').sort().map(k => JSON.stringify(k) + ':' + stableStringify(value[k])).join(',') + '}';
+      }
+      return JSON.stringify(value);
+    }
+
+    function createIntegrityHash(record) {
+      const text = stableStringify(record) + ANSWER_KEY_SALT;
+      let hash = 2166136261;
+      for (let i = 0; i < text.length; i++) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16).padStart(8, '0');
+    }
+
+    function verifyIntegrity(record) {
+      if (!record.integrity) return null;
+      return record.integrity === createIntegrityHash(record);
+    }
+
+    window.addEventListener('load', () => {
+      if (!enforcePcOnly()) return;
+      let sub = null;
+      try { sub = JSON.parse(sessionStorage.getItem('examSubmission')); } catch(e) {}
+
+      if (!sub) {
+        document.querySelector('.container').innerHTML = `
+          <div class="card" style="text-align:center;padding:60px 30px">
+            <div style="font-size:48px;margin-bottom:16px">❌</div>
+            <h2 style="margin-bottom:10px">ไม่พบข้อมูลการสอบ</h2>
+            <p style="color:var(--muted);margin-bottom:24px">กรุณากลับไปทำข้อสอบใหม่</p>
+            <button class="btn btn-primary" onclick="window.location.href='home.html'">กลับหน้าหลัก</button>
+          </div>`;
         return;
       }
 
-      // Sort violations by points (descending = most severe first)
-      const sorted = [...violations].sort((a, b) => (b.points || 0) - (a.points || 0));
+      const integrityValid = verifyIntegrity(sub);
+      if (integrityValid === false) {
+        const warn = document.createElement('div');
+        warn.className = 'card';
+        warn.style.borderColor = '#fecaca';
+        warn.style.background = '#fef2f2';
+        warn.innerHTML = '<div class="card-title" style="color:#dc2626">⚠️ ตรวจพบการแก้ไขข้อมูลผลสอบ</div><div style="color:#991b1b;font-weight:700">ข้อมูลในเครื่องไม่ตรงกับลายเซ็นเดิม ระบบจะบันทึกเป็นความเสี่ยงสูง</div>';
+        document.querySelector('.container').insertBefore(warn, document.querySelector('.container').children[1]);
+        sub.riskLevel = 'DATA TAMPERED';
+      }
 
-      let html = '';
-      sorted.forEach(v => {
-        let severityClass = 'info';
-        let severityLabel = 'INFO';
-        
-        if (v.points >= 30) {
-          severityClass = 'critical';
-          severityLabel = '⛔ ร้ายแรง';
-        } else if (v.points >= 15) {
-          severityClass = 'warning';
-          severityLabel = '⚠️ เตือน';
-        } else {
-          severityLabel = 'ℹ️ ข้อมูล';
-        }
+      document.getElementById('dName').textContent  = sub.name || '-';
+      document.getElementById('dNo').textContent    = sub.studentNo || '-';
+      document.getElementById('dClass').textContent = sub.studentClass || '-';
+      document.getElementById('dTime').textContent  = sub.submitTime || '-';
 
-        html += `
-          <div class="violation-item">
-            <span class="violation-badge ${severityClass}">${v.points}pts</span>
-            <div style="flex: 1;">
-              <div style="color: #1e293b; font-weight: 600;">${v.description}</div>
-              <div style="color: #64748b; font-size: 12px;">${v.time} • ${v.category || 'misc'}</div>
-              ${v.details ? `<div style="color: #94a3b8; font-size: 11px; margin-top: 4px;">💬 ${v.details}</div>` : ''}
-            </div>
+      const score = sub.score ?? 0;
+      document.getElementById('dScore').textContent   = score;
+      document.getElementById('dScorePct').textContent = `(${Math.round(score/8*100)}%)`;
+
+      document.getElementById('dEssay1').textContent = sub.essays?.essay1 || '- ไม่ได้ตอบ -';
+      document.getElementById('dEssay2').textContent = sub.essays?.essay2 || '- ไม่ได้ตอบ -';
+
+      const ac = sub.antiCheatReport;
+      if (ac) renderAntiCheat(ac);
+    });
+
+    function renderAntiCheat(ac) {
+      const score = Math.round(ac.suspicionScore || 0);
+      const level = ac.riskLevel || 'SAFE';
+
+      document.getElementById('acScore').textContent   = score;
+      document.getElementById('acCount').textContent   = ac.violationCount || ac.violations?.length || 0;
+      document.getElementById('acRuntime').textContent = typeof ac.runtime === 'object' ? ac.runtime.formatted : (ac.runtime || '0:00');
+
+      const lvlEl = document.getElementById('acLevel');
+      lvlEl.textContent = level;
+      const badgeClass = {
+        'SAFE': 'badge-safe', 'WARNING': 'badge-warning',
+        'HIGH RISK': 'badge-high', 'CHEATING': 'badge-critical',
+        'DATA TAMPERED': 'badge-critical'
+      }[level] || 'badge-safe';
+      lvlEl.className = 'r-badge ' + badgeClass;
+
+      const st = ac.statistics || {};
+      document.getElementById('stTab').textContent   = st.tabSwitch  || 0;
+      document.getElementById('stPaste').textContent  = st.paste      || 0;
+      document.getElementById('stCopy').textContent   = st.copy       || 0;
+      document.getElementById('stDev').textContent    = st.devtools   || 0;
+      document.getElementById('stShot').textContent   = st.screenshot || 0;
+      document.getElementById('stRight').textContent  = st.rightClick || 0;
+      document.getElementById('stTyping').textContent = st.typing     || 0;
+      document.getElementById('stMouse').textContent  = st.mouse      || 0;
+      document.getElementById('stTiming').textContent = st.answerTiming || 0;
+      document.getElementById('stFullscreen').textContent = st.fullscreen || 0;
+      document.getElementById('stPrint').textContent      = st.print      || 0;
+      document.getElementById('stSearch').textContent     = st.search     || 0;
+      document.getElementById('stStorage').textContent    = st.storage    || 0;
+
+      const vios = (ac.violations || []).slice().sort((a,b) => (b.points||0)-(a.points||0));
+      const list = document.getElementById('vioList');
+      if (!vios.length) return;
+
+      list.innerHTML = vios.map(v => {
+        const pts = v.points || 0;
+        const cls = pts >= 25 ? 'pts-crit' : pts >= 12 ? 'pts-warn' : 'pts-info';
+        return `<div class="vio-item">
+          <span class="vio-pts ${cls}">${pts}pts</span>
+          <div>
+            <div class="vio-desc">${v.description}</div>
+            <div class="vio-meta">${v.time || ''} • ${v.category || 'misc'}${v.details ? ' • ' + v.details : ''}</div>
           </div>
-        `;
-      });
-
-      violationsList.innerHTML = html;
+        </div>`;
+      }).join('');
     }
 
     function goHome() {
-      // ล้างข้อมูล session และกลับหน้าแรก
-      sessionStorage.clear();
-      window.location.href = 'index.html';
-    }
-
-    function printResult() {
-      window.print();
+      sessionStorage.removeItem('examSubmission');
+      window.location.href = 'home.html';
     }
   </script>
 </body>

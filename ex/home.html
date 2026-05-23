@@ -3,175 +3,359 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เริ่มทำข้อสอบ - MATTEP</title>
-
+  <title>MATTEP — ระบบประเมินผลสอบออนไลน์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rose:   #f43f5e;
+      --rose-l: #fb7185;
+      --rose-xl:#fecdd3;
+      --ink:    #1a1a2e;
+      --muted:  #64748b;
+      --card:   #ffffff;
+      --bg:     #fff5f6;
     }
 
     body {
-      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: var(--bg);
       min-height: 100vh;
-      color: #1e293b;
-      padding: 40px 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .container {
-      max-width: 600px;
-      width: 100%;
-    }
-
-    .start-exam-card {
-      background: #ffffff;
-      backdrop-filter: blur(14px);
-      border: 1px solid #f3d7e6;
-      border-radius: 28px;
-      padding: 50px 40px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      overflow-x: hidden;
       position: relative;
-      overflow: hidden;
-      text-align: center;
     }
 
-    .mattep-header {
-      font-size: 42px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
+    /* Decorative blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .35;
+      pointer-events: none;
+    }
+    body::before {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, #fda4af, #fb7185);
+      top: -180px; right: -160px;
+    }
+    body::after {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, #fecdd3, #ffe4e6);
+      bottom: -120px; left: -100px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(244,63,94,.15);
+      border-radius: 32px;
+      padding: 56px 48px 48px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 32px 72px rgba(244,63,94,.12), 0 0 0 1px rgba(255,255,255,.8) inset;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      border-radius: 22px;
+      margin-bottom: 20px;
+      font-size: 32px;
+      box-shadow: 0 12px 28px rgba(244,63,94,.35);
+    }
+
+    .brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 48px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
     }
 
-    .subtitle {
-      font-size: 16px;
-      color: #64748b;
-      margin-bottom: 30px;
-      font-weight: 500;
+    .tagline {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 36px;
+      padding: 0 8px;
     }
 
-    .start-btn {
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--rose-xl);
+    }
+    .divider span {
+      font-size: 12px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       width: 100%;
-      padding: 18px;
+      padding: 17px 24px;
       border: none;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.3);
-      margin-bottom: 15px;
-    }
-
-    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 35px rgba(244, 63, 94, 0.4); }
-
-    .teacher-btn {
-      width: 100%;
-      padding: 15px;
-      border: 2px solid #e2e8f0;
-      border-radius: 20px;
-      background: transparent;
-      color: #64748b;
+      border-radius: 18px;
+      font-family: 'Noto Sans Thai', sans-serif;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.3s;
+      transition: transform .2s, box-shadow .2s;
+      text-decoration: none;
     }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
 
-    .teacher-btn:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-      color: #475569;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(244,63,94,.32);
+      margin-bottom: 12px;
     }
+    .btn-primary:hover { box-shadow: 0 14px 36px rgba(244,63,94,.45); }
 
-    /* Modal Login Styles */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 999;
-      backdrop-filter: blur(5px);
+    .btn-secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid #e2e8f0;
     }
+    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; color: #475569; }
 
-    .login-box {
-      background: white; border-radius: 24px; padding: 30px; max-width: 400px; width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: left;
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #f1f5f9;
     }
-
-    .login-box input {
-      width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px;
-      border: 1px solid #cbd5e1; outline: none; transition: 0.3s;
+    .feat {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
     }
+    .feat .icon { font-size: 20px; display: block; margin-bottom: 4px; }
 
-    .login-box input:focus { border-color: #f43f5e; }
+    /* ===== Modal ===== */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,15,30,.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 40px 80px rgba(0,0,0,.25);
+      animation: fadeUp .35s cubic-bezier(.22,1,.36,1) both;
+    }
+    .modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+    .modal p  { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: 13px; font-weight: 600; color: #475569; }
+    .field input {
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus { border-color: var(--rose); }
+
+    .err { color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; }
+
+    .modal-footer {
+      display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px;
+    }
+    .modal-footer .btn { width: auto; padding: 11px 22px; font-size: 14px; border-radius: 12px; }
+
+    .pc-only-message {
+      display: none;
+      max-width: 520px;
+      width: 100%;
+      background: #fff;
+      border: 1px solid #fecaca;
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15,23,42,.12);
+      position: relative;
+      z-index: 2;
+    }
+    .pc-only-message h1 { font-size: 24px; margin-bottom: 10px; color: #dc2626; }
+    .pc-only-message p { color: var(--muted); line-height: 1.7; }
+    body.pc-only-blocked .card,
+    body.pc-only-blocked .overlay { display: none !important; }
+    body.pc-only-blocked .pc-only-message { display: block; }
+
+    @media (max-width: 560px) {
+      body {
+        align-items: flex-start;
+        padding: 16px 12px 32px;
+      }
+      body::before, body::after { display: none; }
+      .card {
+        padding: 32px 18px 24px;
+        border-radius: 22px;
+        margin: auto 0;
+      }
+      .logo-mark { width: 60px; height: 60px; border-radius: 18px; font-size: 28px; }
+      .brand { font-size: 38px; letter-spacing: 0; }
+      .tagline { margin-bottom: 24px; }
+      .btn { padding: 14px 16px; border-radius: 14px; font-size: 15px; }
+      .features { gap: 10px; margin-top: 22px; padding-top: 18px; }
+      .feat { flex: 1 1 42%; }
+      .modal { width: calc(100% - 24px); padding: 24px 18px; border-radius: 22px; }
+      .modal-footer { flex-direction: column-reverse; }
+      .modal-footer .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="start-exam-card">
-        <div class="mattep-header">MATTEP</div>
-        <p class="subtitle">ระบบประเมินผลสอบออนไลน์ พร้อม AI ตรวจจับพฤติกรรม</p>
 
-        <button class="start-btn" onclick="startExam()">👨‍🎓 เริ่มทำข้อสอบ (สำหรับนักเรียน)</button>
-        <button class="teacher-btn" onclick="openLogin()">👨‍🏫 เข้าสู่ระบบ (สำหรับผู้สอน)</button>
+  <div class="pc-only-message" id="pcOnlyMessage">
+    <h1>ใช้บนคอมพิวเตอร์เท่านั้น</h1>
+    <p>ระบบสอบนี้ถูกตั้งค่าให้ใช้งานบน PC หรือ Notebook เท่านั้น กรุณาเปิดด้วยหน้าจออย่างน้อย 900px เพื่อเริ่มใช้งาน</p>
+  </div>
+
+  <div class="card">
+    <div class="logo-mark">📝</div>
+    <div class="brand">MATTEP</div>
+    <p class="tagline">ระบบประเมินผลสอบออนไลน์<br>พร้อมระบบ AI ตรวจจับพฤติกรรมอัตโนมัติ</p>
+
+    <div class="divider"><span>เลือกโหมดการใช้งาน</span></div>
+
+    <button class="btn btn-primary" onclick="goExam()">
+      <span>👨‍🎓</span> เริ่มทำข้อสอบ (สำหรับนักเรียน)
+    </button>
+    <button class="btn btn-secondary" onclick="openLogin()">
+      <span>👨‍🏫</span> เข้าสู่ระบบครูผู้สอน
+    </button>
+
+    <div class="features">
+      <div class="feat"><span class="icon">🛡️</span>Anti-Cheat AI</div>
+      <div class="feat"><span class="icon">📊</span>Dashboard</div>
+      <div class="feat"><span class="icon">⏱️</span>จับเวลา</div>
+      <div class="feat"><span class="icon">📋</span>รายงานผล</div>
     </div>
   </div>
 
   <!-- Login Modal -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="login-box">
-      <h2 style="color: #1e293b; margin-bottom: 20px;">เข้าสู่ระบบครูผู้สอน</h2>
-      <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">ทดสอบใช้ Username: admin / Password: 1234</p>
-      <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน (Username)" />
-      <input type="password" id="password" placeholder="รหัสผ่าน (Password)" />
-      <div style="color: red; font-size: 12px; margin-bottom: 10px; display: none;" id="loginError">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
-      
-      <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button onclick="closeLogin()" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer;">ยกเลิก</button>
-        <button onclick="attemptLogin()" style="padding: 10px 20px; border-radius: 10px; border: none; background: #f43f5e; color: white; cursor: pointer; font-weight: bold;">เข้าสู่ระบบ</button>
+  <div class="overlay" id="loginModal">
+    <div class="modal">
+      <h2>เข้าสู่ระบบครูผู้สอน</h2>
+      <p>ทดสอบ: Username <strong>admin</strong> / Password <strong>1234</strong></p>
+      <div class="field">
+        <label>ชื่อผู้ใช้งาน</label>
+        <input type="text" id="username" placeholder="admin" />
+      </div>
+      <div class="field">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')attemptLogin()" />
+      </div>
+      <div class="err" id="loginError">⚠️ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeLogin()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="attemptLogin()">เข้าสู่ระบบ</button>
       </div>
     </div>
   </div>
 
   <script>
-    function startExam() {
-      // ตรวจสอบระบบ Preview ของ AI
-      if (window.location.protocol === 'blob:' || window.location.hostname === '' || window.self !== window.top) {
-        alert("คำเตือน: คุณรันอยู่ในโหมด Preview อาจจะเปลี่ยนหน้าอัตโนมัติไม่ได้ โปรดเปิดไฟล์นี้ในเครื่องของคุณโดยตรง");
-      }
+    function isPcOnlyAllowed() {
+      const isSmallScreen = window.innerWidth < 900;
+      const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+      const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+      return !isSmallScreen && !isTouchPrimary && !isMobileUA;
+    }
+
+    function enforcePcOnly() {
+      document.body.classList.toggle('pc-only-blocked', !isPcOnlyAllowed());
+      return isPcOnlyAllowed();
+    }
+
+    enforcePcOnly();
+    window.addEventListener('resize', enforcePcOnly);
+
+    function goExam() {
+      if (!enforcePcOnly()) return;
       window.location.href = 'index.html';
     }
 
     function openLogin() {
-      document.getElementById('loginModal').style.display = 'flex';
+      if (!enforcePcOnly()) return;
+      document.getElementById('loginModal').classList.add('open');
       document.getElementById('loginError').style.display = 'none';
+      setTimeout(() => document.getElementById('username').focus(), 100);
     }
 
     function closeLogin() {
-      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('loginModal').classList.remove('open');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
     }
 
     function attemptLogin() {
-      const user = document.getElementById('username').value;
+      if (!enforcePcOnly()) return;
+      const user = document.getElementById('username').value.trim();
       const pass = document.getElementById('password').value;
-
-      // รหัสผ่านจำลองสำหรับการทดสอบ
       if (user === 'admin' && pass === '1234') {
-          sessionStorage.setItem('isTeacherLoggedIn', 'true');
-          if (window.location.protocol === 'blob:' || window.location.hostname === '' || window.self !== window.top) {
-           alert("เข้าสู่ระบบสำเร็จ! แต่โหมด Preview อาจบล็อกการเปลี่ยนหน้า กรุณารันในเครื่องจริง");
-        }
+        sessionStorage.setItem('isTeacherLoggedIn', 'true');
         window.location.href = 'ai-proctoring-dashboard.html';
       } else {
         document.getElementById('loginError').style.display = 'block';
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
       }
     }
+
+    // Close modal on overlay click
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+      if (e.target === this) closeLogin();
+    });
   </script>
 </body>
 </html>
