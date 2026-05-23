@@ -1,0 +1,13 @@
+Core Detection
+Tab Switching
+ตรวจสลับแท็บ/ออกจากหน้าเว็บ
+Copy/Paste Detection
+ตรวจการคัดลอก/วางคำตอบ
+DevTools Detection
+ตรวจพยายามแก้เว็บหรือ inspect
+Typing Pattern
+วิเคราะห์ลักษณะการพิมพ์
+Mouse Movement
+วิเคราะห์การเคลื่อนเมาส์
+Answer Timing
+วิเคราะห์เวลาทำข้อสอบ
