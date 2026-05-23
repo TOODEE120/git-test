@@ -4,1182 +4,333 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบการสอบ AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
-            color: #1e293b;
-            min-height: 100vh;
-        }
-
-        /* Header Styles */
-        .header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #f3d7e6;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-            position: relative;
-            gap: 1.5rem;
-        }
-
-        .header-left {
-            font-size: 1.5rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e293b;
-            flex: 1;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #1e293b;
-        }
-
-        .timer {
-            background: linear-gradient(135deg, #f43f5e, #fb7185);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 12px;
-            font-family: 'Courier New', monospace;
-            min-width: 120px;
-            text-align: center;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        }
-
-        /* Back Button */
-        .back-button {
-            background: linear-gradient(135deg, #f43f5e, #fb7185);
-            border: none;
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4);
-            background: linear-gradient(135deg, #fb7185, #fca5b0);
-        }
-
-        .back-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
-        }
-
-        .back-button.show {
-            display: flex;
-        }
-
-        /* Main Container */
-        .container {
-            display: flex;
-            gap: 0;
-            padding: 0;
-            max-width: 100%;
-            margin: 0 auto;
-            height: calc(100vh - 70px);
-            overflow: hidden;
-        }
-
-        /* Left Sidebar */
-        .sidebar {
-            width: 30%;
-            background-color: #fff1f2;
-            border-right: 1px solid #f3d7e6;
-            overflow-y: auto;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar.hidden {
-            display: none;
-        }
-
-        .card {
-            background-color: #ffffff;
-            border-radius: 18px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-            border: 1px solid #f3d7e6;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e293b;
-        }
-
-        /* Student List */
-        .student-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .student-item {
-            background: linear-gradient(135deg, #fffafc 0%, #fff5f8 100%);
-            padding: 1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #f3d7e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .student-item:hover {
-            background: #fff1f2;
-            border-color: rgba(244, 63, 94, 0.5);
-            transform: translateX(4px);
-        }
-
-        .student-item.active {
-            background: linear-gradient(135deg, #f43f5e, #fb7185);
-            border-color: #f43f5e;
-            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.3);
-        }
-
-        .student-item.active .student-name {
-            color: white;
-        }
-
-        .student-item.active .risk-score {
-            color: #1e293b;
-        }
-
-        .student-name {
-            font-weight: 500;
-            font-size: 1rem;
-            color: #1e293b;
-        }
-
-        .risk-score {
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            font-family: 'Courier New', monospace;
-        }
-
-        .risk-green {
-            background-color: rgba(34, 197, 94, 0.2);
-            color: #16a34a;
-        }
-
-        .risk-yellow {
-            background-color: rgba(250, 204, 21, 0.2);
-            color: #ea580c;
-        }
-
-        .risk-red {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #dc2626;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            width: 70%;
-            background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
-            overflow-y: auto;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .main-content.full-width {
-            width: 100%;
-        }
-
-        .content-hidden {
-            display: none !important;
-        }
-
-        /* Dashboard View */
-        .dashboard-view {
-            display: none;
-        }
-
-        .dashboard-view.show {
-            display: block;
-        }
-
-        /* Statistics Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 1.5rem;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(244, 63, 94, 0.15);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #f43f5e;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.95rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        /* Question Statistics */
-        .question-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .question-section {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 1.5rem;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-        }
-
-        .question-section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e293b;
-        }
-
-        .question-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .question-item:last-child {
-            border-bottom: none;
-        }
-
-        .question-label {
-            font-weight: 500;
-            color: #475569;
-        }
-
-        .question-stat {
-            background: linear-gradient(135deg, #f43f5e, #fb7185);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .question-stat.green {
-            background: linear-gradient(135deg, #22c55e, #4ade80);
-        }
-
-        .question-stat.yellow {
-            background: linear-gradient(135deg, #facc15, #fcd34d);
-            color: #1e293b;
-        }
-
-        /* Time Analysis */
-        .time-analysis {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 1.5rem;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-            margin-bottom: 2rem;
-        }
-
-        .time-analysis-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e293b;
-        }
-
-        .time-chart {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-        }
-
-        .time-bar-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .time-bar {
-            width: 100%;
-            height: 150px;
-            background: linear-gradient(180deg, #f43f5e, #fb7185);
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
-        }
-
-        .time-bar-value {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 600;
-            color: #1e293b;
-            white-space: nowrap;
-        }
-
-        .time-bar-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 500;
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        /* Risk Distribution */
-        .risk-distribution {
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 1.5rem;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-        }
-
-        .risk-distribution-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e293b;
-        }
-
-        .risk-items {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .risk-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .risk-label {
-            font-weight: 500;
-            color: #475569;
-            min-width: 100px;
-        }
-
-        .risk-bar-container {
-            flex: 1;
-            height: 30px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .risk-bar {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 0.75rem;
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-            border-radius: 8px;
-        }
-
-        .risk-bar.low {
-            background: linear-gradient(90deg, #22c55e, #4ade80);
-        }
-
-        .risk-bar.medium {
-            background: linear-gradient(90deg, #facc15, #fcd34d);
-            color: #1e293b;
-        }
-
-        .risk-bar.high {
-            background: linear-gradient(90deg, #f43f5e, #fb7185);
-        }
-
-        /* Student Detail View */
-        .student-detail-view {
-            display: none;
-        }
-
-        .student-detail-view.show {
-            display: block;
-        }
-
-        .no-selection {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            text-align: center;
-            color: #94a3b8;
-        }
-
-        /* Student Details */
-        .student-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-box {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-        }
-
-        .detail-label {
-            font-size: 0.875rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .detail-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .risk-score-large {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        /* Colored Risk Number */
-        .risk-number {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .risk-number.low {
-            color: #16a34a;
-        }
-
-        .risk-number.medium {
-            color: #ea580c;
-        }
-
-        .risk-number.high {
-            color: #dc2626;
-        }
-
-        /* Two Column Layout */
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Activity Summary */
-        .activity-list {
-            list-style: none;
-        }
-
-        .activity-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.95rem;
-            color: #1e293b;
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-label {
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .activity-value {
-            font-weight: 600;
-            color: #1e293b;
-            font-family: 'Courier New', monospace;
-        }
-
-        /* AI Status */
-        .status-list {
-            list-style: none;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 0;
-            font-size: 0.95rem;
-            color: #1e293b;
-        }
-
-        .status-icon {
-            font-size: 1.25rem;
-            min-width: 30px;
-        }
-
-        .status-ok {
-            color: #16a34a;
-        }
-
-        .status-warning {
-            color: #ea580c;
-        }
-
-        .status-error {
-            color: #dc2626;
-        }
-
-        /* Event Log */
-        .event-log {
-            margin-bottom: 1.5rem;
-        }
-
-        .event-list {
-            list-style: none;
-            background-color: #ffffff;
-            border-radius: 12px;
-            max-height: 250px;
-            overflow-y: auto;
-            padding: 0;
-            border: 1px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-        }
-
-        .event-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.9rem;
-            transition: background-color 0.2s ease;
-            color: #1e293b;
-        }
-
-        .event-item:hover {
-            background-color: #fffafc;
-        }
-
-        .event-item:last-child {
-            border-bottom: none;
-        }
-
-        .event-time {
-            font-family: 'Courier New', monospace;
-            color: #f43f5e;
-            font-weight: 600;
-            min-width: 60px;
-            margin-right: 1rem;
-        }
-
-        .event-description {
-            color: #475569;
-        }
-
-        /* Evidence Section */
-        .evidence-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .evidence-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .evidence-item {
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #f3d7e6;
-            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
-        }
-
-        .evidence-item:hover {
-            border-color: #f43f5e;
-            transform: scale(1.05);
-            box-shadow: 0 15px 35px rgba(244, 63, 94, 0.2);
-        }
-
-        .evidence-image {
-            width: 100%;
-            height: 150px;
-            background: linear-gradient(135deg, #fff1f2, #fff5f8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            border-bottom: 1px solid #f3d7e6;
-        }
-
-        .evidence-time {
-            padding: 0.75rem;
-            font-size: 0.85rem;
-            color: #f43f5e;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .evidence-description {
-            padding: 0 0.75rem 0.75rem;
-            font-size: 0.8rem;
-            color: #64748b;
-            text-align: center;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: #ffffff;
-            padding: 2rem;
-            border-radius: 18px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease;
-            position: relative;
-        }
-
-        .modal-close {
-            position: absolute;
-            right: 1.5rem;
-            top: 1.5rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #94a3b8;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            color: #f43f5e;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 1.5rem;
-            padding-right: 2rem;
-        }
-
-        .modal-image {
-            width: 100%;
-            height: 300px;
-            background: linear-gradient(135deg, #fff1f2, #fff5f8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            border: 2px solid #f3d7e6;
-        }
-
-        .modal-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .modal-info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .modal-info-item:last-child {
-            border-bottom: none;
-        }
-
-        .modal-info-label {
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .modal-info-value {
-            color: #1e293b;
-            font-weight: 600;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Scrollbar Styling */
+        /* Custom Scrollbar styling for a cleaner look */
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
-
         ::-webkit-scrollbar-thumb {
-            background: #f3d7e6;
+            background: #cbd5e1;
             border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
-            background: #f43f5e;
+            background: #94a3b8;
         }
 
-        /* Animation */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Animations for smoother transitions */
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .stat-card,
-        .card {
-            animation: slideIn 0.3s ease;
+        /* Utility classes for animations */
+        .animate-slide-in-right {
+            animation: slideInRight 0.3s forwards;
+        }
+        .animate-fade-out-right {
+            animation: fadeOutRight 0.3s forwards;
+        }
+        .animate-slide-in-up {
+            animation: slideInUp 0.3s ease-out forwards;
         }
 
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .two-column {
-                grid-template-columns: 1fr;
-            }
-
-            .question-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .evidence-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        /* Hide elements gracefully */
+        .hidden-view {
+            display: none !important;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #f3d7e6;
-                max-height: 300px;
-            }
-
-            .main-content {
-                width: 100%;
-            }
-
-            .student-details {
-                grid-template-columns: 1fr;
-            }
-
-            .evidence-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .time-chart {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        /* Pulse animation for high-risk CCTV borders */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .cctv-high-risk {
+            border-color: #ef4444;
+            animation: pulse-red 2s infinite;
         }
     </style>
 </head>
-<body>
-    <!-- Header -->
-    <div class="header">
-        <button class="back-button" id="backButton">
-            ← ย้อนกลับ
-        </button>
-        <div class="header-left">
-            <span>📚</span>
-            <span>ระบบตรวจสอบการสอบ AI</span>
+<body class="bg-gradient-to-br from-rose-50 to-white text-slate-800 font-sans h-screen flex flex-col overflow-hidden" style="background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);">
+
+    <header class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center relative z-20" style="box-shadow: 0 15px 40px rgba(0,0,0,0.3);"
+        <div class="flex items-center gap-4">
+            <!-- Back button, initially hidden -->
+            <button id="backButton" class="hidden-view bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="showDashboard()">
+                <span>←</span> ย้อนกลับ
+            </button>
+            <div class="text-2xl font-bold flex items-center gap-2 text-slate-800">
+                <span>📚</span> ระบบตรวจสอบการสอบ AI
+            </div>
         </div>
-        <div class="header-right">
-            <span>⏱</span>
-            <div class="timer" id="timer">00:00:00</div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Toggle button for CCTV mode -->
+            <button id="btnToggleCCTV" class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="toggleCCTV()">
+                <span>👁️</span> โหมดกล้องสด (CCTV)
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-xl">⏱</span>
+                <div id="timer" class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-xl font-mono font-bold min-w-[120px] text-center" style="box-shadow: 0 10px 25px rgba(244,63,94,0.3);">
+                    00:00:00
+                </div>
+            </div>
         </div>
+    </header>
+
+    <div id="toastContainer" class="fixed top-24 right-6 z-50 flex flex-col gap-3"></div>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside id="sidebar" class="w-full md:w-1/3 lg:w-1/4 border-r border-rose-100 flex flex-col transition-all duration-300 z-10" style="background: linear-gradient(135deg, rgba(255,241,242,0.5) 0%, rgba(255,255,255,0.5) 100%);">
+            <div class="p-6 flex-1 flex flex-col overflow-hidden">
+                <!-- Search and Filter Section -->
+                <div class="bg-white p-4 rounded-xl border border-rose-100 mb-4 flex flex-col gap-3" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                        <input type="text" id="searchInput" placeholder="ค้นหาชื่อนักเรียน..." class="w-full pl-10 pr-4 py-2 border border-rose-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors" oninput="filterStudents()">
+                    </div>
+                    <select id="riskFilter" class="w-full px-4 py-2 border border-rose-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors appearance-none bg-white" onchange="filterStudents()">
+                        <option value="all">📊 แสดงทุกระดับความเสี่ยง</option>
+                        <option value="high">🔴 ความเสี่ยงสูง (61-100)</option>
+                        <option value="medium">🟡 ความเสี่ยงปานกลาง (31-60)</option>
+                        <option value="low">🟢 ความเสี่ยงต่ำ (0-30)</option>
+                    </select>
+                </div>
+                
+                <!-- Student List Header -->
+                <h3 class="text-lg font-semibold mb-3 flex items-center gap-2 text-slate-700">
+                    <span>👥</span> รายชื่อนักเรียน (<span id="studentCount">0</span>)
+                </h3>
+                
+                <!-- Scrollable list of students -->
+                <div id="studentList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-2">
+                    <!-- Student items will be injected here by JS -->
+                </div>
+            </div>
+        </aside>
+
+        <main id="mainContent" class="flex-1 overflow-y-auto p-6 transition-all duration-300" style="background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);">
+            
+            <section id="dashboardView" class="animate-slide-in-up">
+                <!-- Overview Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="text-4xl mb-2">👥</div>
+                        <div id="totalStudents" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                        <div class="text-sm font-medium text-slate-500">นักเรียนทั้งหมด</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="text-4xl mb-2">✅</div>
+                        <div id="avgScore" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                        <div class="text-sm font-medium text-slate-500">คะแนนเฉลี่ยห้อง</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <div id="avgRisk" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                        <div class="text-sm font-medium text-slate-500">ความเสี่ยงเฉลี่ย</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="text-4xl mb-2">🎯</div>
+                        <div id="riskHigh" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                        <div class="text-sm font-medium text-slate-500">นักเรียนเสี่ยงสูง</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Stats Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Correct/Wrong Questions Analysis -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:col-span-2">
+                        <div class="bg-white rounded-2xl p-6 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
+                                <span>🟢</span> ข้อที่ตอบถูกเยอะที่สุด
+                            </h3>
+                            <div id="mostCorrectQuestions" class="flex flex-col"></div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
+                                <span>🔴</span> ข้อที่ตอบผิดเยอะที่สุด
+                            </h3>
+                            <div id="mostWrongQuestions" class="flex flex-col"></div>
+                        </div>
+                    </div>
+
+                    <!-- Time Analysis Chart -->
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 lg:col-span-2" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-slate-700">
+                            <span>⏳</span> สถิติเวลาตอบแต่ละข้อ (วินาที)
+                        </h3>
+                        <div id="timeChart" class="flex justify-around items-end h-40 gap-4"></div>
+                    </div>
+                    
+                    <!-- Risk Distribution Progress Bars -->
+                    <div class="bg-white rounded-2xl p-6 border border-rose-100 lg:col-span-2" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-slate-700">
+                            <span>📊</span> การกระจายความเสี่ยง
+                        </h3>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-32 text-sm font-medium text-slate-600">🟢 ต่ำ (0-30)</div>
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
+                                    <div id="riskLowBar" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-300 flex items-center justify-end px-3 text-white font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-32 text-sm font-medium text-slate-600">🟡 ปานกลาง (31-60)</div>
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
+                                    <div id="riskMediumBar" class="h-full bg-gradient-to-r from-amber-400 to-amber-300 flex items-center justify-end px-3 text-slate-800 font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-32 text-sm font-medium text-slate-600">🔴 สูง (61-100)</div>
+                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
+                                    <div id="riskHighBar" class="h-full bg-gradient-to-r from-rose-500 to-rose-400 flex items-center justify-end px-3 text-white font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="studentDetailView" class="hidden-view animate-slide-in-up" style="animation: slideInUp 0.3s ease-out forwards;">
+                <!-- Header and Export Button -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800">รายละเอียดการสอบ: <span id="detailNameTitle" class="text-rose-600">-</span></h2>
+                    <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2" style="box-shadow: 0 10px 25px rgba(16,185,129,0.2);" onclick="exportReport()">
+                        <span>📥</span> Export Report (PDF)
+                    </button>
+                </div>
+
+                <!-- Core Information Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
+                        <span class="text-sm font-medium text-slate-500 mb-1">👤 ชื่อผู้สอบ</span>
+                        <span id="detailName" class="text-lg font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
+                        <span class="text-sm font-medium text-slate-500 mb-1">🏫 เลขที่ / ห้อง</span>
+                        <span id="detailClass" class="text-lg font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
+                        <span class="text-sm font-medium text-slate-500 mb-1">📚 คะแนนสอบ</span>
+                        <span id="detailScore" class="text-lg font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col items-start">
+                        <span class="text-sm font-medium text-slate-500 mb-1">⚠️ ระดับความเสี่ยง</span>
+                        <div id="detailRisk" class="text-2xl font-black">-</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Status and Activity Logs -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Activity & Status Info -->
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
+                                <span>📊</span> สรุปกิจกรรมน่าสงสัย
+                            </h3>
+                            <ul id="activityList" class="flex flex-col gap-3"></ul>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
+                                <span>🤖</span> สถานะ AI (แบบเรียลไทม์)
+                            </h3>
+                            <ul id="statusList" class="flex flex-col gap-3"></ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Event Log List -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col max-h-[600px]">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
+                            <span>📋</span> ลำดับเหตุการณ์ (Event Log)
+                        </h3>
+                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-0 divide-y divide-slate-100"></ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cctvView" class="hidden-view animate-slide-in-up h-full flex flex-col">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                    <span>👁️</span> โหมดกล้องสด (Live Feed)
+                </h2>
+                <div id="cctvGrid" class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 overflow-y-auto pb-6 pr-2 content-start">
+                    <!-- CCTV items will be dynamically inserted here -->
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Left Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="card">
-                <div class="card-title">
-                    <span>👥</span>
-                    <span>รายชื่อนักเรียน</span>
+    <div id="evidenceModal" class="fixed inset-0 z-[100] hidden-view flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" style="background: rgba(0,0,0,0.5);">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalContentBlock" style="box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modalTitle" class="text-xl font-bold text-slate-800 pr-8 leading-tight">-</h3>
+                    <button onclick="closeEvidenceModal()" class="text-slate-400 hover:text-rose-500 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
                 </div>
-                <div class="student-list" id="studentList"></div>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="main-content" id="mainContent">
-            <!-- Dashboard View (Classroom Statistics) -->
-            <div class="dashboard-view show" id="dashboardView">
-                <!-- Overall Statistics -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-value" id="totalStudents">0</div>
-                        <div class="stat-label">จำนวนนักเรียนทั้งหมด</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-value" id="avgScore">0</div>
-                        <div class="stat-label">คะแนนเฉลี่ยห้อง</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⚠️</div>
-                        <div class="stat-value" id="avgRisk">0</div>
-                        <div class="stat-label">ความเสี่ยงเฉลี่ย</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-value" id="riskHigh">0</div>
-                        <div class="stat-label">นักเรียนเสี่ยงสูง</div>
-                    </div>
+                
+                <div id="modalImage" class="w-full h-48 bg-slate-100 rounded-xl mb-6 flex items-center justify-center text-6xl border-2 border-dashed border-slate-300 shadow-inner">
+                    📷
                 </div>
-
-                <!-- Question Statistics -->
-                <div class="question-stats">
-                    <!-- Most Correct Questions -->
-                    <div class="question-section">
-                        <div class="question-section-title">
-                            <span>🟢</span>
-                            <span>ข้อที่ตอบถูกเยอะที่สุด</span>
-                        </div>
-                        <div id="mostCorrectQuestions"></div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span class="text-slate-500 font-medium text-sm">🕐 เวลา</span>
+                        <span id="modalTime" class="text-slate-800 font-bold">-</span>
                     </div>
-
-                    <!-- Most Wrong Questions -->
-                    <div class="question-section">
-                        <div class="question-section-title">
-                            <span>🔴</span>
-                            <span>ข้อที่ตอบผิดเยอะที่สุด</span>
-                        </div>
-                        <div id="mostWrongQuestions"></div>
-                    </div>
-                </div>
-
-                <!-- Time Analysis -->
-                <div class="time-analysis">
-                    <div class="time-analysis-title">
-                        <span>⏳</span>
-                        <span>สถิติเวลาตอบแต่ละข้อ (วินาที)</span>
-                    </div>
-                    <div class="time-chart" id="timeChart"></div>
-                </div>
-
-                <!-- Risk Distribution -->
-                <div class="risk-distribution">
-                    <div class="risk-distribution-title">
-                        <span>📊</span>
-                        <span>การกระจายความเสี่ยง</span>
-                    </div>
-                    <div class="risk-items">
-                        <div class="risk-item">
-                            <div class="risk-label">🟢 ต่ำ (0-30)</div>
-                            <div class="risk-bar-container">
-                                <div class="risk-bar low" id="riskLowBar">0</div>
-                            </div>
-                        </div>
-                        <div class="risk-item">
-                            <div class="risk-label">🟡 ปานกลาง (31-60)</div>
-                            <div class="risk-bar-container">
-                                <div class="risk-bar medium" id="riskMediumBar">0</div>
-                            </div>
-                        </div>
-                        <div class="risk-item">
-                            <div class="risk-label">🔴 สูง (61-100)</div>
-                            <div class="risk-bar-container">
-                                <div class="risk-bar high" id="riskHighBar">0</div>
-                            </div>
-                        </div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-slate-500 font-medium text-sm">📝 คำอธิบาย</span>
+                        <span id="modalDescription" class="text-slate-800 font-semibold text-right max-w-[70%]">-</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Student Detail View -->
-            <div class="student-detail-view" id="studentDetailView">
-                <div id="noSelection" class="no-selection">
-                    <div>
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
-                        <div style="font-size: 1.25rem; font-weight: 500; color: #64748b;">เลือกนักเรียนจากรายชื่อทางซ้ายเพื่อดูรายละเอียด</div>
-                    </div>
-                </div>
-
-                <div id="studentContent" class="content-hidden">
-                    <!-- Student Info -->
-                    <div class="student-details">
-                        <div class="detail-box">
-                            <div class="detail-label">👤 ชื่อผู้สอบ</div>
-                            <div class="detail-value" id="detailName">-</div>
-                        </div>
-                        <div class="detail-box">
-                            <div class="detail-label">🔢 เลขที่</div>
-                            <div class="detail-value" id="detailId">-</div>
-                        </div>
-                        <div class="detail-box">
-                            <div class="detail-label">🏫 ห้อง</div>
-                            <div class="detail-value" id="detailClass">-</div>
-                        </div>
-                        <div class="detail-box">
-                            <div class="detail-label">⚠️ คะแนนความเสี่ยง</div>
-                            <div class="detail-value risk-score-large" id="detailRisk">-</div>
-                        </div>
-                    </div>
-
-                    <!-- Exam Score and Current Time -->
-                    <div class="student-details">
-                        <div class="detail-box">
-                            <div class="detail-label">📚 คะแนนสอบ</div>
-                            <div class="detail-value" id="detailScore">-</div>
-                        </div>
-                        <div class="detail-box">
-                            <div class="detail-label">🕒 เวลาทำเสร็จ</div>
-                            <div class="detail-value" id="detailCurrentTime">-</div>
-                        </div>
-                    </div>
-
-                    <!-- Activity Summary and AI Status -->
-                    <div class="two-column">
-                        <!-- Card 1: Activity Summary -->
-                        <div class="card">
-                            <div class="card-title">
-                                <span>📊</span>
-                                <span>สรุปกิจกรรม</span>
-                            </div>
-                            <ul class="activity-list" id="activityList"></ul>
-                        </div>
-
-                        <!-- Card 2: AI Status -->
-                        <div class="card">
-                            <div class="card-title">
-                                <span>🤖</span>
-                                <span>สถานะ AI</span>
-                            </div>
-                            <ul class="status-list" id="statusList"></ul>
-                        </div>
-                    </div>
-
-                    <!-- Event Log -->
-                    <div class="event-log">
-                        <div class="card-title">
-                            <span>📋</span>
-                            <span>ลำดับเหตุการณ์</span>
-                        </div>
-                        <ul class="event-list" id="eventList"></ul>
-                    </div>
-                </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeEvidenceModal()" class="bg-white border border-rose-200 hover:bg-rose-50 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
-
-    <!-- Modal for Evidence -->
-    <div class="modal" id="evidenceModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeEvidenceModal()">✕</button>
-            <div class="modal-title" id="modalTitle">-</div>
-            <div class="modal-image" id="modalImage">📷</div>
-            <div class="modal-info">
-                <div class="modal-info-item">
-                    <span class="modal-info-label">🕐 เวลา</span>
-                    <span class="modal-info-value" id="modalTime">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">📝 คำอธิบาย</span>
-                    <span class="modal-info-value" id="modalDescription">-</span>
-                </div>
-            </div>
-        </div>
 
     <script>
-        // Mock Data
+        // Expanded Mock Data to demonstrate dashboard statistics thoroughly
         const studentsData = [
             {
-                id: 1,
-                name: 'สมชาย เด่นวงศ์',
-                studentId: '1',
-                className: '6/1',
-                riskScore: 12,
-                examScore: 98,
-                finishTime: '10:00',
-                activities: {
-                    tabSwitch: 0,
-                    pasteAttempts: 0,
-                    avgResponseTime: 1.8,
-                    fastAnswers: 0,
-                    mouseMovement: 'ปกติ',
-                    faceTurns: 2
-                },
-                status: {
-                    faceFound: true,
-                    personCount: 1,
-                    phoneFound: false,
-                    headDown: false
-                },
+                id: 1, name: 'สมชาย เด่นวงศ์', studentId: '1', className: '6/1', riskScore: 12, examScore: 98, finishTime: '10:00',
+                activities: { tabSwitch: 0, pasteAttempts: 0, avgResponseTime: 1.8, fastAnswers: 0, mouseMovement: 'ปกติ', faceTurns: 2 },
+                status: { faceFound: true, personCount: 1, phoneFound: false, headDown: false },
                 events: [
                     { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
                     { time: '09:15', description: 'ตอบข้อ 5 ภายใน 1.8 วินาที', emoji: '✅' },
                     { time: '10:00', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
-                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📷' },
+                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📸' },
                     { time: '09:15', description: 'ตรวจสอบประจำตัว', emoji: '✅' },
-                    { time: '10:00', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                    { time: '10:00', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 2.1 },
-                    { q: 2, correct: true, time: 1.9 },
-                    { q: 3, correct: true, time: 2.0 },
-                    { q: 4, correct: false, time: 3.5 },
-                    { q: 5, correct: true, time: 1.8 }
+                    { q: 1, correct: true, time: 2.1 }, { q: 2, correct: true, time: 1.9 },
+                    { q: 3, correct: true, time: 2.0 }, { q: 4, correct: false, time: 3.5 }, { q: 5, correct: true, time: 1.8 }
                 ]
             },
             {
-                id: 2,
-                name: 'อารีน่า สมิงห์',
-                studentId: '2',
-                className: '6/1',
-                riskScore: 48,
-                examScore: 76,
-                finishTime: '10:15',
-                activities: {
-                    tabSwitch: 3,
-                    pasteAttempts: 1,
-                    avgResponseTime: 3.2,
-                    fastAnswers: 1,
-                    mouseMovement: 'ปกติ',
-                    faceTurns: 8
-                },
-                status: {
-                    faceFound: true,
-                    personCount: 1,
-                    phoneFound: true,
-                    headDown: true
-                },
+                id: 2, name: 'อารีน่า สมิงห์', studentId: '2', className: '6/1', riskScore: 85, examScore: 76, finishTime: '10:15',
+                activities: { tabSwitch: 4, pasteAttempts: 1, avgResponseTime: 3.2, fastAnswers: 1, mouseMovement: 'ปกติ', faceTurns: 8 },
+                status: { faceFound: true, personCount: 1, phoneFound: true, headDown: true },
                 events: [
                     { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
                     { time: '09:05', description: 'สลับแท็บ', emoji: '⚠️' },
@@ -1188,41 +339,20 @@
                     { time: '10:15', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
-                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📷' },
-                    { time: '09:12', description: 'พบโทรศัพท์', emoji: '📱' },
-                    { time: '09:20', description: 'ก้มหน้าบ่อย', emoji: '⬇️' },
-                    { time: '10:15', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📸' },
+                    { time: '09:12', description: 'ตรวจจับวัตถุต้องสงสัย', emoji: '📱' },
+                    { time: '09:20', description: 'วิเคราะห์ท่าทาง', emoji: '⬇️' },
+                    { time: '10:15', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 2.8 },
-                    { q: 2, correct: false, time: 4.2 },
-                    { q: 3, correct: true, time: 3.0 },
-                    { q: 4, correct: true, time: 3.1 },
-                    { q: 5, correct: false, time: 3.5 }
+                    { q: 1, correct: true, time: 2.8 }, { q: 2, correct: false, time: 4.2 },
+                    { q: 3, correct: true, time: 3.0 }, { q: 4, correct: true, time: 3.1 }, { q: 5, correct: false, time: 3.5 }
                 ]
             },
             {
-                id: 3,
-                name: 'จอห์น สมิธ',
-                studentId: '3',
-                className: '6/2',
-                riskScore: 82,
-                examScore: 45,
-                finishTime: '10:30',
-                activities: {
-                    tabSwitch: 12,
-                    pasteAttempts: 8,
-                    avgResponseTime: 0.8,
-                    fastAnswers: 6,
-                    mouseMovement: 'ผิดปกติ',
-                    faceTurns: 25
-                },
-                status: {
-                    faceFound: false,
-                    personCount: 2,
-                    phoneFound: true,
-                    headDown: true
-                },
+                id: 3, name: 'จอห์น สมิธ', studentId: '3', className: '6/2', riskScore: 92, examScore: 45, finishTime: '10:30',
+                activities: { tabSwitch: 12, pasteAttempts: 8, avgResponseTime: 0.8, fastAnswers: 6, mouseMovement: 'ผิดปกติ', faceTurns: 25 },
+                status: { faceFound: false, personCount: 2, phoneFound: true, headDown: true },
                 events: [
                     { time: '10:01', description: 'สลับแท็บ', emoji: '⚠️' },
                     { time: '10:02', description: 'พบโทรศัพท์', emoji: '📱' },
@@ -1231,41 +361,20 @@
                     { time: '10:30', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
-                    { time: '10:02', description: 'พบโทรศัพท์', emoji: '📱' },
-                    { time: '10:03', description: 'ก้มหน้าบ่อย', emoji: '⬇️' },
-                    { time: '10:04', description: 'สลับแท็บ', emoji: '🔀' },
-                    { time: '10:30', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                    { time: '10:02', description: 'ภาพจากกล้องจับโทรศัพท์', emoji: '📱' },
+                    { time: '10:03', description: 'ตรวจสอบมุมก้ม', emoji: '⬇️' },
+                    { time: '10:04', description: 'Log การกดคีย์บอร์ด', emoji: '⌨️' },
+                    { time: '10:30', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: false, time: 0.5 },
-                    { q: 2, correct: false, time: 0.7 },
-                    { q: 3, correct: false, time: 0.6 },
-                    { q: 4, correct: true, time: 0.9 },
-                    { q: 5, correct: false, time: 0.8 }
+                    { q: 1, correct: false, time: 0.5 }, { q: 2, correct: false, time: 0.7 },
+                    { q: 3, correct: false, time: 0.6 }, { q: 4, correct: true, time: 0.9 }, { q: 5, correct: false, time: 0.8 }
                 ]
             },
             {
-                id: 4,
-                name: 'ไมค์ ชาติประนอม',
-                studentId: '4',
-                className: '6/1',
-                riskScore: 15,
-                examScore: 92,
-                finishTime: '10:20',
-                activities: {
-                    tabSwitch: 1,
-                    pasteAttempts: 0,
-                    avgResponseTime: 2.0,
-                    fastAnswers: 0,
-                    mouseMovement: 'ปกติ',
-                    faceTurns: 3
-                },
-                status: {
-                    faceFound: true,
-                    personCount: 1,
-                    phoneFound: false,
-                    headDown: false
-                },
+                id: 4, name: 'ไมค์ ชาติประนอม', studentId: '4', className: '6/1', riskScore: 15, examScore: 92, finishTime: '10:20',
+                activities: { tabSwitch: 1, pasteAttempts: 0, avgResponseTime: 2.0, fastAnswers: 0, mouseMovement: 'ปกติ', faceTurns: 3 },
+                status: { faceFound: true, personCount: 1, phoneFound: false, headDown: false },
                 events: [
                     { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
                     { time: '09:45', description: 'ตอบข้อ 10 ภายใน 2.1 วินาที', emoji: '✅' },
@@ -1274,368 +383,472 @@
                 evidence: [
                     { time: '09:00', description: 'ตรวจสอบเริ่มต้น', emoji: '✅' },
                     { time: '09:45', description: 'ทำข้อสอบ', emoji: '✅' },
-                    { time: '10:20', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                    { time: '10:20', description: 'ส่งข้อสอบสำเร็จ', emoji: '🏁' }
                 ],
                 questionAnswers: [
-                    { q: 1, correct: true, time: 1.9 },
-                    { q: 2, correct: true, time: 2.0 },
-                    { q: 3, correct: true, time: 1.95 },
-                    { q: 4, correct: true, time: 2.1 },
-                    { q: 5, correct: true, time: 2.0 }
+                    { q: 1, correct: true, time: 1.9 }, { q: 2, correct: true, time: 2.0 },
+                    { q: 3, correct: true, time: 1.95 }, { q: 4, correct: true, time: 2.1 }, { q: 5, correct: true, time: 2.0 }
+                ]
+            },
+            {
+                id: 5, name: 'นภา ฟ้าใส', studentId: '5', className: '6/2', riskScore: 45, examScore: 88, finishTime: '10:10',
+                activities: { tabSwitch: 2, pasteAttempts: 0, avgResponseTime: 2.5, fastAnswers: 0, mouseMovement: 'ปกติ', faceTurns: 10 },
+                status: { faceFound: true, personCount: 1, phoneFound: false, headDown: true },
+                events: [
+                    { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
+                    { time: '09:30', description: 'ก้มหน้านานเกินไป', emoji: '⬇️' },
+                    { time: '10:10', description: 'ทำเสร็จ', emoji: '📷' }
+                ],
+                evidence: [
+                    { time: '09:00', description: 'เริ่มสอบ', emoji: '📸' },
+                    { time: '09:30', description: 'ตรวจพบการก้มหน้า', emoji: '⬇️' },
+                    { time: '10:10', description: 'ส่งข้อสอบ', emoji: '🏁' }
+                ],
+                questionAnswers: [
+                    { q: 1, correct: true, time: 2.5 }, { q: 2, correct: true, time: 2.2 },
+                    { q: 3, correct: false, time: 3.8 }, { q: 4, correct: true, time: 2.1 }, { q: 5, correct: true, time: 2.4 }
                 ]
             }
         ];
 
         let currentStudent = null;
-        let currentView = 'dashboard'; // 'dashboard' or 'student'
+        let isCCTVMode = false;
+        let timerInterval;
 
-        // Initialize
         function init() {
-            renderStudentList();
-            renderDashboard();
-            updateTimer();
-            setInterval(updateTimer, 1000);
+            renderStudentList(studentsData);
+            calculateDashboardStats();
+            renderCCTVGrid();
             
-            // Back button listener
-            document.getElementById('backButton').addEventListener('click', goBackToDashboard);
-        }
-
-        // Render Student List
-        function renderStudentList() {
-            const studentList = document.getElementById('studentList');
-            studentList.innerHTML = '';
-
-            studentsData.forEach(student => {
-                const item = document.createElement('div');
-                item.className = 'student-item';
-                
-                const riskClass = student.riskScore < 30 ? 'risk-green' : 
-                                 student.riskScore < 60 ? 'risk-yellow' : 'risk-red';
-
-                item.innerHTML = `
-                    <div class="student-name">${student.name}</div>
-                    <div class="risk-score ${riskClass}">${student.riskScore}</div>
-                `;
-
-                item.addEventListener('click', () => selectStudent(student.id));
-                studentList.appendChild(item);
+            // Start clock
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            
+            // Simulate an incoming alert after a few seconds
+            setTimeout(() => {
+                showToast('อารีน่า สมิงห์ สลับแท็บหน้าจอเกิน 3 ครั้ง!', 'warning');
+            }, 3000);
+            setTimeout(() => {
+                showToast('จอห์น สมิธ ตรวจพบการใช้โทรศัพท์!', 'error');
+            }, 8000);
+            
+            // Modal click outside to close
+            document.getElementById('evidenceModal').addEventListener('click', function(e) {
+                if (e.target === this) closeEvidenceModal();
             });
         }
 
-        // Render Dashboard (Classroom Statistics)
-        function renderDashboard() {
-            // Calculate statistics
-            const totalStudents = studentsData.length;
-            const avgScore = Math.round(studentsData.reduce((sum, s) => sum + s.examScore, 0) / totalStudents);
-            const avgRisk = Math.round(studentsData.reduce((sum, s) => sum + s.riskScore, 0) / totalStudents);
-            const riskHigh = studentsData.filter(s => s.riskScore >= 61).length;
+        function updateTimer() {
+            const now = new Date();
+            document.getElementById('timer').textContent = now.toLocaleTimeString('th-TH', { hour12: false });
+        }
 
-            document.getElementById('totalStudents').textContent = totalStudents;
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const riskLevel = document.getElementById('riskFilter').value;
+
+            const filtered = studentsData.filter(student => {
+                const matchName = student.name.toLowerCase().includes(searchTerm);
+                let matchRisk = true;
+                
+                if (riskLevel === 'high') matchRisk = student.riskScore >= 61;
+                else if (riskLevel === 'medium') matchRisk = student.riskScore >= 31 && student.riskScore <= 60;
+                else if (riskLevel === 'low') matchRisk = student.riskScore <= 30;
+                
+                return matchName && matchRisk;
+            });
+
+            renderStudentList(filtered);
+        }
+
+        function renderStudentList(data) {
+            const listEl = document.getElementById('studentList');
+            document.getElementById('studentCount').textContent = data.length;
+            listEl.innerHTML = '';
+
+            if (data.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-slate-400 py-4 text-sm">ไม่พบรายชื่อนักเรียน</div>';
+                return;
+            }
+
+            data.forEach(student => {
+                const isActive = currentStudent && currentStudent.id === student.id;
+                
+                let riskClasses = 'bg-emerald-100 text-emerald-700';
+                if (student.riskScore >= 61) riskClasses = 'bg-rose-100 text-rose-700';
+                else if (student.riskScore >= 31) riskClasses = 'bg-amber-100 text-amber-700';
+
+                // Active state styling logic
+                let itemClasses = `flex justify-between items-center p-3 rounded-xl cursor-pointer transition-all border-2 border-transparent ${isActive ? 'bg-gradient-to-r from-rose-500 to-rose-400 border-rose-500 shadow-md transform translate-x-1' : 'bg-white hover:border-rose-200 hover:translate-x-1 shadow-sm'}`;
+                
+                let nameClass = isActive ? 'text-white font-semibold' : 'text-slate-700 font-medium';
+                let riskBadgeClass = isActive ? 'bg-white/20 text-white border-white/30' : riskClasses;
+
+                const itemHTML = `
+                    <div class="${itemClasses}" onclick="selectStudent(${student.id})">
+                        <div class="${nameClass}">${student.name}</div>
+                        <div class="px-2 py-1 rounded-md text-xs font-mono font-bold border border-transparent ${riskBadgeClass}">${student.riskScore}</div>
+                    </div>
+                `;
+                listEl.insertAdjacentHTML('beforeend', itemHTML);
+            });
+        }
+
+        function switchMainView(viewId) {
+            ['dashboardView', 'studentDetailView', 'cctvView'].forEach(id => {
+                document.getElementById(id).classList.add('hidden-view');
+            });
+            document.getElementById(viewId).classList.remove('hidden-view');
+        }
+
+        function showDashboard() {
+            isCCTVMode = false;
+            currentStudent = null;
+            
+            // Update UI State
+            document.getElementById('backButton').classList.add('hidden-view');
+            
+            // Show sidebar if hidden (mobile/tablet responsiveness context)
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('hidden', 'md:flex'); // Reset classes if needed, though we use width manipulation mostly
+            sidebar.style.display = 'flex';
+            
+            const btnToggle = document.getElementById('btnToggleCCTV');
+            btnToggle.innerHTML = '<span>👁️</span> โหมดกล้องสด (CCTV)';
+            btnToggle.className = 'bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-slate-700 transition-colors flex items-center gap-2';
+
+            renderStudentList(studentsData); // Reset active state in list
+            calculateDashboardStats(); // Refresh stats
+            switchMainView('dashboardView');
+        }
+
+        function selectStudent(id) {
+            if (isCCTVMode) toggleCCTV(); // Exit CCTV mode if selecting a student
+            
+            currentStudent = studentsData.find(s => s.id === id);
+            
+            // Update UI State
+            document.getElementById('backButton').classList.remove('hidden-view');
+            renderStudentList(studentsData); // To update active highlight
+            
+            populateStudentDetails(currentStudent);
+            switchMainView('studentDetailView');
+        }
+
+        function calculateDashboardStats() {
+            const total = studentsData.length;
+            if(total === 0) return;
+
+            const avgScore = Math.round(studentsData.reduce((sum, s) => sum + s.examScore, 0) / total);
+            const avgRisk = Math.round(studentsData.reduce((sum, s) => sum + s.riskScore, 0) / total);
+            const highRiskCount = studentsData.filter(s => s.riskScore >= 61).length;
+
+            document.getElementById('totalStudents').textContent = total;
             document.getElementById('avgScore').textContent = avgScore;
             document.getElementById('avgRisk').textContent = avgRisk;
-            document.getElementById('riskHigh').textContent = riskHigh;
+            document.getElementById('riskHigh').textContent = highRiskCount;
 
-            // Question Statistics
-            const questionStats = {};
+            // Question Analytics
+            const qStats = {};
             studentsData.forEach(student => {
-                student.questionAnswers.forEach(answer => {
-                    if (!questionStats[answer.q]) {
-                        questionStats[answer.q] = { correct: 0, wrong: 0, totalTime: 0, count: 0 };
-                    }
-                    if (answer.correct) {
-                        questionStats[answer.q].correct++;
-                    } else {
-                        questionStats[answer.q].wrong++;
-                    }
-                    questionStats[answer.q].totalTime += answer.time;
-                    questionStats[answer.q].count++;
+                student.questionAnswers.forEach(ans => {
+                    if (!qStats[ans.q]) qStats[ans.q] = { correct: 0, wrong: 0, totalTime: 0, count: 0 };
+                    if (ans.correct) qStats[ans.q].correct++;
+                    else qStats[ans.q].wrong++;
+                    qStats[ans.q].totalTime += ans.time;
+                    qStats[ans.q].count++;
                 });
             });
 
-            // Most Correct Questions
-            const correctSorted = Object.entries(questionStats)
-                .sort((a, b) => b[1].correct - a[1].correct)
-                .slice(0, 5);
+            // Top Correct
+            const topCorrect = Object.entries(qStats).sort((a, b) => b[1].correct - a[1].correct).slice(0, 3);
+            const correctHTML = topCorrect.map(([q, stats]) => `
+                <div class="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                    <span class="text-slate-600 font-medium">ข้อ ${q}</span>
+                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-sm font-bold">${stats.correct} คน</span>
+                </div>
+            `).join('');
+            document.getElementById('mostCorrectQuestions').innerHTML = correctHTML;
 
-            const mostCorrectDiv = document.getElementById('mostCorrectQuestions');
-            mostCorrectDiv.innerHTML = '';
-            correctSorted.forEach(([qNum, stats]) => {
-                const item = document.createElement('div');
-                item.className = 'question-item';
-                item.innerHTML = `
-                    <div class="question-label">ข้อ ${qNum}</div>
-                    <div class="question-stat green">${stats.correct} คน</div>
-                `;
-                mostCorrectDiv.appendChild(item);
+            // Top Wrong
+            const topWrong = Object.entries(qStats).sort((a, b) => b[1].wrong - a[1].wrong).slice(0, 3);
+            const wrongHTML = topWrong.map(([q, stats]) => `
+                <div class="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+                    <span class="text-slate-600 font-medium">ข้อ ${q}</span>
+                    <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-md text-sm font-bold">${stats.wrong} คน</span>
+                </div>
+            `).join('');
+            document.getElementById('mostWrongQuestions').innerHTML = wrongHTML;
+
+            // Time Chart (Simplified bars)
+            let maxTime = 0;
+            const timeData = Object.entries(qStats).slice(0, 5).map(([q, stats]) => {
+                const avgT = stats.totalTime / stats.count;
+                if(avgT > maxTime) maxTime = avgT;
+                return { q, avgT };
             });
 
-            // Most Wrong Questions
-            const wrongSorted = Object.entries(questionStats)
-                .sort((a, b) => b[1].wrong - a[1].wrong)
-                .slice(0, 5);
-
-            const mostWrongDiv = document.getElementById('mostWrongQuestions');
-            mostWrongDiv.innerHTML = '';
-            wrongSorted.forEach(([qNum, stats]) => {
-                const item = document.createElement('div');
-                item.className = 'question-item';
-                item.innerHTML = `
-                    <div class="question-label">ข้อ ${qNum}</div>
-                    <div class="question-stat">${stats.wrong} คน</div>
-                `;
-                mostWrongDiv.appendChild(item);
-            });
-
-            // Time Analysis
-            const timeChart = document.getElementById('timeChart');
-            timeChart.innerHTML = '';
-            Object.entries(questionStats).slice(0, 5).forEach(([qNum, stats]) => {
-                const avgTime = (stats.totalTime / stats.count).toFixed(1);
-                const heightPercent = (avgTime / 5) * 100; // Max 5 seconds
-                const item = document.createElement('div');
-                item.className = 'time-bar-item';
-                item.innerHTML = `
-                    <div class="time-bar" style="height: ${Math.min(heightPercent, 100)}%">
-                        <div class="time-bar-value">${avgTime}s</div>
+            const chartHTML = timeData.map(d => {
+                const hPercent = maxTime > 0 ? (d.avgT / maxTime) * 100 : 0;
+                return `
+                    <div class="flex flex-col items-center gap-2 group cursor-default">
+                        <div class="w-10 bg-slate-100 rounded-t-lg relative h-full flex items-end">
+                            <div class="w-full bg-gradient-to-t from-rose-500 to-rose-400 rounded-t-lg transition-all duration-500 group-hover:from-rose-400 group-hover:to-rose-300" style="height: ${hPercent}%"></div>
+                            <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">${d.avgT.toFixed(1)}s</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500">ข้อ ${d.q}</span>
                     </div>
-                    <div class="time-bar-label">ข้อ ${qNum}</div>
                 `;
-                timeChart.appendChild(item);
-            });
+            }).join('');
+            document.getElementById('timeChart').innerHTML = chartHTML;
 
-            // Risk Distribution
-            const riskLow = studentsData.filter(s => s.riskScore < 31).length;
-            const riskMedium = studentsData.filter(s => s.riskScore >= 31 && s.riskScore <= 60).length;
-            const riskHigh2 = studentsData.filter(s => s.riskScore > 60).length;
+            // Risk Bars
+            const low = studentsData.filter(s => s.riskScore <= 30).length;
+            const med = studentsData.filter(s => s.riskScore >= 31 && s.riskScore <= 60).length;
+            
+            // Set widths and text
+            const totalCount = Math.max(total, 1); // Prevent division by zero visually
+            
+            const lowBar = document.getElementById('riskLowBar');
+            lowBar.style.width = `${(low/totalCount)*100}%`;
+            lowBar.textContent = `${low} คน`;
 
-            const total = riskLow + riskMedium + riskHigh2;
-            document.getElementById('riskLowBar').textContent = `${riskLow} คน`;
-            document.getElementById('riskLowBar').style.width = `${(riskLow / total) * 100}%`;
-            
-            document.getElementById('riskMediumBar').textContent = `${riskMedium} คน`;
-            document.getElementById('riskMediumBar').style.width = `${(riskMedium / total) * 100}%`;
-            
-            document.getElementById('riskHighBar').textContent = `${riskHigh2} คน`;
-            document.getElementById('riskHighBar').style.width = `${(riskHigh2 / total) * 100}%`;
+            const medBar = document.getElementById('riskMediumBar');
+            medBar.style.width = `${(med/totalCount)*100}%`;
+            medBar.textContent = `${med} คน`;
+
+            const highBar = document.getElementById('riskHighBar');
+            highBar.style.width = `${(highRiskCount/totalCount)*100}%`;
+            highBar.textContent = `${highRiskCount} คน`;
         }
 
-        // Select Student
-        function selectStudent(studentId) {
-            currentStudent = studentsData.find(s => s.id === studentId);
-            currentView = 'student';
+        function populateStudentDetails(s) {
+            document.getElementById('detailNameTitle').textContent = s.name;
+            document.getElementById('detailName').textContent = s.name;
+            document.getElementById('detailClass').textContent = `${s.studentId} / ${s.className}`;
+            document.getElementById('detailScore').textContent = `${s.examScore}/100`;
+
+            // Risk Score Styling
+            const riskEl = document.getElementById('detailRisk');
+            let rColor = 'text-emerald-500';
+            if(s.riskScore >= 61) rColor = 'text-rose-500';
+            else if(s.riskScore >= 31) rColor = 'text-amber-500';
             
-            // Update active state
-            document.querySelectorAll('.student-item').forEach((item, index) => {
-                item.classList.toggle('active', Object.keys(studentsData)[index] == studentId - 1);
-            });
+            riskEl.innerHTML = `<span class="${rColor}">${s.riskScore}</span><span class="text-lg text-slate-400">/100</span>`;
 
-            // Show back button
-            document.getElementById('backButton').classList.add('show');
+            // Activity Log
+            const activities = [
+                { label: 'สลับแท็บ', val: `${s.activities.tabSwitch} ครั้ง`, warn: s.activities.tabSwitch > 2 },
+                { label: 'วางข้อความ (Paste)', val: `${s.activities.pasteAttempts} ครั้ง`, warn: s.activities.pasteAttempts > 0 },
+                { label: 'เวลาตอบเฉลี่ย', val: `${s.activities.avgResponseTime.toFixed(1)} วินาที`, warn: s.activities.avgResponseTime < 1.0 },
+                { label: 'ตอบเร็วผิดปกติ', val: `${s.activities.fastAnswers} ข้อ`, warn: s.activities.fastAnswers > 2 }
+            ];
 
-            // Hide sidebar
-            document.getElementById('sidebar').classList.add('hidden');
-            document.getElementById('mainContent').classList.add('full-width');
+            document.getElementById('activityList').innerHTML = activities.map(a => `
+                <li class="flex justify-between items-center p-2 rounded ${a.warn ? 'bg-amber-50' : ''}">
+                    <span class="text-slate-600 font-medium">${a.label}</span>
+                    <span class="font-bold font-mono ${a.warn ? 'text-amber-600' : 'text-slate-800'}">${a.val}</span>
+                </li>
+            `).join('');
 
-            // Switch view
-            document.getElementById('dashboardView').classList.remove('show');
-            document.getElementById('studentDetailView').classList.add('show');
+            // Status List (AI Realtime)
+            const statuses = [
+                { label: 'พบใบหน้า', ok: s.status.faceFound },
+                { label: `พบผู้สอบ ${s.status.personCount} คน`, ok: s.status.personCount === 1, warn: s.status.personCount > 1 },
+                { label: 'ตรวจพบโทรศัพท์', ok: !s.status.phoneFound, warn: s.status.phoneFound },
+                { label: 'ก้มหน้าบ่อย', ok: !s.status.headDown, warn: s.status.headDown }
+            ];
 
-            // Render student content
-            renderStudentContent();
+            document.getElementById('statusList').innerHTML = statuses.map(st => {
+                let icon = '✅';
+                let textClass = 'text-slate-700';
+                if (!st.ok) {
+                    icon = st.warn ? '⚠️' : '❌';
+                    textClass = st.warn ? 'text-amber-600 font-medium' : 'text-rose-600 font-medium';
+                }
+                return `
+                    <li class="flex items-center gap-3 p-2 border-b border-slate-50 last:border-0">
+                        <span class="text-lg w-6 text-center">${icon}</span>
+                        <span class="${textClass}">${st.label}</span>
+                    </li>
+                `;
+            }).join('');
+
+            // Event List
+            document.getElementById('eventList').innerHTML = s.events.map((e, index) => `
+                <li class="flex items-start gap-4 py-3 hover:bg-slate-50 rounded-lg px-2 cursor-pointer transition-colors group" onclick="openEvidenceModal(${index})">
+                    <span class="font-mono font-bold text-rose-500 whitespace-nowrap mt-0.5">${e.time}</span>
+                    <span class="text-slate-700 font-medium flex-1 group-hover:text-rose-600 transition-colors">${e.description}</span>
+                    <span class="text-xl bg-white shadow-sm rounded-full w-8 h-8 flex items-center justify-center">${e.emoji}</span>
+                </li>
+            `).join('');
         }
 
-        // Go back to Dashboard
-        function goBackToDashboard() {
-            currentView = 'dashboard';
-            currentStudent = null;
+        function performAction(type) {
+            if(!currentStudent) return;
+            const name = currentStudent.name;
 
-            // Hide back button
-            document.getElementById('backButton').classList.remove('show');
-
-            // Show sidebar
-            document.getElementById('sidebar').classList.remove('hidden');
-            document.getElementById('mainContent').classList.remove('full-width');
-
-            // Switch view
-            document.getElementById('studentDetailView').classList.remove('show');
-            document.getElementById('dashboardView').classList.add('show');
-            document.getElementById('noSelection').classList.add('content-hidden');
-            document.getElementById('studentContent').classList.add('content-hidden');
-
-            // Clear active state
-            document.querySelectorAll('.student-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            switch(type) {
+                case 'warn':
+                    showToast(`ส่งข้อความแจ้งเตือนไปที่หน้าจอของ "${name}" แล้ว`, 'success');
+                    break;
+                case 'suspend':
+                    // Using standard confirm box for critical actions per general pattern, 
+                    // though UI instructions suggest avoiding alert/confirm if possible.
+                    // To strictly follow rules, we create a custom message box via Toast or assume Toast is sufficient feedback.
+                    // Here we use a Toast to simulate the action taking effect.
+                    showToast(`ระงับการสอบของ "${name}" ชั่วคราว ระบบได้ล็อคหน้าจอผู้สอบแล้ว`, 'warning');
+                    break;
+                case 'cancel':
+                    showToast(`🚨 ยกเลิกกระดาษคำตอบของ "${name}" เรียบร้อยแล้ว`, 'error');
+                    break;
+            }
         }
 
-        // Render Student Content
-        function renderStudentContent() {
-            if (!currentStudent) return;
+        function exportReport() {
+            if(!currentStudent) return;
+            showToast(`กำลังสร้าง PDF รายงานของ ${currentStudent.name}...`, 'success');
+        }
 
-            // Basic Info
-            document.getElementById('detailName').textContent = currentStudent.name;
-            document.getElementById('detailId').textContent = currentStudent.studentId;
-            document.getElementById('detailClass').textContent = currentStudent.className;
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
             
-            const riskClass = currentStudent.riskScore < 30 ? 'risk-green' : 
-                             currentStudent.riskScore < 60 ? 'risk-yellow' : 'risk-red';
-            const riskElement = document.getElementById('detailRisk');
-            const riskColorClass = currentStudent.riskScore < 30 ? 'low' : 
-                                   currentStudent.riskScore < 60 ? 'medium' : 'high';
-            riskElement.innerHTML = `<span class="risk-number ${riskColorClass}">${currentStudent.riskScore}</span>/100`;
-            riskElement.className = `detail-value risk-score-large`;
+            const toast = document.createElement('div');
+            // Styling based on type
+            let bgClass = 'bg-white border-l-4 border-slate-500';
+            let icon = 'ℹ️';
             
-            document.getElementById('detailScore').textContent = `${currentStudent.examScore}/100`;
-            document.getElementById('detailCurrentTime').textContent = currentStudent.finishTime;
+            if (type === 'error') { bgClass = 'bg-white border-l-4 border-rose-500'; icon = '🚨'; }
+            else if (type === 'warning') { bgClass = 'bg-white border-l-4 border-amber-500'; icon = '⚠️'; }
+            else if (type === 'success') { bgClass = 'bg-white border-l-4 border-emerald-500'; icon = '✅'; }
 
-            // Activity Summary
-            const activityList = document.getElementById('activityList');
-            activityList.innerHTML = `
-                <li class="activity-item">
-                    <span class="activity-label">สลับแท็บ</span>
-                    <span class="activity-value">${currentStudent.activities.tabSwitch} ครั้ง</span>
-                </li>
-                <li class="activity-item">
-                    <span class="activity-label">วางข้อความ</span>
-                    <span class="activity-value">${currentStudent.activities.pasteAttempts} ครั้ง</span>
-                </li>
-                <li class="activity-item">
-                    <span class="activity-label">เวลาตอบเฉลี่ย</span>
-                    <span class="activity-value">${currentStudent.activities.avgResponseTime.toFixed(1)} วินาที</span>
-                </li>
-                <li class="activity-item">
-                    <span class="activity-label">ตอบเร็วผิดปกติ</span>
-                    <span class="activity-value">${currentStudent.activities.fastAnswers} ข้อ</span>
-                </li>
-                <li class="activity-item">
-                    <span class="activity-label">การเคลื่อนเมาส์</span>
-                    <span class="activity-value">${currentStudent.activities.mouseMovement}</span>
-                </li>
+            toast.className = `${bgClass} p-4 rounded-r-xl shadow-lg flex items-center gap-3 animate-slide-in-right min-w-[300px] max-w-sm relative`;
+            
+            toast.innerHTML = `
+                <div class="text-2xl">${icon}</div>
+                <div class="flex-1 text-sm font-medium text-slate-700">${message}</div>
+                <button class="absolute top-2 right-2 text-slate-400 hover:text-slate-600" onclick="this.parentElement.remove()">✕</button>
             `;
 
-            // AI Status
-            const statusList = document.getElementById('statusList');
-            statusList.innerHTML = `
-                <li class="status-item">
-                    <span class="status-icon ${currentStudent.status.faceFound ? 'status-ok' : 'status-error'}">
-                        ${currentStudent.status.faceFound ? '✓' : '✗'}
-                    </span>
-                    <span>พบใบหน้า</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-icon ${currentStudent.status.personCount === 1 ? 'status-ok' : 'status-error'}">
-                        ${currentStudent.status.personCount === 1 ? '✓' : '⚠'}
-                    </span>
-                    <span>พบผู้สอบ ${currentStudent.status.personCount} คน</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-icon ${!currentStudent.status.phoneFound ? 'status-ok' : 'status-warning'}">
-                        ${!currentStudent.status.phoneFound ? '✓' : '⚠'}
-                    </span>
-                    <span>พบโทรศัพท์</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-icon ${!currentStudent.status.headDown ? 'status-ok' : 'status-warning'}">
-                        ${!currentStudent.status.headDown ? '✓' : '⚠'}
-                    </span>
-                    <span>ก้มหน้าบ่อย</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-icon ${currentStudent.activities.faceTurns <= 5 ? 'status-ok' : currentStudent.activities.faceTurns <= 15 ? 'status-warning' : 'status-error'}">
-                        ${currentStudent.activities.faceTurns <= 5 ? '✓' : '⚠'}
-                    </span>
-                    <span>หันหน้า ${currentStudent.activities.faceTurns} ครั้ง</span>
-                </li>
-            `;
+            container.appendChild(toast);
 
-            // Event Log
-            const eventList = document.getElementById('eventList');
-            eventList.innerHTML = '';
-            currentStudent.events.forEach((event, index) => {
-                const item = document.createElement('li');
-                item.className = 'event-item';
-                item.style.cursor = 'pointer';
-                item.style.transition = 'all 0.2s ease';
-                item.innerHTML = `
-                    <span class="event-time">${event.time}</span>
-                    <span class="event-description">${event.description}</span>
-                    <span style="margin-left: auto; font-size: 1.2rem;">${event.emoji || ''}</span>
+            // Auto remove
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.remove('animate-slide-in-right');
+                    toast.classList.add('animate-fade-out-right');
+                    setTimeout(() => { if (toast.parentElement) toast.remove(); }, 300);
+                }
+            }, 5000);
+        }
+
+        function toggleCCTV() {
+            isCCTVMode = !isCCTVMode;
+            const btn = document.getElementById('btnToggleCCTV');
+            const sidebar = document.getElementById('sidebar');
+
+            if (isCCTVMode) {
+                // Enter CCTV Mode
+                btn.innerHTML = '<span>⬅️</span> กลับสู่หน้าหลัก';
+                btn.className = 'bg-rose-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-rose-600 transition-colors flex items-center gap-2';
+                
+                // Hide Sidebar to give full width
+                sidebar.style.display = 'none';
+                
+                document.getElementById('backButton').classList.add('hidden-view');
+                switchMainView('cctvView');
+                renderCCTVGrid();
+            } else {
+                // Exit CCTV Mode
+                showDashboard();
+            }
+        }
+
+        function renderCCTVGrid() {
+            const grid = document.getElementById('cctvGrid');
+            grid.innerHTML = '';
+
+            studentsData.forEach(student => {
+                const isHighRisk = student.riskScore >= 61;
+                
+                // Card classes
+                let cardClass = `bg-white rounded-xl overflow-hidden border-2 transition-all flex flex-col ${isHighRisk ? 'cctv-high-risk' : 'border-slate-200 shadow-sm'}`;
+                
+                // Status indicator
+                let statusBadge = '';
+                if(isHighRisk) {
+                    statusBadge = `<div class="absolute top-2 right-2 bg-black/70 text-rose-500 text-xs font-bold px-2 py-1 rounded animate-pulse flex items-center gap-1"><div class="w-2 h-2 bg-rose-500 rounded-full"></div> REC</div>`;
+                } else if(student.status.phoneFound || student.status.headDown || student.activities.tabSwitch > 0) {
+                    statusBadge = `<div class="absolute top-2 right-2 bg-black/70 text-amber-400 text-xs font-bold px-2 py-1 rounded">⚠️ ALERT</div>`;
+                }
+
+                // Randomizing slightly different views for realism
+                const camIcon = isHighRisk && student.status.phoneFound ? '📱' : (student.status.headDown ? '⬇️' : '👤');
+
+                const html = `
+                    <div class="${cardClass} cursor-pointer hover:shadow-md" onclick="selectStudent(${student.id})">
+                        <!-- Camera Screen Simulation -->
+                        <div class="h-32 bg-slate-800 relative flex items-center justify-center text-4xl text-white/50">
+                            ${camIcon}
+                            ${statusBadge}
+                            <!-- Timestamp -->
+                            <div class="absolute bottom-1 right-2 text-[10px] text-white/60 font-mono">CAM-${student.studentId.padStart(2,'0')}</div>
+                        </div>
+                        
+                        <!-- Info Footer -->
+                        <div class="p-3 flex justify-between items-center bg-white">
+                            <div class="flex flex-col overflow-hidden">
+                                <span class="font-semibold text-sm text-slate-800 truncate">${student.name}</span>
+                                <span class="text-xs text-slate-500">${student.className}</span>
+                            </div>
+                            <div class="px-2 py-1 rounded text-xs font-bold font-mono ${isHighRisk ? 'bg-rose-100 text-rose-600' : (student.riskScore>=31 ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600')}">
+                                ${student.riskScore}%
+                            </div>
+                        </div>
+                    </div>
                 `;
-                
-                // เพิ่ม Hover effect
-                item.addEventListener('mouseenter', () => {
-                    item.style.backgroundColor = '#fffafc';
-                    item.style.transform = 'translateX(4px)';
-                });
-                
-                item.addEventListener('mouseleave', () => {
-                    item.style.backgroundColor = 'transparent';
-                    item.style.transform = 'translateX(0)';
-                });
-                
-                // เพิ่ม Click event
-                item.addEventListener('click', () => {
-                    showEvidenceModal(event, index);
-                });
-                
-                eventList.appendChild(item);
+                grid.insertAdjacentHTML('beforeend', html);
             });
-
-            // Evidence Grid - ลบออก
-            // (ลบส่วนนี้ทั้งหมด)
-
-            // Show content
-            document.getElementById('noSelection').classList.add('content-hidden');
-            document.getElementById('studentContent').classList.remove('content-hidden');
         }
 
-        // Update Timer
-        function updateTimer() {
-            const timer = document.getElementById('timer');
-            const now = new Date();
-            
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            timer.textContent = `${hours}:${minutes}:${seconds}`;
-        }
+        function openEvidenceModal(eventIndex) {
+            if(!currentStudent || !currentStudent.evidence[eventIndex]) return;
+            const evidence = currentStudent.evidence[eventIndex];
+            const eventData = currentStudent.events[eventIndex];
 
-        // Show Evidence Modal
-        function showEvidenceModal(event, index) {
-            const modal = document.getElementById('evidenceModal');
-            const evidence = currentStudent.evidence[index];
-            
-            if (!evidence) return;
-            
-            document.getElementById('modalTitle').textContent = `หลักฐานภาพ - ${event.description}`;
-            document.getElementById('modalImage').textContent = evidence.emoji || '📷';
+            document.getElementById('modalTitle').textContent = `หลักฐาน - ${eventData.description}`;
+            document.getElementById('modalImage').textContent = evidence.emoji;
             document.getElementById('modalTime').textContent = evidence.time;
             document.getElementById('modalDescription').textContent = evidence.description;
+
+            const modal = document.getElementById('evidenceModal');
+            const content = document.getElementById('modalContentBlock');
             
-            modal.classList.add('show');
+            modal.classList.remove('hidden-view');
+            // Trigger animation
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
         }
 
-        // Close Evidence Modal
         function closeEvidenceModal() {
             const modal = document.getElementById('evidenceModal');
-            modal.classList.remove('show');
+            const content = document.getElementById('modalContentBlock');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            modal.classList.remove('opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden-view');
+            }, 300); // Wait for transition to finish
         }
 
-        // Close modal when clicking outside
-        document.addEventListener('DOMContentLoaded', () => {
-            const modal = document.getElementById('evidenceModal');
-            if (modal) {
-                window.addEventListener('click', (event) => {
-                    if (event.target === modal) {
-                        closeEvidenceModal();
-                    }
-                });
-            }
-        });
-
-        // Start
+        // Initialize App
         init();
+
     </script>
 </body>
 </html>
