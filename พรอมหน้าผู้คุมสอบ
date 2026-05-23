@@ -1,0 +1,40 @@
+Act as an expert Frontend Developer and UI/UX Designer. 
+Please write a single, complete HTML file for an "AI Proctor Dashboard" (ระบบตรวจสอบการสอบ AI / MATTEP Monitoring System) using HTML5, Tailwind CSS (via CDN with custom config), and Vanilla JavaScript. 
+
+The dashboard must meet the following requirements:
+
+1. UI/UX Style & Theme:
+- Use a "Glassmorphism" design style (blur backdrop, semi-transparent white backgrounds, soft borders).
+- Color Palette: Slate (Primary: #1e293b) for text, and Rose/Pink (Primary: #f43f5e) for accents, buttons, and alerts.
+- Smooth transitions on hover (transform, box-shadow).
+- Custom hidden scrollbars (scrollable but invisible).
+- Background should have soft radial gradients using pink/rose tones.
+
+2. Layout Structure:
+- A Header containing: Logo/Title, View toggle buttons (Individual, CCTV, Overview), an Export button, a "Live Alerts" toggle, and a red countdown timer.
+- A Main Content Area divided into two columns: Left Sidebar (30% width) and Right Content Area (70% width).
+
+3. Left Sidebar (Student List):
+- A search input box to filter students by name or ID.
+- Smart filter pill buttons: All, High Risk, Medium Risk, Low Risk.
+- A scrollable list of students. Each item should show an avatar, name, ID, and a Risk Score badge.
+- If a student is "High Risk" (score >= 70), the card should have a flashing red border CSS animation.
+- Right-clicking a student must open a custom Context Menu (Send Warning, View Camera, Log Note).
+
+4. Right Content Area (3 View Modes handled by JS):
+- Mode A (Overview): Show total students, average score, and average risk score. Show cards analyzing "Most Correct Question" and "Most Wrong Question".
+- Mode B (CCTV Grid): A 2x2 grid showing simulated webcam feeds (using placeholder images) of the top 4 highest-risk students. Include a blinking "REC" dot, risk score overlay, and AI confidence percentage.
+- Mode C (Individual Detail): Shows detailed info for a selected student. 
+   - Top stats: Risk Score, Exam Score, Current Time.
+   - Quick action buttons (Send Warning, Request Screen Share, Retro Record).
+   - Activity Summary list and AI Status list (with a circular SVG gauge for AI Confidence).
+   - A Timeline showing events (time, event text). If an event has "evidence", show a mock snapshot image.
+
+5. Advanced Features & Logic (Vanilla JS):
+- Create a `mockData` array with at least 4-5 students containing risk scores, timeline events, and nested data.
+- Implement real-time filtering and searching logic for the student list.
+- A floating "Incident Sidebar" (Live Alerts) on the right side that shows a real-time feed of AI warnings and events. Provide a toggle button in the header to show/hide it.
+- Use the WebAudio API to play a short, subtle "beep" sound ONLY ONCE when a new High-Risk student is detected.
+- Include mock Socket.io event listeners (`riskUpdate`, `incident`) to simulate receiving real-time data from a backend and updating the UI dynamically.
+
+Do not use any external frameworks like React or Vue. Write everything cleanly in one file with `<style>` and `<script>` tags. Make sure the code is fully functional, beautiful, and ready to run in a browser.
