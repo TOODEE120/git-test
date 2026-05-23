@@ -27,6 +27,8 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
+            gap: 1.5rem;
         }
 
         .header-left {
@@ -36,6 +38,7 @@
             align-items: center;
             gap: 0.5rem;
             color: #1e293b;
+            flex: 1;
         }
 
         .header-right {
@@ -59,10 +62,48 @@
             box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
         }
 
+        /* Back Button */
+        .back-button {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4);
+            background: linear-gradient(135deg, #fb7185, #fca5b0);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
+        }
+
+        .back-button.show {
+            display: flex;
+        }
+
         /* Main Container */
         .container {
             display: flex;
+            gap: 0;
+            padding: 0;
+            max-width: 100%;
+            margin: 0 auto;
             height: calc(100vh - 70px);
+            overflow: hidden;
         }
 
         /* Left Sidebar */
@@ -72,6 +113,11 @@
             border-right: 1px solid #f3d7e6;
             overflow-y: auto;
             padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.hidden {
+            display: none;
         }
 
         .card {
@@ -167,10 +213,266 @@
             background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
             overflow-y: auto;
             padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.full-width {
+            width: 100%;
         }
 
         .content-hidden {
             display: none !important;
+        }
+
+        /* Dashboard View */
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.show {
+            display: block;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 1.5rem;
+            border: 1px solid #f3d7e6;
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(244, 63, 94, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f43f5e;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* Question Statistics */
+        .question-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-section {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 1.5rem;
+            border: 1px solid #f3d7e6;
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
+        }
+
+        .question-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1e293b;
+        }
+
+        .question-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+        }
+
+        .question-label {
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .question-stat {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .question-stat.green {
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+        }
+
+        .question-stat.yellow {
+            background: linear-gradient(135deg, #facc15, #fcd34d);
+            color: #1e293b;
+        }
+
+        /* Time Analysis */
+        .time-analysis {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 1.5rem;
+            border: 1px solid #f3d7e6;
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .time-analysis-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1e293b;
+        }
+
+        .time-chart {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        .time-bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .time-bar {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(180deg, #f43f5e, #fb7185);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+        }
+
+        .time-bar-value {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        .time-bar-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Risk Distribution */
+        .risk-distribution {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 1.5rem;
+            border: 1px solid #f3d7e6;
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
+        }
+
+        .risk-distribution-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1e293b;
+        }
+
+        .risk-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .risk-label {
+            font-weight: 500;
+            color: #475569;
+            min-width: 100px;
+        }
+
+        .risk-bar-container {
+            flex: 1;
+            height: 30px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .risk-bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .risk-bar.low {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        .risk-bar.medium {
+            background: linear-gradient(90deg, #facc15, #fcd34d);
+            color: #1e293b;
+        }
+
+        .risk-bar.high {
+            background: linear-gradient(90deg, #f43f5e, #fb7185);
+        }
+
+        /* Student Detail View */
+        .student-detail-view {
+            display: none;
+        }
+
+        .student-detail-view.show {
+            display: block;
         }
 
         .no-selection {
@@ -218,7 +520,25 @@
             font-weight: 700;
         }
 
-        /* Two Column Layout for Activity and AI Status */
+        /* Colored Risk Number */
+        .risk-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .risk-number.low {
+            color: #16a34a;
+        }
+
+        .risk-number.medium {
+            color: #ea580c;
+        }
+
+        .risk-number.high {
+            color: #dc2626;
+        }
+
+        /* Two Column Layout */
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -385,6 +705,112 @@
             text-align: center;
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 18px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #f43f5e;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-right: 2rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #fff1f2, #fff5f8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 2px solid #f3d7e6;
+        }
+
+        .modal-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .modal-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .modal-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .modal-info-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .modal-info-value {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
@@ -403,10 +829,35 @@
             background: #f43f5e;
         }
 
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card,
+        .card {
+            animation: slideIn 0.3s ease;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .two-column {
                 grid-template-columns: 1fr;
+            }
+
+            .question-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .evidence-grid {
@@ -443,29 +894,23 @@
                 gap: 1rem;
                 align-items: flex-start;
             }
-        }
 
-        /* Animation */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
-        .student-details,
-        .card {
-            animation: slideIn 0.3s ease;
+            .time-chart {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <!-- Header -->
     <div class="header">
+        <button class="back-button" id="backButton">
+            ← ย้อนกลับ
+        </button>
         <div class="header-left">
             <span>📚</span>
             <span>ระบบตรวจสอบการสอบ AI</span>
@@ -479,7 +924,7 @@
     <!-- Main Container -->
     <div class="container">
         <!-- Left Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="card">
                 <div class="card-title">
                     <span>👥</span>
@@ -490,88 +935,185 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="main-content">
-            <div id="noSelection" class="no-selection">
-                <div>
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
-                    <div style="font-size: 1.25rem; font-weight: 500; color: #64748b;">เลือกนักเรียนจากรายชื่อทางซ้ายเพื่อดูรายละเอียด</div>
+        <div class="main-content" id="mainContent">
+            <!-- Dashboard View (Classroom Statistics) -->
+            <div class="dashboard-view show" id="dashboardView">
+                <!-- Overall Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">จำนวนนักเรียนทั้งหมด</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="avgScore">0</div>
+                        <div class="stat-label">คะแนนเฉลี่ยห้อง</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-value" id="avgRisk">0</div>
+                        <div class="stat-label">ความเสี่ยงเฉลี่ย</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="riskHigh">0</div>
+                        <div class="stat-label">นักเรียนเสี่ยงสูง</div>
+                    </div>
+                </div>
+
+                <!-- Question Statistics -->
+                <div class="question-stats">
+                    <!-- Most Correct Questions -->
+                    <div class="question-section">
+                        <div class="question-section-title">
+                            <span>🟢</span>
+                            <span>ข้อที่ตอบถูกเยอะที่สุด</span>
+                        </div>
+                        <div id="mostCorrectQuestions"></div>
+                    </div>
+
+                    <!-- Most Wrong Questions -->
+                    <div class="question-section">
+                        <div class="question-section-title">
+                            <span>🔴</span>
+                            <span>ข้อที่ตอบผิดเยอะที่สุด</span>
+                        </div>
+                        <div id="mostWrongQuestions"></div>
+                    </div>
+                </div>
+
+                <!-- Time Analysis -->
+                <div class="time-analysis">
+                    <div class="time-analysis-title">
+                        <span>⏳</span>
+                        <span>สถิติเวลาตอบแต่ละข้อ (วินาที)</span>
+                    </div>
+                    <div class="time-chart" id="timeChart"></div>
+                </div>
+
+                <!-- Risk Distribution -->
+                <div class="risk-distribution">
+                    <div class="risk-distribution-title">
+                        <span>📊</span>
+                        <span>การกระจายความเสี่ยง</span>
+                    </div>
+                    <div class="risk-items">
+                        <div class="risk-item">
+                            <div class="risk-label">🟢 ต่ำ (0-30)</div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar low" id="riskLowBar">0</div>
+                            </div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-label">🟡 ปานกลาง (31-60)</div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar medium" id="riskMediumBar">0</div>
+                            </div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-label">🔴 สูง (61-100)</div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar high" id="riskHighBar">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="studentContent" class="content-hidden">
-                <!-- Student Info -->
-                <div class="student-details">
-                    <div class="detail-box">
-                        <div class="detail-label">👤 ชื่อผู้สอบ</div>
-                        <div class="detail-value" id="detailName">-</div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-label">🔢 เลขที่</div>
-                        <div class="detail-value" id="detailId">-</div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-label">🏫 ชั้น</div>
-                        <div class="detail-value" id="detailClass">-</div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-label">⚠️ คะแนนความเสี่ยง</div>
-                        <div class="detail-value risk-score-large" id="detailRisk">-</div>
+            <!-- Student Detail View -->
+            <div class="student-detail-view" id="studentDetailView">
+                <div id="noSelection" class="no-selection">
+                    <div>
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
+                        <div style="font-size: 1.25rem; font-weight: 500; color: #64748b;">เลือกนักเรียนจากรายชื่อทางซ้ายเพื่อดูรายละเอียด</div>
                     </div>
                 </div>
 
-                <!-- Exam Score and Current Time -->
-                <div class="student-details">
-                    <div class="detail-box">
-                        <div class="detail-label">📚 คะแนนสอบ</div>
-                        <div class="detail-value" id="detailScore">-</div>
-                    </div>
-                    <div class="detail-box">
-                        <div class="detail-label">🕒 เวลาเปิดดู</div>
-                        <div class="detail-value" id="detailCurrentTime">-</div>
-                    </div>
-                </div>
-
-                <!-- Activity Summary and AI Status -->
-                <div class="two-column">
-                    <!-- Card 1: Activity Summary -->
-                    <div class="card">
-                        <div class="card-title">
-                            <span>📊</span>
-                            <span>สรุปกิจกรรม</span>
+                <div id="studentContent" class="content-hidden">
+                    <!-- Student Info -->
+                    <div class="student-details">
+                        <div class="detail-box">
+                            <div class="detail-label">👤 ชื่อผู้สอบ</div>
+                            <div class="detail-value" id="detailName">-</div>
                         </div>
-                        <ul class="activity-list" id="activityList"></ul>
-                    </div>
-
-                    <!-- Card 2: AI Status -->
-                    <div class="card">
-                        <div class="card-title">
-                            <span>🤖</span>
-                            <span>สถานะ AI</span>
+                        <div class="detail-box">
+                            <div class="detail-label">🔢 เลขที่</div>
+                            <div class="detail-value" id="detailId">-</div>
                         </div>
-                        <ul class="status-list" id="statusList"></ul>
+                        <div class="detail-box">
+                            <div class="detail-label">🏫 ห้อง</div>
+                            <div class="detail-value" id="detailClass">-</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">⚠️ คะแนนความเสี่ยง</div>
+                            <div class="detail-value risk-score-large" id="detailRisk">-</div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Event Log -->
-                <div class="event-log">
-                    <div class="card-title">
-                        <span>📋</span>
-                        <span>ลำดับเหตุการณ์</span>
+                    <!-- Exam Score and Current Time -->
+                    <div class="student-details">
+                        <div class="detail-box">
+                            <div class="detail-label">📚 คะแนนสอบ</div>
+                            <div class="detail-value" id="detailScore">-</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">🕒 เวลาทำเสร็จ</div>
+                            <div class="detail-value" id="detailCurrentTime">-</div>
+                        </div>
                     </div>
-                    <ul class="event-list" id="eventList"></ul>
-                </div>
 
-                <!-- Evidence Section -->
-                <div class="evidence-section">
-                    <div class="card-title">
-                        <span>📷</span>
-                        <span>หลักฐานภาพ</span>
+                    <!-- Activity Summary and AI Status -->
+                    <div class="two-column">
+                        <!-- Card 1: Activity Summary -->
+                        <div class="card">
+                            <div class="card-title">
+                                <span>📊</span>
+                                <span>สรุปกิจกรรม</span>
+                            </div>
+                            <ul class="activity-list" id="activityList"></ul>
+                        </div>
+
+                        <!-- Card 2: AI Status -->
+                        <div class="card">
+                            <div class="card-title">
+                                <span>🤖</span>
+                                <span>สถานะ AI</span>
+                            </div>
+                            <ul class="status-list" id="statusList"></ul>
+                        </div>
                     </div>
-                    <div class="evidence-grid" id="evidenceGrid"></div>
+
+                    <!-- Event Log -->
+                    <div class="event-log">
+                        <div class="card-title">
+                            <span>📋</span>
+                            <span>ลำดับเหตุการณ์</span>
+                        </div>
+                        <ul class="event-list" id="eventList"></ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal for Evidence -->
+    <div class="modal" id="evidenceModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEvidenceModal()">✕</button>
+            <div class="modal-title" id="modalTitle">-</div>
+            <div class="modal-image" id="modalImage">📷</div>
+            <div class="modal-info">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">🕐 เวลา</span>
+                    <span class="modal-info-value" id="modalTime">-</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">📝 คำอธิบาย</span>
+                    <span class="modal-info-value" id="modalDescription">-</span>
+                </div>
+            </div>
+        </div>
 
     <script>
         // Mock Data
@@ -579,10 +1121,11 @@
             {
                 id: 1,
                 name: 'สมชาย เด่นวงศ์',
-                studentId: '001',
+                studentId: '1',
                 className: '6/1',
                 riskScore: 12,
                 examScore: 98,
+                finishTime: '10:00',
                 activities: {
                     tabSwitch: 0,
                     pasteAttempts: 0,
@@ -598,22 +1141,31 @@
                     headDown: false
                 },
                 events: [
-                    { time: '09:00', description: 'เริ่มสอบ' },
-                    { time: '09:15', description: 'ตอบข้อ 5 ภายใน 1.8 วินาที' },
-                    { time: '09:30', description: 'หันหน้าหนึ่งครั้ง' }
+                    { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
+                    { time: '09:15', description: 'ตอบข้อ 5 ภายใน 1.8 วินาที', emoji: '✅' },
+                    { time: '10:00', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
-                    { time: '09:05', description: 'ภาพเริ่มต้น', emoji: '📷' },
-                    { time: '09:30', description: 'ตรวจสอบประจำตัว', emoji: '✅' }
+                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📷' },
+                    { time: '09:15', description: 'ตรวจสอบประจำตัว', emoji: '✅' },
+                    { time: '10:00', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                ],
+                questionAnswers: [
+                    { q: 1, correct: true, time: 2.1 },
+                    { q: 2, correct: true, time: 1.9 },
+                    { q: 3, correct: true, time: 2.0 },
+                    { q: 4, correct: false, time: 3.5 },
+                    { q: 5, correct: true, time: 1.8 }
                 ]
             },
             {
                 id: 2,
                 name: 'อารีน่า สมิงห์',
-                studentId: '002',
+                studentId: '2',
                 className: '6/1',
                 riskScore: 48,
                 examScore: 76,
+                finishTime: '10:15',
                 activities: {
                     tabSwitch: 3,
                     pasteAttempts: 1,
@@ -629,25 +1181,34 @@
                     headDown: true
                 },
                 events: [
-                    { time: '09:00', description: 'เริ่มสอบ' },
-                    { time: '09:05', description: 'สลับแท็บ' },
-                    { time: '09:12', description: 'พบโทรศัพท์' },
-                    { time: '09:20', description: 'ก้มหน้าบ่อย' },
-                    { time: '09:25', description: 'พยายามวางข้อความ' }
-                ],
-                evidence: [
+                    { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
+                    { time: '09:05', description: 'สลับแท็บ', emoji: '⚠️' },
                     { time: '09:12', description: 'พบโทรศัพท์', emoji: '📱' },
                     { time: '09:20', description: 'ก้มหน้าบ่อย', emoji: '⬇️' },
-                    { time: '09:25', description: 'สลับแท็บ', emoji: '🔀' }
+                    { time: '10:15', description: 'ทำเสร็จ', emoji: '📷' }
+                ],
+                evidence: [
+                    { time: '09:00', description: 'ภาพเริ่มต้น', emoji: '📷' },
+                    { time: '09:12', description: 'พบโทรศัพท์', emoji: '📱' },
+                    { time: '09:20', description: 'ก้มหน้าบ่อย', emoji: '⬇️' },
+                    { time: '10:15', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                ],
+                questionAnswers: [
+                    { q: 1, correct: true, time: 2.8 },
+                    { q: 2, correct: false, time: 4.2 },
+                    { q: 3, correct: true, time: 3.0 },
+                    { q: 4, correct: true, time: 3.1 },
+                    { q: 5, correct: false, time: 3.5 }
                 ]
             },
             {
                 id: 3,
                 name: 'จอห์น สมิธ',
-                studentId: '003',
+                studentId: '3',
                 className: '6/2',
                 riskScore: 82,
                 examScore: 45,
+                finishTime: '10:30',
                 activities: {
                     tabSwitch: 12,
                     pasteAttempts: 8,
@@ -663,26 +1224,34 @@
                     headDown: true
                 },
                 events: [
-                    { time: '10:01', description: 'สลับแท็บ' },
-                    { time: '10:02', description: 'พบโทรศัพท์' },
-                    { time: '10:03', description: 'ก้มหน้า' },
-                    { time: '10:04', description: 'วางข้อความ' },
-                    { time: '10:06', description: 'ตอบข้อ 15 ภายใน 0.8 วินาที' },
-                    { time: '10:08', description: 'ไม่พบใบหน้า' }
+                    { time: '10:01', description: 'สลับแท็บ', emoji: '⚠️' },
+                    { time: '10:02', description: 'พบโทรศัพท์', emoji: '📱' },
+                    { time: '10:03', description: 'ก้มหน้า', emoji: '⬇️' },
+                    { time: '10:04', description: 'วางข้อความ', emoji: '⚠️' },
+                    { time: '10:30', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
                     { time: '10:02', description: 'พบโทรศัพท์', emoji: '📱' },
                     { time: '10:03', description: 'ก้มหน้าบ่อย', emoji: '⬇️' },
-                    { time: '10:04', description: 'พบหลายคนในภาพ', emoji: '👥' }
+                    { time: '10:04', description: 'สลับแท็บ', emoji: '🔀' },
+                    { time: '10:30', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                ],
+                questionAnswers: [
+                    { q: 1, correct: false, time: 0.5 },
+                    { q: 2, correct: false, time: 0.7 },
+                    { q: 3, correct: false, time: 0.6 },
+                    { q: 4, correct: true, time: 0.9 },
+                    { q: 5, correct: false, time: 0.8 }
                 ]
             },
             {
                 id: 4,
                 name: 'ไมค์ ชาติประนอม',
-                studentId: '004',
+                studentId: '4',
                 className: '6/1',
                 riskScore: 15,
                 examScore: 92,
+                finishTime: '10:20',
                 activities: {
                     tabSwitch: 1,
                     pasteAttempts: 0,
@@ -698,25 +1267,37 @@
                     headDown: false
                 },
                 events: [
-                    { time: '09:00', description: 'เริ่มสอบ' },
-                    { time: '09:45', description: 'ตอบข้อ 10 ภายใน 2.1 วินาที' },
-                    { time: '10:00', description: 'ส่งข้อสอบ' }
+                    { time: '09:00', description: 'เริ่มสอบ', emoji: '📷' },
+                    { time: '09:45', description: 'ตอบข้อ 10 ภายใน 2.1 วินาที', emoji: '✅' },
+                    { time: '10:20', description: 'ทำเสร็จ', emoji: '📷' }
                 ],
                 evidence: [
                     { time: '09:00', description: 'ตรวจสอบเริ่มต้น', emoji: '✅' },
-                    { time: '10:00', description: 'ส่งข้อสอบสำเร็จ', emoji: '✅' }
+                    { time: '09:45', description: 'ทำข้อสอบ', emoji: '✅' },
+                    { time: '10:20', description: 'ส่งข้อสอบสำเร็จ', emoji: '📷' }
+                ],
+                questionAnswers: [
+                    { q: 1, correct: true, time: 1.9 },
+                    { q: 2, correct: true, time: 2.0 },
+                    { q: 3, correct: true, time: 1.95 },
+                    { q: 4, correct: true, time: 2.1 },
+                    { q: 5, correct: true, time: 2.0 }
                 ]
             }
         ];
 
         let currentStudent = null;
+        let currentView = 'dashboard'; // 'dashboard' or 'student'
 
         // Initialize
         function init() {
             renderStudentList();
+            renderDashboard();
             updateTimer();
             setInterval(updateTimer, 1000);
-            setInterval(updateCurrentTime, 1000);
+            
+            // Back button listener
+            document.getElementById('backButton').addEventListener('click', goBackToDashboard);
         }
 
         // Render Student List
@@ -741,22 +1322,150 @@
             });
         }
 
+        // Render Dashboard (Classroom Statistics)
+        function renderDashboard() {
+            // Calculate statistics
+            const totalStudents = studentsData.length;
+            const avgScore = Math.round(studentsData.reduce((sum, s) => sum + s.examScore, 0) / totalStudents);
+            const avgRisk = Math.round(studentsData.reduce((sum, s) => sum + s.riskScore, 0) / totalStudents);
+            const riskHigh = studentsData.filter(s => s.riskScore >= 61).length;
+
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('avgScore').textContent = avgScore;
+            document.getElementById('avgRisk').textContent = avgRisk;
+            document.getElementById('riskHigh').textContent = riskHigh;
+
+            // Question Statistics
+            const questionStats = {};
+            studentsData.forEach(student => {
+                student.questionAnswers.forEach(answer => {
+                    if (!questionStats[answer.q]) {
+                        questionStats[answer.q] = { correct: 0, wrong: 0, totalTime: 0, count: 0 };
+                    }
+                    if (answer.correct) {
+                        questionStats[answer.q].correct++;
+                    } else {
+                        questionStats[answer.q].wrong++;
+                    }
+                    questionStats[answer.q].totalTime += answer.time;
+                    questionStats[answer.q].count++;
+                });
+            });
+
+            // Most Correct Questions
+            const correctSorted = Object.entries(questionStats)
+                .sort((a, b) => b[1].correct - a[1].correct)
+                .slice(0, 5);
+
+            const mostCorrectDiv = document.getElementById('mostCorrectQuestions');
+            mostCorrectDiv.innerHTML = '';
+            correctSorted.forEach(([qNum, stats]) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.innerHTML = `
+                    <div class="question-label">ข้อ ${qNum}</div>
+                    <div class="question-stat green">${stats.correct} คน</div>
+                `;
+                mostCorrectDiv.appendChild(item);
+            });
+
+            // Most Wrong Questions
+            const wrongSorted = Object.entries(questionStats)
+                .sort((a, b) => b[1].wrong - a[1].wrong)
+                .slice(0, 5);
+
+            const mostWrongDiv = document.getElementById('mostWrongQuestions');
+            mostWrongDiv.innerHTML = '';
+            wrongSorted.forEach(([qNum, stats]) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.innerHTML = `
+                    <div class="question-label">ข้อ ${qNum}</div>
+                    <div class="question-stat">${stats.wrong} คน</div>
+                `;
+                mostWrongDiv.appendChild(item);
+            });
+
+            // Time Analysis
+            const timeChart = document.getElementById('timeChart');
+            timeChart.innerHTML = '';
+            Object.entries(questionStats).slice(0, 5).forEach(([qNum, stats]) => {
+                const avgTime = (stats.totalTime / stats.count).toFixed(1);
+                const heightPercent = (avgTime / 5) * 100; // Max 5 seconds
+                const item = document.createElement('div');
+                item.className = 'time-bar-item';
+                item.innerHTML = `
+                    <div class="time-bar" style="height: ${Math.min(heightPercent, 100)}%">
+                        <div class="time-bar-value">${avgTime}s</div>
+                    </div>
+                    <div class="time-bar-label">ข้อ ${qNum}</div>
+                `;
+                timeChart.appendChild(item);
+            });
+
+            // Risk Distribution
+            const riskLow = studentsData.filter(s => s.riskScore < 31).length;
+            const riskMedium = studentsData.filter(s => s.riskScore >= 31 && s.riskScore <= 60).length;
+            const riskHigh2 = studentsData.filter(s => s.riskScore > 60).length;
+
+            const total = riskLow + riskMedium + riskHigh2;
+            document.getElementById('riskLowBar').textContent = `${riskLow} คน`;
+            document.getElementById('riskLowBar').style.width = `${(riskLow / total) * 100}%`;
+            
+            document.getElementById('riskMediumBar').textContent = `${riskMedium} คน`;
+            document.getElementById('riskMediumBar').style.width = `${(riskMedium / total) * 100}%`;
+            
+            document.getElementById('riskHighBar').textContent = `${riskHigh2} คน`;
+            document.getElementById('riskHighBar').style.width = `${(riskHigh2 / total) * 100}%`;
+        }
+
         // Select Student
         function selectStudent(studentId) {
             currentStudent = studentsData.find(s => s.id === studentId);
+            currentView = 'student';
             
             // Update active state
+            document.querySelectorAll('.student-item').forEach((item, index) => {
+                item.classList.toggle('active', Object.keys(studentsData)[index] == studentId - 1);
+            });
+
+            // Show back button
+            document.getElementById('backButton').classList.add('show');
+
+            // Hide sidebar
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('full-width');
+
+            // Switch view
+            document.getElementById('dashboardView').classList.remove('show');
+            document.getElementById('studentDetailView').classList.add('show');
+
+            // Render student content
+            renderStudentContent();
+        }
+
+        // Go back to Dashboard
+        function goBackToDashboard() {
+            currentView = 'dashboard';
+            currentStudent = null;
+
+            // Hide back button
+            document.getElementById('backButton').classList.remove('show');
+
+            // Show sidebar
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('full-width');
+
+            // Switch view
+            document.getElementById('studentDetailView').classList.remove('show');
+            document.getElementById('dashboardView').classList.add('show');
+            document.getElementById('noSelection').classList.add('content-hidden');
+            document.getElementById('studentContent').classList.add('content-hidden');
+
+            // Clear active state
             document.querySelectorAll('.student-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
-
-            // Show content
-            document.getElementById('noSelection').classList.add('content-hidden');
-            document.getElementById('studentContent').classList.remove('content-hidden');
-
-            // Render content
-            renderStudentContent();
         }
 
         // Render Student Content
@@ -771,10 +1480,13 @@
             const riskClass = currentStudent.riskScore < 30 ? 'risk-green' : 
                              currentStudent.riskScore < 60 ? 'risk-yellow' : 'risk-red';
             const riskElement = document.getElementById('detailRisk');
-            riskElement.textContent = `${currentStudent.riskScore}/100`;
-            riskElement.className = `detail-value risk-score-large ${riskClass}`;
+            const riskColorClass = currentStudent.riskScore < 30 ? 'low' : 
+                                   currentStudent.riskScore < 60 ? 'medium' : 'high';
+            riskElement.innerHTML = `<span class="risk-number ${riskColorClass}">${currentStudent.riskScore}</span>/100`;
+            riskElement.className = `detail-value risk-score-large`;
             
             document.getElementById('detailScore').textContent = `${currentStudent.examScore}/100`;
+            document.getElementById('detailCurrentTime').textContent = currentStudent.finishTime;
 
             // Activity Summary
             const activityList = document.getElementById('activityList');
@@ -798,10 +1510,6 @@
                 <li class="activity-item">
                     <span class="activity-label">การเคลื่อนเมาส์</span>
                     <span class="activity-value">${currentStudent.activities.mouseMovement}</span>
-                </li>
-                <li class="activity-item">
-                    <span class="activity-label">หันหน้า</span>
-                    <span class="activity-value">${currentStudent.activities.faceTurns} ครั้ง</span>
                 </li>
             `;
 
@@ -832,34 +1540,53 @@
                     </span>
                     <span>ก้มหน้าบ่อย</span>
                 </li>
+                <li class="status-item">
+                    <span class="status-icon ${currentStudent.activities.faceTurns <= 5 ? 'status-ok' : currentStudent.activities.faceTurns <= 15 ? 'status-warning' : 'status-error'}">
+                        ${currentStudent.activities.faceTurns <= 5 ? '✓' : '⚠'}
+                    </span>
+                    <span>หันหน้า ${currentStudent.activities.faceTurns} ครั้ง</span>
+                </li>
             `;
 
             // Event Log
             const eventList = document.getElementById('eventList');
             eventList.innerHTML = '';
-            currentStudent.events.forEach(event => {
+            currentStudent.events.forEach((event, index) => {
                 const item = document.createElement('li');
                 item.className = 'event-item';
+                item.style.cursor = 'pointer';
+                item.style.transition = 'all 0.2s ease';
                 item.innerHTML = `
                     <span class="event-time">${event.time}</span>
                     <span class="event-description">${event.description}</span>
+                    <span style="margin-left: auto; font-size: 1.2rem;">${event.emoji || ''}</span>
                 `;
+                
+                // เพิ่ม Hover effect
+                item.addEventListener('mouseenter', () => {
+                    item.style.backgroundColor = '#fffafc';
+                    item.style.transform = 'translateX(4px)';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    item.style.backgroundColor = 'transparent';
+                    item.style.transform = 'translateX(0)';
+                });
+                
+                // เพิ่ม Click event
+                item.addEventListener('click', () => {
+                    showEvidenceModal(event, index);
+                });
+                
                 eventList.appendChild(item);
             });
 
-            // Evidence Grid
-            const evidenceGrid = document.getElementById('evidenceGrid');
-            evidenceGrid.innerHTML = '';
-            currentStudent.evidence.forEach(evidence => {
-                const item = document.createElement('div');
-                item.className = 'evidence-item';
-                item.innerHTML = `
-                    <div class="evidence-image">${evidence.emoji}</div>
-                    <div class="evidence-time">${evidence.time}</div>
-                    <div class="evidence-description">${evidence.description}</div>
-                `;
-                evidenceGrid.appendChild(item);
-            });
+            // Evidence Grid - ลบออก
+            // (ลบส่วนนี้ทั้งหมด)
+
+            // Show content
+            document.getElementById('noSelection').classList.add('content-hidden');
+            document.getElementById('studentContent').classList.remove('content-hidden');
         }
 
         // Update Timer
@@ -874,17 +1601,38 @@
             timer.textContent = `${hours}:${minutes}:${seconds}`;
         }
 
-        // Update Current Time in Student Details
-        function updateCurrentTime() {
-            if (!currentStudent) return;
+        // Show Evidence Modal
+        function showEvidenceModal(event, index) {
+            const modal = document.getElementById('evidenceModal');
+            const evidence = currentStudent.evidence[index];
             
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
+            if (!evidence) return;
             
-            document.getElementById('detailCurrentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('modalTitle').textContent = `หลักฐานภาพ - ${event.description}`;
+            document.getElementById('modalImage').textContent = evidence.emoji || '📷';
+            document.getElementById('modalTime').textContent = evidence.time;
+            document.getElementById('modalDescription').textContent = evidence.description;
+            
+            modal.classList.add('show');
         }
+
+        // Close Evidence Modal
+        function closeEvidenceModal() {
+            const modal = document.getElementById('evidenceModal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('evidenceModal');
+            if (modal) {
+                window.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeEvidenceModal();
+                    }
+                });
+            }
+        });
 
         // Start
         init();
