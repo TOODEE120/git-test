@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจสอบการสอบ AI (Dashboard)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .hidden-view { display: none !important; }
+        .bar-fill { transition: width 1s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 to-white text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center z-20 shadow-sm">
+        <div class="flex items-center gap-4">
+            <button id="backButton" class="hidden-view bg-rose-500 text-white px-4 py-2 rounded-lg font-semibold" onclick="showDashboard()">
+                ← ย้อนกลับ
+            </button>
+            <div class="text-2xl font-bold flex items-center gap-2">
+                📚 AI Proctoring Dashboard
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="logout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold transition-colors">
+                ออกจากระบบ
+            </button>
+            <button onclick="clearData()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                🗑️ ล้างข้อมูล
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        
+        <aside class="w-full md:w-1/3 lg:w-1/4 border-r border-rose-100 bg-white flex flex-col p-4">
+            <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อนักเรียน..." class="w-full px-4 py-2 mb-4 border border-slate-200 rounded-lg outline-none focus:border-rose-500" oninput="renderStudentList()">
+            
+            <h3 class="text-lg font-semibold mb-3 text-slate-700">👥 รายชื่อส่งข้อสอบแล้ว (<span id="studentCount">0</span>)</h3>
+            <div id="studentList" class="flex-1 overflow-y-auto flex flex-col gap-2 pr-2"></div>
+        </aside>
+
+        <main id="mainContent" class="flex-1 overflow-y-auto p-6 bg-slate-50">
+            
+            <!-- Dashboard Overview -->
+            <section id="dashboardView">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                        <div class="text-4xl mb-2">👥</div>
+                        <div id="totalStudents" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                        <div class="text-sm text-slate-500">จำนวนที่ส่งแล้ว</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                        <div class="text-4xl mb-2">✅</div>
+                        <div id="avgScore" class="text-3xl font-bold text-emerald-500 mb-1">0</div>
+                        <div class="text-sm text-slate-500">คะแนนเฉลี่ยห้อง</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <div id="avgRisk" class="text-3xl font-bold text-amber-500 mb-1">0%</div>
+                        <div class="text-sm text-slate-500">ความเสี่ยงเฉลี่ย</div>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center">
+                        <div class="text-4xl mb-2">🚨</div>
+                        <div id="highRiskCount" class="text-3xl font-bold text-red-500 mb-1">0</div>
+                        <div class="text-sm text-slate-500">นักเรียนความเสี่ยงสูง</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- การกระจายความเสี่ยง -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-semibold mb-4 text-slate-700">📊 การกระจายความเสี่ยง</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-emerald-600 font-bold">🟢 ต่ำ (0-30%)</span><span id="txtLow">0 คน</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-4"><div id="barLow" class="bg-emerald-400 h-4 rounded-full bar-fill" style="width: 0%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-amber-500 font-bold">🟡 ปานกลาง (31-60%)</span><span id="txtMed">0 คน</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-4"><div id="barMed" class="bg-amber-400 h-4 rounded-full bar-fill" style="width: 0%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-red-500 font-bold">🔴 สูง (61-100%)</span><span id="txtHigh">0 คน</span></div>
+                                <div class="w-full bg-slate-100 rounded-full h-4"><div id="barHigh" class="bg-red-500 h-4 rounded-full bar-fill" style="width: 0%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- สถิติข้อสอบ -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-semibold mb-4 text-slate-700">🎯 สถิติข้อสอบปรนัย</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <span class="block text-emerald-800 font-bold mb-2">ข้อที่ตอบถูกมากที่สุด</span>
+                                <div id="mostCorrect" class="text-emerald-600">-</div>
+                            </div>
+                            <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                                <span class="block text-red-800 font-bold mb-2">ข้อที่ตอบผิดมากที่สุด</span>
+                                <div id="mostWrong" class="text-red-600">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mockups Section (อธิบายส่วนที่ยังไม่มีข้อมูลจริง) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 opacity-70">
+                        <h3 class="text-lg font-semibold mb-4 text-slate-700">⏳ สถิติเวลาตอบแต่ละข้อ (Mockup)</h3>
+                        <p class="text-xs text-slate-500 mb-4">* ระบบจำลองการแสดงผลกราฟแท่ง</p>
+                        <div class="flex items-end justify-around h-32 gap-2 mt-4 border-b border-slate-200 pb-2">
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 80%"></div>
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 40%"></div>
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 90%"></div>
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 30%"></div>
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 60%"></div>
+                            <div class="w-8 bg-indigo-300 rounded-t-sm" style="height: 70%"></div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-700 text-white relative overflow-hidden">
+                        <h3 class="text-lg font-semibold mb-4">👁️ โหมดกล้องสด (CCTV Mockup)</h3>
+                        <p class="text-xs text-slate-400 mb-4">* ระบบกล้องจริงต้องเชื่อมต่อ WebRTC และเซิร์ฟเวอร์หลังบ้าน</p>
+                        <div class="grid grid-cols-3 gap-2 opacity-50">
+                            <div class="bg-slate-900 aspect-video rounded flex items-center justify-center text-2xl">📷</div>
+                            <div class="bg-slate-900 aspect-video rounded flex items-center justify-center text-2xl">📷</div>
+                            <div class="bg-slate-900 aspect-video rounded flex items-center justify-center text-2xl border-2 border-red-500 animate-pulse">📷</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Student Detail View -->
+            <section id="studentDetailView" class="hidden-view">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6">รายละเอียด: <span id="detailNameTitle" class="text-rose-600">-</span></h2>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="text-sm text-slate-500 block">ห้อง</span><span id="detailClass" class="text-lg font-bold">-</span></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="text-sm text-slate-500 block">คะแนนสอบ</span><span id="detailScore" class="text-lg font-bold">-</span></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="text-sm text-slate-500 block">Risk Score</span><span id="detailRiskScore" class="text-lg font-bold">-</span></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm"><span class="text-sm text-slate-500 block">สถานะส่ง</span><span id="detailTime" class="text-sm font-bold mt-1">-</span></div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 mb-6">
+                    <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">📋 ประวัติพฤติกรรม (Log)</h3>
+                    <ul id="eventList" class="flex flex-col gap-3 max-h-64 overflow-y-auto pr-2"></ul>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">✍️ คำตอบข้อเขียน</h3>
+                    <div class="mb-4">
+                        <div class="font-bold text-slate-700 mb-1">ข้อ 9: JavaScript ทำอะไร</div>
+                        <div id="ansEssay1" class="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600"></div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-700 mb-1">ข้อ 10: ระบบกันโกงสอบ</div>
+                        <div id="ansEssay2" class="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Check Login Status
+        if (sessionStorage.getItem('isTeacherLoggedIn') !== 'true') {
+            window.location.href = 'home.html';
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isTeacherLoggedIn');
+            window.location.href = 'home.html';
+        }
+
+        let examData = [];
+
+        function loadData() {
+            const dataStr = localStorage.getItem('mattepExamRecords');
+            examData = dataStr ? JSON.parse(dataStr) : [];
+            updateDashboardStats();
+            renderStudentList();
+        }
+
+        function updateDashboardStats() {
+            const total = examData.length;
+            document.getElementById('studentCount').innerText = total;
+            document.getElementById('totalStudents').innerText = total;
+            
+            if(total === 0) return;
+
+            let totalScore = 0, totalRisk = 0, highRisk = 0;
+            let riskLevels = { low: 0, med: 0, high: 0 };
+            
+            // สำหรับคำนวณข้อที่ถูก/ผิด
+            let questionCorrectCounts = [0,0,0,0,0,0,0,0]; 
+
+            examData.forEach(student => {
+                totalScore += student.score;
+                let risk = student.suspicionScore || 0;
+                totalRisk += risk;
+                
+                if (risk <= 30) riskLevels.low++;
+                else if (risk <= 60) riskLevels.med++;
+                else { riskLevels.high++; highRisk++; }
+
+                // นับคะแนนรายข้อ (index.html บันทึกแบบ Array [1,0,1,1...])
+                if(student.objectiveAnswers) {
+                    student.objectiveAnswers.forEach((ans, idx) => {
+                        if(ans === 1) questionCorrectCounts[idx]++;
+                    });
+                }
+            });
+
+            document.getElementById('avgScore').innerText = (totalScore / total).toFixed(1);
+            document.getElementById('avgRisk').innerText = (totalRisk / total).toFixed(1) + '%';
+            document.getElementById('highRiskCount').innerText = highRisk;
+
+            // กราฟแท่งความเสี่ยง
+            document.getElementById('barLow').style.width = (riskLevels.low / total * 100) + '%';
+            document.getElementById('barMed').style.width = (riskLevels.med / total * 100) + '%';
+            document.getElementById('barHigh').style.width = (riskLevels.high / total * 100) + '%';
+            document.getElementById('txtLow').innerText = `${riskLevels.low} คน`;
+            document.getElementById('txtMed').innerText = `${riskLevels.med} คน`;
+            document.getElementById('txtHigh').innerText = `${riskLevels.high} คน`;
+
+            // คำนวณข้อที่ถูกมากสุด/ผิดมากสุด
+            if(examData[0].objectiveAnswers) {
+                let maxCorrect = Math.max(...questionCorrectCounts);
+                let minCorrect = Math.min(...questionCorrectCounts);
+                
+                let bestQs = [], worstQs = [];
+                questionCorrectCounts.forEach((count, idx) => {
+                    if(count === maxCorrect) bestQs.push(`ข้อ ${idx+1}`);
+                    if(count === minCorrect) worstQs.push(`ข้อ ${idx+1}`);
+                });
+
+                document.getElementById('mostCorrect').innerText = bestQs.join(', ') + ` (ถูก ${maxCorrect} คน)`;
+                document.getElementById('mostWrong').innerText = worstQs.join(', ') + ` (ถูกแค่ ${minCorrect} คน)`;
+            }
+        }
+
+        function renderStudentList() {
+            const list = document.getElementById('studentList');
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            list.innerHTML = '';
+            
+            // เรียงจากเสี่ยงมากไปน้อย
+            const sorted = [...examData].sort((a, b) => (b.suspicionScore || 0) - (a.suspicionScore || 0));
+
+            sorted.forEach(student => {
+                if(!student.name.toLowerCase().includes(keyword)) return;
+
+                const risk = student.suspicionScore || 0;
+                let riskColor = risk > 60 ? 'bg-red-100 text-red-700' : (risk > 30 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+                
+                const item = document.createElement('div');
+                item.className = 'p-3 rounded-lg border border-slate-100 bg-slate-50 cursor-pointer hover:bg-rose-50 transition flex justify-between items-center';
+                item.onclick = () => showStudentDetails(student);
+                item.innerHTML = `
+                    <div>
+                        <div class="font-bold text-slate-800 text-sm">${student.name}</div>
+                        <div class="text-xs text-slate-500">เลขที่ ${student.studentNo} | ห้อง ${student.studentClass}</div>
+                    </div>
+                    <div class="px-2 py-1 rounded-md text-xs font-bold ${riskColor}">${risk}%</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function showStudentDetails(student) {
+            document.getElementById('dashboardView').classList.add('hidden-view');
+            document.getElementById('studentDetailView').classList.remove('hidden-view');
+            document.getElementById('backButton').classList.remove('hidden-view');
+
+            document.getElementById('detailNameTitle').innerText = student.name;
+            document.getElementById('detailClass').innerText = student.studentClass;
+            document.getElementById('detailScore').innerText = `${student.score} / ${student.scoreMax}`;
+            document.getElementById('detailRiskScore').innerText = `${student.suspicionScore || 0}%`;
+            document.getElementById('detailTime').innerText = student.submitTime;
+
+            // แสดงคำตอบข้อเขียน
+            document.getElementById('ansEssay1').innerText = student.essays?.essay1 || '- ไม่ได้ตอบ -';
+            document.getElementById('ansEssay2').innerText = student.essays?.essay2 || '- ไม่ได้ตอบ -';
+
+            // แสดง Event Log (Violations sorted by severity)
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
+            let violations = student.violations || [];
+            
+            // Sort by points (most severe first)
+            violations = [...violations].sort((a, b) => (b.points || 0) - (a.points || 0));
+            
+            if(violations.length === 0) {
+                eventList.innerHTML = '<div class="text-center text-slate-500 py-4">✅ ปลอดภัย ไม่พบความผิดปกติ</div>';
+            } else {
+                violations.forEach(v => {
+                    // Determine severity level based on points
+                    let badgeColor = 'bg-blue-500';
+                    let severityLabel = 'ℹ️ Info';
+                    
+                    if (v.points >= 30) {
+                        badgeColor = 'bg-red-600';
+                        severityLabel = '⛔ ร้ายแรง';
+                    } else if (v.points >= 15) {
+                        badgeColor = 'bg-amber-600';
+                        severityLabel = '⚠️ เตือน';
+                    }
+                    
+                    const li = document.createElement('li');
+                    li.className = 'p-3 bg-white rounded-lg border border-slate-100 flex gap-4 text-sm';
+                    li.innerHTML = `
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2 py-0.5 rounded text-white text-xs font-bold ${badgeColor}">${v.points}pts</span>
+                                <span class="font-semibold text-slate-800">${v.description}</span>
+                            </div>
+                            <div class="text-xs text-slate-500 ml-0">📅 ${v.time} • 🏷️ ${v.category || 'misc'}</div>
+                            ${v.details ? `<div class="text-xs text-slate-400 mt-1">💬 ${v.details}</div>` : ''}
+                        </div>
+                    `;
+                    eventList.appendChild(li);
+                });
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('dashboardView').classList.remove('hidden-view');
+            document.getElementById('studentDetailView').classList.add('hidden-view');
+            document.getElementById('backButton').classList.add('hidden-view');
+        }
+
+        function clearData() {
+            if(confirm('ยืนยันล้างข้อมูลผลสอบทั้งหมด?')) {
+                localStorage.removeItem('mattepExamRecords');
+                loadData();
+                showDashboard();
+            }
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

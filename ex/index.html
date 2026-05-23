@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MATTEP - สอบ</title>
+  <style>
+    /* ใช้ CSS เดิมของคุณทั้งหมดครับ (ละไว้เพื่อให้โค้ดสั้นลง แต่คงการแสดงผลเดิม) */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%); min-height: 100vh; color: #1e293b; padding: 40px 20px; }
+    .container { max-width: 950px; margin: auto; }
+    .header { position: relative; overflow: hidden; background: #ffffff; border-radius: 28px; padding: 35px; margin-bottom: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+    .header h1 { font-size: 42px; margin-bottom: 10px; }
+    .header p { color: #475569; font-size: 18px; display: inline-block; padding: 8px 24px; background: rgba(255, 255, 255, 0.7); border: 2px solid #e9d5ff; border-radius: 999px; }
+    .top-info { display: flex; gap: 15px; margin-top: 20px; }
+    .badge { background: #fff1f2; border: 1px solid #fecdd3; padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; }
+    .timer-badge { background: #fee2e2; color: #dc2626; border-color: #fca5a5; font-weight: bold; }
+    .student-form, .question-card { background: #ffffff; border: 1px solid #f3d7e6; border-radius: 24px; padding: 28px; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(244,63,94,0.08); }
+    .form-title { font-size: 22px; font-weight: 600; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-group input, textarea { padding: 14px; border-radius: 14px; border: 1px solid #cbd5e1; outline: none; font-size: 15px;}
+    .question-number { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f43f5e, #fb7185); color: white; font-weight: bold; margin-bottom: 18px; }
+    .question-title { font-size: 20px; margin-bottom: 20px; font-weight: 500; }
+    .choices label { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 16px; background: #fffafc; border: 1px solid #dbe4ee; cursor: pointer; margin-bottom: 10px;}
+    textarea { width: 100%; min-height: 120px; }
+    .submit-btn { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, #f43f5e, #fb7185); color: white; font-size: 20px; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="student-form">
+      <div class="form-title">ข้อมูลนักเรียน</div>
+      <div class="form-grid">
+        <div class="input-group">
+          <label>ชื่อ - นามสกุล <span style="color:red">*</span></label>
+          <input type="text" id="studentName" placeholder="กรอกชื่อ - นามสกุล">
+        </div>
+        <div class="input-group">
+          <label>เลขที่ <span style="color:red">*</span></label>
+          <input type="number" id="studentNo" placeholder="กรอกเลขที่">
+        </div>
+        <div class="input-group">
+          <label>ชั้นเรียน <span style="color:red">*</span></label>
+          <input type="text" id="studentClass" placeholder="เช่น ม.5/11">
+        </div>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>MATTEP</h1>
+      <p>ระบบทำข้อสอบออนไลน์</p>
+      <div class="top-info">
+        <div class="badge">วิชา: Web Technology</div>
+        <div class="badge timer-badge" id="timerDisplay">เวลา: 60:00</div>
+      </div>
+    </div>
+
+    <div id="examForm">
+      <!-- ข้อ 1-8 เป็นปรนัย ค่า value คือคำตอบที่ถูก/ผิด (1=ถูก, 0=ผิด) -->
+      <div class="question-card">
+        <div class="question-number">1</div><div class="question-title">ภาษา HTML ใช้ทำอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q1" value="0"> ใช้ตัดต่อวิดีโอ</label>
+          <label><input type="radio" name="q1" value="1"> ใช้สร้างหน้าเว็บไซต์</label>
+          <label><input type="radio" name="q1" value="0"> ใช้ทำเพลง</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">2</div><div class="question-title">CSS มีหน้าที่อะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q2" value="1"> ตกแต่งเว็บไซต์</label>
+          <label><input type="radio" name="q2" value="0"> เก็บฐานข้อมูล</label>
+          <label><input type="radio" name="q2" value="0"> สร้างไวรัส</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">3</div><div class="question-title">JavaScript ใช้ในการทำอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q3" value="1"> ทำให้หน้าเว็บมีความโต้ตอบ</label>
+          <label><input type="radio" name="q3" value="0"> จัดเก็บข้อมูล</label>
+          <label><input type="radio" name="q3" value="0"> ตัดต่อวิดีโอ</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">4</div><div class="question-title">ตัวแปร (Variable) คืออะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q4" value="1"> ที่เก็บค่าข้อมูลในโปรแกรม</label>
+          <label><input type="radio" name="q4" value="0"> ชนิดของปุ่มเมาส์</label>
+          <label><input type="radio" name="q4" value="0"> ระบบปฏิบัติการ</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">5</div><div class="question-title">Loop ใช้สำหรับการทำอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q5" value="1"> ทำซ้ำรหัสหลายครั้ง</label>
+          <label><input type="radio" name="q5" value="0"> ลบข้อมูล</label>
+          <label><input type="radio" name="q5" value="0"> เปลี่ยนแบบอักษร</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">6</div><div class="question-title">Function มีประโยชน์อะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q6" value="1"> เก็บรหัสและใช้ซ้ำได้</label>
+          <label><input type="radio" name="q6" value="0"> สร้างตารางข้อมูล</label>
+          <label><input type="radio" name="q6" value="0"> เชื่อมต่ออินเทอร์เน็ต</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">7</div><div class="question-title">Database ใช้เพื่อการอะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q7" value="0"> วาดรูปภาพ</label>
+          <label><input type="radio" name="q7" value="1"> เก็บและจัดการข้อมูล</label>
+          <label><input type="radio" name="q7" value="0"> สร้างเสียง</label>
+        </div>
+      </div>
+      <div class="question-card">
+        <div class="question-number">8</div><div class="question-title">API ในการเขียนโปรแกรมคืออะไร? <span style="color:red">*</span></div>
+        <div class="choices">
+          <label><input type="radio" name="q8" value="1"> อินเตอร์เฟซสำหรับเชื่อมต่อซอฟต์แวร์</label>
+          <label><input type="radio" name="q8" value="0"> ชนิดของเกม</label>
+          <label><input type="radio" name="q8" value="0"> อุปกรณ์คอมพิวเตอร์</label>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-number">9</div><div class="question-title">อธิบายว่า JavaScript ใช้ทำอะไร</div>
+        <textarea id="essay1" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
+      </div>
+      <div class="question-card">
+        <div class="question-number">10</div><div class="question-title">ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
+        <textarea id="essay2" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitExam()">ส่งข้อสอบ</button>
+  </div>
+
+  <script src="antiCheat.js"></script>
+  <script>
+    let timeInSeconds = 60 * 60; 
+    let timerInterval = setInterval(() => {
+        timeInSeconds--;
+        let min = Math.floor(timeInSeconds / 60);
+        let sec = timeInSeconds % 60;
+        document.getElementById('timerDisplay').innerText = `เวลา: ${min}:${sec < 10 ? '0'+sec : sec}`;
+        if (timeInSeconds <= 0) submitExam();
+    }, 1000);
+
+    function submitExam() {
+      const name = document.getElementById('studentName').value || 'นักเรียนไม่ระบุชื่อ';
+      const no = document.getElementById('studentNo').value || '0';
+      const cls = document.getElementById('studentClass').value || '-';
+
+      clearInterval(timerInterval);
+
+      // รวบรวมข้อมูลคำตอบ
+      let score = 0;
+      let objAnswers = [];
+      for(let i=1; i<=8; i++) {
+        let ans = document.querySelector(`input[name="q${i}"]:checked`);
+        let val = ans ? Number(ans.value) : 0; // 1 คือถูก, 0 คือผิด
+        score += val;
+        objAnswers.push(val); // ส่งอาเรย์ 0,1 ไปให้ Dashboard นับ
+      }
+
+      // ดึงข้อมูล AntiCheat
+      let antiCheatReport = { 
+        suspicionScore: 0, 
+        riskLevel: 'SAFE',
+        violations: [], 
+        statistics: { 
+          devtools: 0,
+          tabSwitch: 0,
+          paste: 0,
+          copy: 0,
+          cut: 0,
+          rightClick: 0,
+          screenshot: 0
+        }, 
+        violationCount: 0,
+        runtime: '0:00',
+        timestamp: new Date().toLocaleString('th-TH')
+      };
+
+      if (typeof antiCheat !== 'undefined' && antiCheat !== null) {
+        try {
+          antiCheatReport = antiCheat.getAnalysisReport();
+          console.log('[Exam] AntiCheat report:', antiCheatReport);
+        } catch (e) {
+          console.error('[Exam] Error getting AntiCheat report:', e);
+        }
+      }
+
+      const examRecord = {
+        name: name,
+        studentNo: no,
+        studentClass: cls,
+        score: score,
+        scoreMax: 8,
+        objectiveAnswers: objAnswers,
+        essays: {
+          essay1: document.getElementById('essay1').value,
+          essay2: document.getElementById('essay2').value
+        },
+        submitTime: new Date().toLocaleTimeString('th-TH'),
+        timestamp: new Date().toLocaleString('th-TH'),
+        antiCheatReport: antiCheatReport,
+        suspicionScore: antiCheatReport.suspicionScore,
+        riskLevel: antiCheatReport.riskLevel,
+        violations: antiCheatReport.violations,
+        violationCount: antiCheatReport.violationCount
+      };
+
+      // บันทึกเฉพาะของคนนี้เพื่อไปแสดงหน้า results.html
+      sessionStorage.setItem('examSubmission', JSON.stringify(examRecord));
+
+      // บันทึกสะสมสำหรับ Dashboard
+      let allRecords = JSON.parse(localStorage.getItem('mattepExamRecords') || '[]');
+      allRecords.push(examRecord);
+      localStorage.setItem('mattepExamRecords', JSON.stringify(allRecords));
+
+      console.log('[Exam] Submission complete. Exam Record:', examRecord);
+
+      // เปลี่ยนหน้า
+      if (window.location.protocol === 'blob:' || window.location.hostname === '') {
+        alert("บันทึกคำตอบสำเร็จ! (ระบบจำลองบล็อกการเปลี่ยนหน้าอัตโนมัติ รบกวนกดเปิดหน้า results.html เองนะครับ)");
+      } else {
+        window.location.href = 'results.html';
+      }
+    }
+  </script>
+</body>
+</html>
