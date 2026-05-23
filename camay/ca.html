@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบ AI ตรวจจับการทุจริต (Training + Live Camera)</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f4f5f7;
+      --color-border-tertiary: #e2e8f0;
+      --color-text-primary: #1e293b;
+      --color-text-secondary: #475569;
+      --color-text-tertiary: #94a3b8;
+      --color-background-success: #dcfce7;
+      --color-text-success: #166534;
+      --color-background-danger: #fee2e2;
+      --color-text-danger: #991b1b;
+      --color-background-warning: #fef08a;
+      --color-text-warning: #854d0e;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+    }
+    body { font-family: var(--font-sans); color: var(--color-text-primary); margin: 0; padding: 20px; background: #fafafa;}
+    .app { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .tabs { display: flex; gap: 4px; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; }
+    .tab { padding: 8px 16px; font-size: 14px; border: none; background: transparent; cursor: pointer; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+    .tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: bold; }
+    .tab:hover:not(.active) { color: var(--color-text-primary); }
+    .section { display: none; }
+    .section.active { display: block; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+    .badge-success { background: var(--color-background-success); color: var(--color-text-success); }
+    .badge-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+    .badge-warning { background: var(--color-background-warning); color: var(--color-text-warning); }
+    .notice { font-size: 14px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 16px; margin-top: 10px; border-left: 4px solid #3b82f6; }
+    
+    .btn-primary { background: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;}
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-danger { background: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; font-weight: 500;}
+    
+    /* กล่องวิดีโอ */
+    .video-wrapper { position: relative; width: 100%; max-width: 640px; margin: 1rem auto; border-radius: var(--border-radius-lg); overflow: hidden; background: #000; display: none; border: 4px solid #e2e8f0; }
+    #webcam { width: 100%; height: auto; display: block; transform: scaleX(-1); }
+    #overlay-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
+    
+    /* แถบ Progress */
+    .progress-bg { width: 100%; background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+    .progress-bar { height: 100%; background: #10b981; width: 0%; transition: width 0.3s ease; }
+    
+    .prediction-box { text-align: center; padding: 15px; border-radius: var(--border-radius-md); margin-top: 15px; font-size: 20px; font-weight: bold; background: var(--color-background-secondary); display: none; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem;">
+    <div style="width:40px;height:40px;border-radius:10px;background:#2563eb;display:flex;align-items:center;justify-content:center;">
+      <i class="ti ti-brain" style="font-size:24px;color:white;" aria-hidden="true"></i>
+    </div>
+    <div>
+      <p style="font-size:18px;font-weight:bold;margin:0;">ระบบ AI ตรวจจับทุจริตในห้องสอบ</p>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin:0;">CSV Training + Live Camera Detection</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('train', event)">1. เรียนรู้โมเดลจาก CSV</button>
+    <button class="tab" onclick="showTab('camera', event)" id="tab-btn-camera" disabled>2. ทดสอบผ่านกล้อง</button>
+  </div>
+
+  <div id="tab-train" class="section active">
+    <p style="font-size:14px; font-weight:bold;">สถานะการสร้าง AI จากไฟล์ <code>exam_dataset_9906frames_1779524487668.csv</code></p>
+    
+    <div class="notice" id="train-status">
+      <i class="ti ti-loader"></i> กำลังโหลดไลบรารีและข้อมูล โปรดรอสักครู่...
+    </div>
+    
+    <div class="progress-bg" id="progress-container" style="display:none;">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <div id="tab-camera" class="section">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:1rem;justify-content:center;">
+      <button id="start-btn" class="btn-primary" onclick="startCameraAndAI()">
+        <i class="ti ti-video"></i> เปิดกล้องเว็บแคม
+      </button>
+      <button id="stop-btn" class="btn-danger" onclick="stopCamera()" style="display:none;">
+        <i class="ti ti-camera-off"></i> ปิดกล้อง
+      </button>
+    </div>
+
+    <div id="prediction-result" class="prediction-box">
+      กำลังรอการประมวลผลใบหน้า...
+    </div>
+
+    <!-- เพิ่มกล่องแสดงผลลัพธ์จากเซิร์ฟเวอร์ (Gemini) -->
+    <div id="gemini-result" class="notice" style="display:none; margin-top:10px; text-align:center;">
+      <i class="ti ti-brain"></i> Gemini API: <strong id="gemini-status-text">รอการวิเคราะห์ภาพ (ทุกๆ 5 วินาที)...</strong>
+    </div>
+
+    <div class="video-wrapper" id="video-wrapper">
+      <video id="webcam" autoplay playsinline muted></video>
+      <canvas id="overlay-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ตัวแปรส่วนกลาง
+  const CLASSES = ['device_left','device_right','face_absent','gaze_down','gaze_left','gaze_right','gaze_up','multi_person','normal'];
+  const CLASS_TH = {
+    'device_left': 'ใช้อุปกรณ์ (ซ้าย)', 'device_right': 'ใช้อุปกรณ์ (ขวา)', 'face_absent': 'ไม่มีใบหน้า',
+    'gaze_down': 'ก้มหน้ามองลง', 'gaze_left': 'มองไปทางซ้าย', 'gaze_right': 'มองไปทางขวา', 'gaze_up': 'แหงนหน้ามองขึ้น',
+    'multi_person': 'มีบุคคลอื่นอยู่ในกล้อง', 'normal': 'ปกติ (มองหน้าจอ)'
+  };
+  const IS_FRAUD = {
+    'device_left': true, 'device_right': true, 'face_absent': true,
+    'gaze_down': true, 'gaze_left': true, 'gaze_right': true, 'gaze_up': true,
+    'multi_person': true, 'normal': false
+  };
+
+  let aiModel = null;
+  let detector = null;
+  let video = document.getElementById('webcam');
+  let canvas = document.getElementById('overlay-canvas');
+  let ctx = canvas.getContext('2d');
+  let stream, animationId;
+  let lastGeminiAnalyzeTime = 0;
+
+  // ตัวแปรสำหรับเสียงแจ้งเตือน
+  let alertAudio = new Audio('https://www.soundjay.com/buttons/sounds/beep-01a.mp3');
+  let lastAlertTime = 0;
+  
+  function playAlertSound() {
+    const now = Date.now();
+    // หน่วงเวลาไม่ให้เสียงดังรัวเกินไป (เตือนทุกๆ 2 วินาที)
+    if (now - lastAlertTime > 2000) {
+      alertAudio.play().catch(e => console.log("เบราว์เซอร์บล็อกการเล่นเสียง:", e));
+      lastAlertTime = now;
+    }
+  }
+
+  // ฟังก์ชันเปลี่ยน Tab UI
+  function showTab(name, event) {
+    if(name === 'camera' && !aiModel) {
+        alert('กรุณารอให้ระบบเรียนรู้ข้อมูล CSV เสร็จก่อนครับ!');
+        return;
+    }
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add('active');
+    }
+  }
+
+  // ==========================================
+  // ส่วนที่ 1: โหลด CSV และเทรน TensorFlow.js
+  // ==========================================
+  async function loadAndTrain() {
+    const statusBox = document.getElementById('train-status');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    
+    statusBox.innerHTML = '<i class="ti ti-download"></i> กำลังโหลดไฟล์ CSV...';
+
+    Papa.parse("exam_dataset_9906frames_1779524487668.csv", {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: async function(results) {
+        statusBox.innerHTML = '<i class="ti ti-settings"></i> กำลังเตรียมข้อมูล AI จาก ' + results.data.length + ' แถว...';
+        progressContainer.style.display = 'block';
+        
+        const features = [];
+        const labels = [];
+        
+        results.data.forEach(row => {
+          let f = [];
+          for(let i=0; i<174; i++) { f.push(row['f'+i] || 0); }
+          if(f.length === 174 && CLASSES.includes(row.label)) {
+              features.push(f);
+              labels.push(CLASSES.indexOf(row.label));
+          }
+        });
+
+        // สร้าง Neural Network (รับค่า 174 ตัวแปร)
+        aiModel = tf.sequential();
+        aiModel.add(tf.layers.dense({units: 128, activation: 'relu', inputShape: [174]}));
+        aiModel.add(tf.layers.dropout({rate: 0.2}));
+        aiModel.add(tf.layers.dense({units: 64, activation: 'relu'}));
+        aiModel.add(tf.layers.dense({units: CLASSES.length, activation: 'softmax'}));
+
+        aiModel.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
+
+        const xs = tf.tensor2d(features);
+        const ys = tf.oneHot(tf.tensor1d(labels, 'int32'), CLASSES.length);
+        const totalEpochs = 15;
+
+        // เริ่มสอน AI (Train)
+        await aiModel.fit(xs, ys, {
+          epochs: totalEpochs,
+          batchSize: 256,
+          callbacks: {
+            onEpochEnd: (epoch, logs) => {
+              const percent = Math.round(((epoch + 1) / totalEpochs) * 100);
+              progressBar.style.width = percent + '%';
+              statusBox.innerHTML = `<i class="ti ti-brain"></i> AI กำลังเรียนรู้... รอบที่ ${epoch + 1}/${totalEpochs} (ความแม่นยำ: ${(logs.acc * 100).toFixed(2)}%)`;
+            }
+          }
+        });
+
+        // เทรนเสร็จแล้ว
+        statusBox.innerHTML = `<span style="color:var(--color-text-success);"><i class="ti ti-circle-check"></i> <b>การเทรน AI สำเร็จ!</b> ความแม่นยำของโมเดลพร้อมใช้งานแล้ว</span>`;
+        statusBox.style.borderLeftColor = '#10b981';
+        
+        // ปลดล็อกปุ่ม Tab กล้อง
+        const camBtn = document.getElementById('tab-btn-camera');
+        camBtn.disabled = false;
+        camBtn.style.color = '#2563eb';
+        camBtn.innerText = '✨ 2. ทดสอบผ่านกล้อง (พร้อมแล้ว)';
+
+        xs.dispose();
+        ys.dispose();
+      },
+      error: function() {
+        statusBox.innerHTML = `<span style="color:var(--color-text-danger);"><i class="ti ti-alert-triangle"></i> ไม่พบไฟล์ CSV! ตรวจสอบให้แน่ใจว่าไฟล์รันอยู่บน Local Server (Live Server) และชื่อไฟล์ถูกต้อง</span>`;
+        statusBox.style.borderLeftColor = '#ef4444';
+      }
+    });
+  }
+
+  // เริ่มเทรนอัตโนมัติเมื่อเปิดหน้าเว็บ
+  setTimeout(loadAndTrain, 500);
+
+  // ==========================================
+  // ส่วนที่ 2: เปิดกล้องและดึงข้อมูลใบหน้า (MediaPipe)
+  // ==========================================
+  
+  // ฟังก์ชันแปลงจุด 468 จุดของ MediaPipe ให้กลายเป็น 174 Features เพื่อส่งให้ AI ของเรา
+  // *หมายเหตุ: เป็นการจำลองวิธีสกัดฟีเจอร์เบื้องต้น เพื่อให้จำนวนอาร์เรย์ (174) ตรงกับโครงสร้าง CSV
+  function extractFeaturesFromKeypoints(keypoints, videoWidth, videoHeight) {
+    let features = [];
+    const nose = keypoints[1]; // จุดจมูกเป็นจุดอ้างอิงตรงกลาง
+    
+    // ดึงจุดมา 87 จุด (87จุด * แกน X,Y = 174 ข้อมูล)
+    for(let i=0; i<87; i++) {
+        if(keypoints[i]) {
+            // ทำ Normalization ทำให้ค่าอยู่ระหว่าง -1 ถึง 1
+            features.push((keypoints[i].x - nose.x) / videoWidth);
+            features.push((keypoints[i].y - nose.y) / videoHeight);
+        } else {
+            features.push(0, 0); // เติม 0 กรณีหาจุดไม่เจอ
+        }
+    }
+    return features;
+  }
+
+  async function setupCameraComponents() {
+    const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+    detector = await faceLandmarksDetection.createDetector(model, { runtime: 'tfjs' });
+
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }});
+    video.srcObject = stream;
+
+    return new Promise((resolve) => {
+      video.onloadedmetadata = () => resolve(video);
+    });
+  }
+
+  // ==========================================
+  // ฟังก์ชันสแนปภาพจากกล้องและส่งไปหา server.py
+  // ==========================================
+  async function sendImageToGemini() {
+    if (!video || !video.videoWidth) return;
+    
+    // สร้าง Canvas ชั่วคราวเพื่อจับภาพจาก Video
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = video.videoWidth;
+    tempCanvas.height = video.videoHeight;
+    const tCtx = tempCanvas.getContext('2d');
+    tCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // แปลงภาพเป็น Base64 (บีบอัด JPEG 80% เพื่อให้ส่งได้เร็วขึ้น)
+    const base64Data = tempCanvas.toDataURL('image/jpeg', 0.8);
+    const statusText = document.getElementById('gemini-status-text');
+    statusText.innerText = "กำลังวิเคราะห์...";
+    
+    try {
+      const res = await fetch('http://localhost:5000/api/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64Data })
+      });
+      
+      const data = await res.json();
+      if (res.ok) {
+        statusText.innerText = data.status;
+        statusText.style.color = data.status.includes('CHEAT') ? "#ef4444" : "#10b981";
+        if(data.status.includes('CHEAT')) playAlertSound(); // แจ้งเตือนเมื่อ Gemini พบทุจริต
+      } else {
+        statusText.innerText = "Error: " + (data.error || "Unknown");
+      }
+    } catch (e) {
+      statusText.innerText = "ไม่สามารถเชื่อมต่อ Server.py ได้";
+      statusText.style.color = "#ef4444";
+    }
+  }
+
+  async function renderPrediction() {
+    if (!detector || !video.readyState) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // สั่งให้ส่งภาพไปวิเคราะห์ที่ Gemini ทุกๆ 5 วินาที เพื่อไม่ให้หนักเครื่องจนเกินไป
+    const now = Date.now();
+    if (now - lastGeminiAnalyzeTime > 5000) {
+        lastGeminiAnalyzeTime = now;
+        sendImageToGemini();
+    }
+
+    const faces = await detector.estimateFaces(video);
+    const resultBox = document.getElementById('prediction-result');
+
+    if (faces.length === 0) {
+        resultBox.innerHTML = '<span class="badge badge-danger" style="font-size:16px;">⚠ ไม่พบใบหน้า (Face Absent) - ทุจริต!</span>';
+        resultBox.style.background = '#fee2e2';
+        resultBox.style.color = '#991b1b';
+        playAlertSound();
+    } 
+    else if (faces.length > 1) {
+        resultBox.innerHTML = `<span class="badge badge-danger" style="font-size:16px;">⚠ พบคน ${faces.length} คนในเฟรม (Multi Person) - ทุจริต!</span>`;
+        resultBox.style.background = '#fee2e2';
+        resultBox.style.color = '#991b1b';
+        playAlertSound();
+    } 
+    else {
+        // กรณีพบ 1 คนแบบปกติ -> สกัดฟีเจอร์แล้วส่งให้ AI CSV ของเราทำนาย!
+        const face = faces[0];
+        
+        // วาดจุดบนหน้าเพื่อความสวยงาม
+        ctx.fillStyle = '#10b981';
+        face.keypoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+
+        // แปลงหน้าเป็น Array 174 ตัว
+        const extractedFeatures = extractFeaturesFromKeypoints(face.keypoints, video.videoWidth, video.videoHeight);
+        
+        // ให้โมเดล AI ตัดสิน
+        const inputTensor = tf.tensor2d([extractedFeatures]);
+        const prediction = aiModel.predict(inputTensor);
+        const classIdx = prediction.argMax(-1).dataSync()[0]; // ดึง Index ที่น่าจะเป็นไปได้มากที่สุดออกมา
+        const predictedClass = CLASSES[classIdx];
+
+        // แสดงผลลัพธ์
+        if (IS_FRAUD[predictedClass]) {
+            resultBox.innerHTML = `<span class="badge badge-danger" style="font-size:18px;">⚠ ${CLASS_TH[predictedClass]}</span>`;
+            resultBox.style.background = '#fee2e2';
+            resultBox.style.border = '2px solid #ef4444';
+            playAlertSound();
+        } else {
+            resultBox.innerHTML = `<span class="badge badge-success" style="font-size:18px;">✓ ${CLASS_TH[predictedClass]}</span>`;
+            resultBox.style.background = '#dcfce7';
+            resultBox.style.border = '2px solid #10b981';
+        }
+
+        inputTensor.dispose();
+        prediction.dispose();
+    }
+
+    animationId = requestAnimationFrame(renderPrediction);
+  }
+
+  async function startCameraAndAI() {
+    document.getElementById('start-btn').innerHTML = '<i class="ti ti-loader"></i> กำลังเปิดกล้อง...';
+    
+    try {
+      await setupCameraComponents();
+      video.play();
+      
+      document.getElementById('video-wrapper').style.display = 'block';
+      document.getElementById('prediction-result').style.display = 'block';
+      document.getElementById('gemini-result').style.display = 'block';
+      document.getElementById('start-btn').style.display = 'none';
+      document.getElementById('stop-btn').style.display = 'inline-flex';
+      
+      renderPrediction(); // เริ่มลูปกล้อง
+    } catch (error) {
+      console.error("พบปัญหาการเปิดกล้อง:", error);
+      let errorMsg = "ไม่สามารถเปิดกล้องได้ เกิดข้อผิดพลาดบางอย่าง";
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMsg = "เบราว์เซอร์ถูกบล็อกไม่ให้ใช้งานกล้อง กรุณากดอนุญาต (Allow) ที่ไอคอนรูปกล้องตรงแถบ URL ด้านบน";
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMsg = "ไม่พบอุปกรณ์กล้อง (Webcam) ที่เชื่อมต่ออยู่กับเครื่องของคุณ";
+      }
+      alert("❌ " + errorMsg);
+      
+      // รีเซ็ตปุ่มกลับมาสภาพเดิม เพื่อให้ผู้ใช้กดลองใหม่ได้
+      document.getElementById('start-btn').innerHTML = '<i class="ti ti-video"></i> เปิดกล้องเว็บแคม';
+    }
+  }
+
+  function stopCamera() {
+    if (stream) { stream.getTracks().forEach(track => track.stop()); }
+    if (animationId) { cancelAnimationFrame(animationId); }
+    
+    document.getElementById('video-wrapper').style.display = 'none';
+    document.getElementById('prediction-result').style.display = 'none';
+    document.getElementById('gemini-result').style.display = 'none';
+    document.getElementById('start-btn').style.display = 'inline-flex';
+    document.getElementById('start-btn').innerHTML = '<i class="ti ti-video"></i> เปิดกล้องเว็บแคม';
+    document.getElementById('stop-btn').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
