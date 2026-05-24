@@ -212,13 +212,16 @@ class AntiCheat {
 
     const now = Date.now();
     this.answerTiming.answered[name] = now;
-    if (this.lastAnswerAt) {
-      const interval = now - this.lastAnswerAt;
-      this.answerTiming.intervals.push(interval);
-      if (interval < 1200) {
-        this.answerTiming.rapidAnswers++;
-        this._addViolation('Rapid Answer', 7, 'answerTiming', `ตอบห่างกัน ${Math.round(interval)} ms`);
-      }
+
+    // คำนวณช่วงเวลา: ถ้าเป็นข้อแรกใช้เวลาเริ่มสอบ ถ้าไม่ใช่ใช้เวลาข้อก่อนหน้า
+    const referenceTime = this.lastAnswerAt || this.examStartTime;
+    const interval = now - referenceTime;
+    const qNum = parseInt(name.substring(1));
+    if (qNum > 0) this.answerTiming.intervals[qNum - 1] = interval;
+
+    if (interval < 1200) {
+      this.answerTiming.rapidAnswers++;
+      this._addViolation('Rapid Answer', 7, 'answerTiming', `ตอบห่างกัน ${Math.round(interval)} ms`);
     }
     this.lastAnswerAt = now;
   }
@@ -308,6 +311,9 @@ class AntiCheat {
     };
     this.violations.push(event);
     this.timeline.push(event);
+
+    // แจ้งเตือนระบบภายนอกทันทีเมื่อพบการทำผิดกฎ (Real-time trigger)
+    document.dispatchEvent(new CustomEvent('antiCheatViolation', { detail: event }));
   }
 
   _describe(type) {
@@ -368,6 +374,7 @@ class AntiCheat {
         rapidAnswers: this.answerTiming.rapidAnswers,
         answeredCount,
         averageInterval: avgInterval,
+        intervals: this.answerTiming.intervals,
       },
       timeline: this.timeline.slice(-120),
       timestamp: new Date().toLocaleString('th-TH'),

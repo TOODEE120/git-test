@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MATTEP — สอบ</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -19,7 +19,8 @@
     }
 
     body {
-      font-family: 'Noto Sans Thai', sans-serif;
+      font-family: 'Khwan Thong', 'Sarabun', sans-serif;
+      font-weight: 300;
       background: var(--bg);
       min-height: 100vh;
       color: var(--ink);
@@ -45,9 +46,10 @@
       flex-wrap: wrap;
     }
     .banner-left .brand {
-      font-family: 'DM Serif Display', serif;
+      font-family: 'Khwan Thong', 'Outfit', sans-serif;
       font-size: 36px;
       line-height: 1;
+      font-weight: 600;
     }
     .banner-left .subtitle { font-size: 13px; opacity: .85; margin-top: 4px; }
     .banner-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
@@ -58,7 +60,8 @@
       border-radius: 14px;
       padding: 10px 20px;
       font-size: 22px;
-      font-weight: 800;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
       letter-spacing: 1px;
       backdrop-filter: blur(4px);
       transition: background .3s;
@@ -80,20 +83,22 @@
     /* ===== STUDENT FORM ===== */
     .student-card {
       background: var(--card);
-      border: 1px solid var(--rose-xl);
-      border-radius: 22px;
-      padding: 28px 30px;
+      border: 1px solid #f1f5f9;
+      border-radius: 20px;
+      padding: 24px;
       margin-bottom: 22px;
-      box-shadow: 0 4px 20px rgba(244,63,94,.07);
+      box-shadow: 0 4px 12px rgba(0,0,0,.03);
     }
     .student-card h2 {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 600;
       color: var(--rose);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .form-grid {
       display: grid;
@@ -101,18 +106,21 @@
       gap: 16px;
     }
     .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 13px; font-weight: 600; color: #475569; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--muted); }
     .field input {
-      padding: 13px 16px;
-      border-radius: 14px;
-      border: 1.5px solid #e2e8f0;
-      font-family: 'Noto Sans Thai', sans-serif;
-      font-size: 15px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #f1f5f9;
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 300;
       outline: none;
-      transition: border-color .2s, box-shadow .2s;
+      transition: all .2s;
       user-select: text;
     }
     .field input:focus {
+      background: #fff;
       border-color: var(--rose);
       box-shadow: 0 0 0 3px rgba(244,63,94,.12);
     }
@@ -141,11 +149,16 @@
       padding: 26px 28px;
       margin-bottom: 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,.04);
-      transition: border-color .2s, box-shadow .2s;
+      transition: border-color .2s, box-shadow .3s, transform .3s;
     }
     .q-card:has(input:checked) {
       border-color: var(--rose-xl);
       box-shadow: 0 4px 18px rgba(244,63,94,.1);
+    }
+    /* เพิ่มเอฟเฟกต์สำหรับข้อที่กำลังทำ (Active Question) */
+    .q-card:focus-within {
+      border-color: var(--rose-l);
+      box-shadow: 0 12px 30px rgba(244,63,94, 0.15);
     }
 
     .q-header {
@@ -173,32 +186,46 @@
       gap: 12px;
       padding: 13px 16px;
       border-radius: 14px;
-      border: 1.5px solid #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-weight: 300;
       cursor: pointer;
-      transition: border-color .2s, background .2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 15px;
       color: #475569;
       min-width: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
     }
     .radio-text { min-width: 0; overflow-wrap: anywhere; }
-    .choice-label:hover { border-color: var(--rose-xl); background: #fff5f6; }
+    .choice-label:hover { 
+      border-color: var(--rose-xl); 
+      background: rgba(255, 245, 246, 0.8); 
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0,0,0, 0.02);
+    }
     .choice-label input[type=radio] { display: none; }
     .choice-label .radio-dot {
       width: 20px; height: 20px;
       border-radius: 50%;
-      border: 2px solid #cbd5e1;
+      border: 1.5px solid rgba(203, 213, 225, 0.8);
+      background: rgba(255, 255, 255, 0.4);
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      transition: border-color .2s, background .2s;
+      transition: all 0.2s ease;
     }
-    .choice-label input[type=radio]:checked ~ .radio-text { color: var(--ink); font-weight: 600; }
+    .choice-label input[type=radio]:checked ~ .radio-text { color: var(--ink); font-weight: 500; }
     .choice-label:has(input:checked) {
       border-color: var(--rose);
-      background: linear-gradient(90deg, #fff5f6, #fff);
+      background: rgba(244, 63, 94, 0.05);
+      box-shadow: 0 8px 20px rgba(244, 63, 94, 0.08);
     }
     .choice-label:has(input:checked) .radio-dot {
       border-color: var(--rose);
       background: var(--rose);
+      box-shadow: none;
+      transform: scale(1.1);
     }
     .choice-label:has(input:checked) .radio-dot::after {
       content: '';
@@ -211,34 +238,51 @@
     .essay-wrap textarea {
       width: 100%;
       min-height: 130px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 1.5px solid #e2e8f0;
-      font-family: 'Noto Sans Thai', sans-serif;
-      font-size: 15px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid #f1f5f9;
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 300;
       outline: none;
       resize: vertical;
       line-height: 1.7;
       color: var(--ink);
-      transition: border-color .2s;
+      transition: all .2s;
       user-select: text;
     }
-    .essay-wrap textarea:focus { border-color: var(--rose); }
+    .essay-wrap textarea:focus {
+      background: #fff;
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(244,63,94,.12);
+    }
 
     /* ===== PROGRESS ===== */
     .progress-bar-wrap {
-      background: #f1f5f9;
+      background: rgba(255, 255, 255, 0.4);
       border-radius: 999px;
-      height: 6px;
+      height: 10px;
       margin-bottom: 24px;
       overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
     .progress-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--rose), var(--rose-l));
       border-radius: 999px;
       transition: width .4s cubic-bezier(.22,1,.36,1);
+      position: relative;
+      box-shadow: none;
+      overflow: hidden;
     }
+    /* Removed shine and glossy effects */
+    .progress-bar-fill::after,
+    .progress-bar-fill::before { display: none; }
 
     /* ===== SUBMIT ===== */
     .submit-btn {
@@ -249,17 +293,38 @@
       border-radius: 20px;
       background: linear-gradient(135deg, var(--rose), var(--rose-l));
       color: #fff;
-      font-family: 'Noto Sans Thai', sans-serif;
+      font-family: inherit;
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 500;
       cursor: pointer;
       box-shadow: 0 12px 32px rgba(244,63,94,.35);
-      transition: transform .2s, box-shadow .2s;
+      transition: all 0.4s cubic-bezier(.22, 1, .36, 1);
       margin-top: 8px;
+      position: relative;
+      overflow: hidden;
     }
-    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(244,63,94,.45); }
+    .submit-btn:hover { 
+      transform: translateY(-5px) scale(1.01); 
+      box-shadow: 0 16px 40px rgba(244, 63, 94, 0.3);
+      letter-spacing: 1px;
+    }
+    /* Removed shine effect */
+    .submit-btn::after { display: none; }
     .submit-btn:active { transform: translateY(0); }
     .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .ripple {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      border-radius: 50%;
+      animation: rippleEffect 0.6s linear;
+    }
+    @keyframes rippleEffect {
+      from { width: 0; height: 0; opacity: 1; }
+      to { width: 800px; height: 800px; opacity: 0; }
+    }
 
     /* ===== CONFIRM MODAL ===== */
     .overlay {
@@ -272,6 +337,10 @@
       z-index: 999;
     }
     .overlay.open { display: flex; }
+    @keyframes modalBounce {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
     .modal {
       background: #fff;
       border-radius: 28px;
@@ -281,13 +350,17 @@
       text-align: center;
       box-shadow: 0 40px 80px rgba(0,0,0,.25);
     }
+    .overlay.open .modal {
+      animation: modalBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    }
     .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: var(--ink); }
     .modal p  { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
     .modal-btns { display: flex; gap: 10px; justify-content: center; }
     .modal-btns button {
       padding: 12px 28px;
       border-radius: 14px;
-      font-family: 'Noto Sans Thai', sans-serif;
+      font-family: inherit;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
@@ -374,13 +447,20 @@
     </div>
 
     <!-- Progress bar -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; padding: 0 2px;">
+      <span style="font-size: 13px; font-weight: 700; color: var(--rose);">ความคืบหน้าการทำข้อสอบ</span>
+      <span id="progressText" style="font-size: 13px; font-weight: 600; color: var(--muted);">ทำไปแล้ว 0 จาก 13 ส่วน</span>
+    </div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
     </div>
 
     <!-- Student Info -->
     <div class="student-card">
-      <h2>📋 ข้อมูลนักเรียน</h2>
+      <h2>
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        ข้อมูลนักเรียน
+      </h2>
       <div class="form-grid">
         <div class="field">
           <label>ชื่อ - นามสกุล <span style="color:var(--rose)">*</span></label>
@@ -490,14 +570,14 @@
     </div>
 
     <button class="submit-btn" id="submitBtn" onclick="confirmSubmit()">
-      ✅ ส่งข้อสอบ
+      ส่งข้อสอบ
     </button>
   </div>
 
   <!-- Confirm Modal -->
   <div class="overlay" id="confirmModal">
     <div class="modal">
-      <h3>📤 ยืนยันส่งข้อสอบ?</h3>
+      <h3>ยืนยันส่งข้อสอบ?</h3>
       <p id="confirmText">คุณยังไม่ได้ตอบ <span id="unansweredCount">0</span> ข้อ<br>ต้องการส่งข้อสอบใช่หรือไม่?</p>
       <div class="modal-btns">
         <button class="cancel" onclick="closeConfirm()">ยกเลิก</button>
@@ -505,7 +585,6 @@
       </div>
     </div>
   </div>
-
   <script>
     window.__mattepPcOnlyBlocked = window.innerWidth < 900
       || window.matchMedia('(pointer: coarse)').matches
@@ -513,6 +592,18 @@
   </script>
   <script src="antiCheat.js"></script>
   <script>
+    // ดักฟังเหตุการณ์จาก AI ทันทีเพื่อส่งข้อมูลไป Dashboard (Real-time connection)
+    document.addEventListener('antiCheatViolation', () => {
+      syncLiveStatus();
+    });
+
+    // ใส่ Delay ให้แอนิเมชันของแต่ละ Q-Card ดูลื่นไหล
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.q-card').forEach((card, i) => {
+        card.style.animationDelay = (i * 0.08) + 's';
+      });
+    });
+
     function isPcOnlyAllowed() {
       const isSmallScreen = window.innerWidth < 900;
       const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
@@ -564,55 +655,211 @@
     let timeLeft = 60 * 60;
     const timerEl = document.getElementById('timerDisplay');
 
+    // เชื่อมต่อเวลา (จำเวลาเดิมแม้รีเฟรชหน้า)
+    const savedEndTime = sessionStorage.getItem('mattep_timer_end');
+    let endTime;
+    if (savedEndTime) {
+      endTime = parseInt(savedEndTime);
+    } else {
+      endTime = Date.now() + (timeLeft * 1000);
+      sessionStorage.setItem('mattep_timer_end', endTime);
+    }
+
     let timerInterval = null;
     if (pcModeAllowed) {
       timerInterval = setInterval(() => {
-        timeLeft--;
+        const now = Date.now();
+        timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+
         const m = Math.floor(timeLeft / 60);
         const s = timeLeft % 60;
         timerEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
         if (timeLeft <= 300) timerEl.classList.add('warn');
-        if (timeLeft <= 0) { clearInterval(timerInterval); doSubmit(); }
+        if (timeLeft % 5 === 0) syncLiveStatus(); // อัปเดตสถานะไปที่ Dashboard ทุก 5 วินาที
+        if (timeLeft <= 0) { 
+          clearInterval(timerInterval); 
+          doSubmit(); 
+        }
       }, 1000);
     }
 
-    // ===== PROGRESS =====
-    document.addEventListener('change', updateProgress);
     function updateProgress() {
       let answered = 0;
+      // 1. ตรวจสอบข้อมูลนักเรียน (3 ส่วน)
+      ['studentName', 'studentNo', 'studentClass'].forEach(id => {
+        const val = document.getElementById(id).value.trim();
+        if (val && (id !== 'studentNo' || Number(val) > 0)) answered++;
+      });
+      // 2. ตรวจสอบข้อสอบปรนัย (8 ข้อ)
       for (let i = 1; i <= 8; i++) {
         if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
       }
+      // 3. ตรวจสอบข้อสอบอัตนัย (2 ข้อ)
       if (document.getElementById('essay1').value.trim()) answered++;
       if (document.getElementById('essay2').value.trim()) answered++;
-      document.getElementById('progressBar').style.width = (answered / 10 * 100) + '%';
+
+      // คำนวณความคืบหน้าจากทั้งหมด 13 ส่วน เพื่อให้แถบสีขยับตั้งแต่เริ่มกรอกชื่อ
+      const barFill = document.getElementById('progressBar');
+      barFill.style.width = (answered / 13 * 100) + '%';
+      document.getElementById('progressText').textContent = `ทำไปแล้ว ${answered} จาก 13 ส่วน`;
+
+      // เชื่อมต่อสีแถบความคืบหน้ากับเวลา (เหลือ < 5 นาที เปลี่ยนเป็นสีส้มเตือน)
+      if (timeLeft <= 300) {
+        barFill.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+      }
+      syncLiveStatus();
     }
-    document.querySelectorAll('textarea').forEach(t => t.addEventListener('input', updateProgress));
+
+    // ===== SESSION & SYNC =====
+    let hasWarnedThreshold = false;
+
+    /**
+     * ฟังก์ชันสำหรับกรองรายงาน Anti-Cheat 
+     * เพื่อยกเว้นบทลงโทษจากการตอบเร็ว (Answer Timing)
+     */
+    function processAntiCheatReport(report) {
+      if (!report || !report.violations) return report;
+      
+      // 1. คำนวณคะแนนที่ถูกหักจากเรื่องการตอบเร็ว (Category: answerTiming)
+      const timingPoints = report.violations
+        .filter(v => v.category === 'answerTiming')
+        .reduce((sum, v) => sum + (v.points || 0), 0);
+
+      // 2. กรองเอารายการทำผิดเรื่องตอบเร็วออกจากประวัติ
+      report.violations = report.violations.filter(v => v.category !== 'answerTiming');
+      
+      // 3. ปรับคะแนนความสงสัย (Risk Score) ลงตามสัดส่วนที่หักออก
+      report.suspicionScore = Math.max(0, report.suspicionScore - timingPoints);
+      report.violationCount = report.violations.length;
+
+      // 4. ล้างค่าสถิติในหมวดการตอบเร็วให้เป็น 0 เพื่อความสะอาดของข้อมูล
+      if (report.statistics) report.statistics.answerTiming = 0;
+      
+      return report;
+    }
+
+    // สร้างรหัส ID เฉพาะตัวสำหรับเซสชันนี้ เพื่อแยกคนกรณีชื่อ/เลขที่ซ้ำกัน
+    let sessionUID = sessionStorage.getItem('mattep_session_uid');
+    if (!sessionUID) {
+      sessionUID = 'u-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      sessionStorage.setItem('mattep_session_uid', sessionUID);
+    }
+
+    function syncLiveStatus() {
+      if (hasSubmitted) return;
+      const no = document.getElementById('studentNo').value.trim() || 'temp';
+      const nameVal = document.getElementById('studentName').value.trim();
+      
+      // ดึงข้อมูลคำตอบปัจจุบันเพื่อส่งไปแสดงผลแบบ Real-time
+      const currentEssays = {
+        essay1: document.getElementById('essay1').value,
+        essay2: document.getElementById('essay2').value
+      };
+      const currentObjective = [];
+      for (let i = 1; i <= 8; i++) {
+        const a = document.querySelector(`input[name="q${i}"]:checked`);
+        currentObjective.push(a ? a.value : '-');
+      }
+
+      let acReport = {};
+      if (window.antiCheat?.getAnalysisReport) {
+        try { acReport = processAntiCheatReport(window.antiCheat.getAnalysisReport()); } catch(e) {}
+      }
+
+      // ตรวจสอบคะแนนความเสี่ยงเพื่อดำเนินการอัตโนมัติ
+      const currentRisk = Math.round(acReport.suspicionScore || 0);
+      
+      if (currentRisk >= 80) {
+        alert("ตรวจพบพฤติกรรมทุจริตเกินกำหนด (Risk: " + currentRisk + ")\nระบบจะทำการส่งข้อสอบของคุณทันที");
+        doSubmit();
+        return;
+      } else if (currentRisk >= 50 && !hasWarnedThreshold) {
+        hasWarnedThreshold = true;
+        alert("คำเตือน: ระบบตรวจพบพฤติกรรมน่าสงสัย (Risk: " + currentRisk + ")\nหากคะแนนถึง 80 ระบบจะทำการส่งข้อสอบโดยอัตโนมัติทันที");
+      }
+
+      const liveData = {
+        uid: sessionUID,
+        name: nameVal,
+        no: no,
+        class: document.getElementById('studentClass').value.trim(),
+        timeLeft,
+        progress: document.getElementById('progressBar').style.width,
+        essays: currentEssays,
+        objectiveAnswers: currentObjective,
+        antiCheat: acReport,
+        lastUpdate: Date.now()
+      };
+
+      // ใช้ sessionUID เป็น Key เพื่อให้แยกคนกันอย่างสมบูรณ์แม้ชื่อจะซ้ำกัน
+      localStorage.setItem('mattep_live_user_' + sessionUID, JSON.stringify(liveData));
+      localStorage.setItem('mattep_live_sync_trigger', Date.now()); // ตัวกระตุ้นให้ Dashboard อัปเดต
+    }
 
     // ===== SUBMIT =====
     let hasSubmitted = false;
+    let triedToSubmit = false; // เชื่อมโยงสถานะการกดปุ่มส่ง
 
-    function validateStudentInfo() {
+    function validateStudentInfo(doFocus = false) {
       const fields = ['studentName', 'studentNo', 'studentClass'].map(id => document.getElementById(id));
       let valid = true;
       fields.forEach(field => {
         const ok = field.value.trim().length > 0 && (field.id !== 'studentNo' || Number(field.value) > 0);
-        field.classList.toggle('invalid', !ok);
+        // แสดงสีแดงเฉพาะตอนจะส่ง หรือเคยพยายามส่งไปแล้วเท่านั้น
+        if (triedToSubmit || doFocus) field.classList.toggle('invalid', !ok);
         if (!ok) valid = false;
       });
-      document.getElementById('studentError').classList.toggle('show', !valid);
-      if (!valid) fields.find(field => field.classList.contains('invalid'))?.focus();
+      if (triedToSubmit || doFocus) document.getElementById('studentError').classList.toggle('show', !valid);
+      if (!valid && doFocus === true) {
+        triedToSubmit = true;
+        fields.find(field => field.classList.contains('invalid'))?.focus();
+      }
       return valid;
     }
 
-    ['studentName', 'studentNo', 'studentClass'].forEach(id => {
-      document.getElementById(id).addEventListener('input', validateStudentInfo);
-    });
+    // ===== PERSISTENCE & AUTO-SAVE (เชื่อมโยงข้อมูลทั้งหมด) =====
+    function initExamSync() {
+      // 1. จัดการข้อมูล Text (ชื่อ, เลขที่, ชั้น, ข้อเขียน)
+      const textFields = ['studentName', 'studentNo', 'studentClass', 'essay1', 'essay2'];
+      textFields.forEach(id => {
+        const el = document.getElementById(id);
+        const saved = sessionStorage.getItem('mattep_saved_' + id);
+        if (saved) el.value = saved;
+
+        el.addEventListener('input', (e) => {
+          sessionStorage.setItem('mattep_saved_' + id, e.target.value);
+          if (id.startsWith('student')) validateStudentInfo(false);
+          updateProgress(); // อัปเดต Progress ทันทีที่พิมพ์
+        });
+      });
+
+      // 2. จัดการข้อกา (Radio Buttons)
+      for (let i = 1; i <= 8; i++) {
+        const qName = 'q' + i;
+        const saved = sessionStorage.getItem('mattep_saved_' + qName);
+        if (saved) {
+          const radio = document.querySelector(`input[name="${qName}"][value="${saved}"]`);
+          if (radio) radio.checked = true;
+        }
+
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              sessionStorage.setItem('mattep_saved_' + qName, e.target.value);
+              updateProgress(); // อัปเดต Progress ทันทีที่เลือก
+            }
+          });
+        });
+      }
+      updateProgress(); // ตรวจสอบความคืบหน้าเบื้องต้น
+    }
+
+    initExamSync();
 
     function confirmSubmit() {
       if (!enforcePcOnly()) return;
       if (hasSubmitted) return;
-      if (!validateStudentInfo()) return;
+      if (!validateStudentInfo(true)) return;
       let unanswered = 0;
       for (let i = 1; i <= 8; i++) {
         if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered++;
@@ -630,17 +877,16 @@
       document.getElementById('confirmModal').classList.remove('open');
     }
 
-    function doSubmit() {
+    async function doSubmit() {
       if (!enforcePcOnly()) return;
       if (hasSubmitted) return;
-      if (!validateStudentInfo()) {
+      if (!validateStudentInfo(true)) {
         closeConfirm();
         return;
       }
       hasSubmitted = true;
       closeConfirm();
       clearInterval(timerInterval);
-
       const name  = document.getElementById('studentName').value.trim();
       const no    = document.getElementById('studentNo').value.trim();
       const cls   = document.getElementById('studentClass').value.trim();
@@ -657,6 +903,7 @@
         objAnswers.push(v);
         chosenAnswers.push(selected || '-');
       }
+      // ดึงข้อมูล AI
 
       // Get AntiCheat report
       let acReport = {
@@ -672,10 +919,11 @@
         timeline: [], timestamp: new Date().toLocaleString('th-TH')
       };
       if (window.antiCheat?.getAnalysisReport) {
-        try { acReport = window.antiCheat.getAnalysisReport(); } catch(e) { console.error(e); }
+        try { acReport = processAntiCheatReport(window.antiCheat.getAnalysisReport()); } catch(e) { console.error(e); }
       }
 
       const record = {
+        uid: sessionUID,
         name, studentNo: no, studentClass: cls,
         score, scoreMax: 8, objectiveAnswers: objAnswers, chosenAnswers,
         essays: {
@@ -684,12 +932,15 @@
         },
         submitTime: new Date().toLocaleTimeString('th-TH'),
         timestamp: new Date().toLocaleString('th-TH'),
+        submitTimestamp: Date.now(), // เพิ่มเพื่อการเรียงลำดับที่แม่นยำ
         antiCheatReport: acReport,
         suspicionScore: acReport.suspicionScore,
         riskLevel: acReport.riskLevel,
         violations: acReport.violations,
         violationCount: acReport.violationCount,
       };
+      // บันทึกและสร้างลายเซ็น
+
       record.integrity = createIntegrityHash(record);
 
       let all = [];
@@ -704,11 +955,34 @@
         window.__mattepSubmitting = false;
       }
 
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('submitBtn').textContent = '✅ กำลังส่ง...';
+      // ล้างข้อมูลที่จำไว้เมื่อส่งข้อสอบเรียบร้อยแล้ว
+      ['studentName', 'studentNo', 'studentClass', 'essay1', 'essay2', 'timer_end'].forEach(id => {
+        sessionStorage.removeItem('mattep_saved_' + id);
+        if (id === 'timer_end') sessionStorage.removeItem('mattep_timer_end');
+      });
+      for (let i = 1; i <= 8; i++) {
+        sessionStorage.removeItem('mattep_saved_q' + i);
+      }
 
-      setTimeout(() => { window.location.href = 'results.html'; }, 400);
+      // ลบสถานะ Live ออกจาก Dashboard เมื่อส่งเสร็จแล้ว
+      localStorage.removeItem('mattep_live_user_' + sessionUID);
+      localStorage.setItem('mattep_live_sync_trigger', Date.now());
+      document.getElementById('submitBtn').disabled = true;
+      window.location.href = 'results.html';
     }
+
+    // Ripple effect for submit button
+    document.getElementById('submitBtn').addEventListener('mousedown', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
   </script>
 </body>
 </html>
