@@ -327,7 +327,7 @@
         <svg class="w-10 h-10" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
     </div>
     <div class="brand">MATTEP</div>
-    <p class="tagline">ระบบประเมินผลสอบออนไลน์<br>พร้อมระบบ AI ตรวจจับพฤติกรรมอัตโนมัติ</p>
+    <p class="tagline">ระบบประเมินผลสอบออนไลน์</p>
 
     <div class="divider"><span>เลือกโหมดการใช้งาน</span></div>
 
@@ -394,7 +394,7 @@
       if (!enforcePcOnly()) return;
       document.getElementById('loginModal').classList.add('open');
       document.getElementById('loginError').style.display = 'none';
-      setTimeout(() => document.getElementById('username').focus(), 100);
+      setTimeout(() => document.getElementById('username').focus(), 450); // รอให้แอนิเมชัน fadeUp เสร็จสิ้นก่อน (450ms)
     }
 
     function closeLogin() {

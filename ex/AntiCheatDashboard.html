@@ -108,7 +108,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 ออกจากระบบ
             </button>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 hidden">
                 <!-- ตัวบ่งชี้สถานะ Sync -->
                 <div class="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 mr-2 shadow-sm">
                     <span class="relative flex h-2 w-2">
@@ -148,6 +148,14 @@
                             <option value="high">🔴 ความเสี่ยงสูง (61-100)</option>
                             <option value="medium">🟡 ความเสี่ยงปานกลาง (31-60)</option>
                             <option value="low">🟢 ความเสี่ยงต่ำ (0-30)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <select id="classFilter" class="w-full px-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light appearance-none" onchange="filterStudents()">
+                            <option value="all">🏫 แสดงทุกห้องเรียน</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
@@ -362,15 +370,15 @@
                         </div>
                     </div>
                     
-                    <!-- Event Log List -->
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col max-h-[600px]">
+                    <!-- Event Log List (Clean Theme) -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col h-[500px]">
                         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
                             <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            ลำดับเหตุการณ์ (Event Log)
+                            บันทึกเหตุการณ์ (Event Log)
                         </h3>
-                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-0 divide-y divide-slate-100"></ul>
+                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-2"></ul>
                     </div>
                 </div>
             </section>

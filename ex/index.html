@@ -574,6 +574,20 @@
     </button>
   </div>
 
+  <!-- Anti-Cheat Warning Modal -->
+  <div class="overlay" id="antiCheatWarningModal" style="z-index: 9999;">
+    <div class="modal" style="border-top: 6px solid #ef4444; padding-top: 32px;">
+      <div style="width: 64px; height: 64px; background: #fef2f2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.1);">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 style="color: #ef4444; font-size: 22px; font-weight: 700; margin-bottom: 8px;">คำเตือนจากระบบป้องกันทุจริต</h3>
+      <p id="acWarningText" style="font-size: 15px; color: var(--muted); margin-bottom: 24px; line-height: 1.6;">ตรวจพบพฤติกรรมผิดปกติ</p>
+      <div class="modal-btns">
+        <button id="acWarningBtn" class="confirm" style="width: 100%; background: linear-gradient(135deg, #ef4444, #f43f5e);" onclick="closeAcWarning()">รับทราบและกลับไปทำข้อสอบ</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Confirm Modal -->
   <div class="overlay" id="confirmModal">
     <div class="modal">
@@ -594,7 +608,7 @@
   <script>
     // ดักฟังเหตุการณ์จาก AI ทันทีเพื่อส่งข้อมูลไป Dashboard (Real-time connection)
     document.addEventListener('antiCheatViolation', () => {
-      syncLiveStatus();
+      checkRiskLevel();
     });
 
     // ใส่ Delay ให้แอนิเมชันของแต่ละ Q-Card ดูลื่นไหล
@@ -675,7 +689,6 @@
         const s = timeLeft % 60;
         timerEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
         if (timeLeft <= 300) timerEl.classList.add('warn');
-        if (timeLeft % 5 === 0) syncLiveStatus(); // อัปเดตสถานะไปที่ Dashboard ทุก 5 วินาที
         if (timeLeft <= 0) { 
           clearInterval(timerInterval); 
           doSubmit(); 
@@ -707,7 +720,6 @@
       if (timeLeft <= 300) {
         barFill.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
       }
-      syncLiveStatus();
     }
 
     // ===== SESSION & SYNC =====
@@ -745,55 +757,35 @@
       sessionStorage.setItem('mattep_session_uid', sessionUID);
     }
 
-    function syncLiveStatus() {
-      if (hasSubmitted) return;
-      const no = document.getElementById('studentNo').value.trim() || 'temp';
-      const nameVal = document.getElementById('studentName').value.trim();
-      
-      // ดึงข้อมูลคำตอบปัจจุบันเพื่อส่งไปแสดงผลแบบ Real-time
-      const currentEssays = {
-        essay1: document.getElementById('essay1').value,
-        essay2: document.getElementById('essay2').value
-      };
-      const currentObjective = [];
-      for (let i = 1; i <= 8; i++) {
-        const a = document.querySelector(`input[name="q${i}"]:checked`);
-        currentObjective.push(a ? a.value : '-');
+    function showAcWarning(msg, autoSubmit = false) {
+      document.getElementById('acWarningText').innerHTML = msg;
+      const btn = document.getElementById('acWarningBtn');
+      if (autoSubmit) {
+        btn.textContent = "ตกลง (ระบบกำลังส่งข้อสอบ...)";
+        btn.onclick = doSubmit;
+      } else {
+        btn.textContent = "รับทราบและกลับไปทำข้อสอบ";
+        btn.onclick = () => document.getElementById('antiCheatWarningModal').classList.remove('open');
       }
+      document.getElementById('antiCheatWarningModal').classList.add('open');
+    }
 
+    function checkRiskLevel() {
+      if (hasSubmitted) return;
       let acReport = {};
       if (window.antiCheat?.getAnalysisReport) {
         try { acReport = processAntiCheatReport(window.antiCheat.getAnalysisReport()); } catch(e) {}
       }
 
-      // ตรวจสอบคะแนนความเสี่ยงเพื่อดำเนินการอัตโนมัติ
       const currentRisk = Math.round(acReport.suspicionScore || 0);
       
       if (currentRisk >= 80) {
-        alert("ตรวจพบพฤติกรรมทุจริตเกินกำหนด (Risk: " + currentRisk + ")\nระบบจะทำการส่งข้อสอบของคุณทันที");
-        doSubmit();
+        showAcWarning(`ตรวจพบพฤติกรรมทุจริตเกินกำหนด (ความเสี่ยง: ${currentRisk}%)<br><strong style="color:#ef4444">ระบบจะทำการส่งข้อสอบของคุณทันที</strong>`, true);
         return;
       } else if (currentRisk >= 50 && !hasWarnedThreshold) {
         hasWarnedThreshold = true;
-        alert("คำเตือน: ระบบตรวจพบพฤติกรรมน่าสงสัย (Risk: " + currentRisk + ")\nหากคะแนนถึง 80 ระบบจะทำการส่งข้อสอบโดยอัตโนมัติทันที");
+        showAcWarning(`คำเตือน: ระบบตรวจพบพฤติกรรมน่าสงสัย (ความเสี่ยง: ${currentRisk}%)<br>หากคะแนนถึง 80 ระบบจะทำการส่งข้อสอบโดยอัตโนมัติทันที`);
       }
-
-      const liveData = {
-        uid: sessionUID,
-        name: nameVal,
-        no: no,
-        class: document.getElementById('studentClass').value.trim(),
-        timeLeft,
-        progress: document.getElementById('progressBar').style.width,
-        essays: currentEssays,
-        objectiveAnswers: currentObjective,
-        antiCheat: acReport,
-        lastUpdate: Date.now()
-      };
-
-      // ใช้ sessionUID เป็น Key เพื่อให้แยกคนกันอย่างสมบูรณ์แม้ชื่อจะซ้ำกัน
-      localStorage.setItem('mattep_live_user_' + sessionUID, JSON.stringify(liveData));
-      localStorage.setItem('mattep_live_sync_trigger', Date.now()); // ตัวกระตุ้นให้ Dashboard อัปเดต
     }
 
     // ===== SUBMIT =====
@@ -960,13 +952,11 @@
         sessionStorage.removeItem('mattep_saved_' + id);
         if (id === 'timer_end') sessionStorage.removeItem('mattep_timer_end');
       });
+      sessionStorage.removeItem('mattep_session_uid'); // ล้างรหัส UID ประจำเซสชันเมื่อส่งข้อสอบเสร็จ
       for (let i = 1; i <= 8; i++) {
         sessionStorage.removeItem('mattep_saved_q' + i);
       }
 
-      // ลบสถานะ Live ออกจาก Dashboard เมื่อส่งเสร็จแล้ว
-      localStorage.removeItem('mattep_live_user_' + sessionUID);
-      localStorage.setItem('mattep_live_sync_trigger', Date.now());
       document.getElementById('submitBtn').disabled = true;
       window.location.href = 'results.html';
     }

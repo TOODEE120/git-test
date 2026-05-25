@@ -68,10 +68,10 @@ function updateDashboard() {
     
     let allStudents = [];
     // 1. นำเข้าข้อมูลคนสอบเสร็จ
-    finishedData.forEach(item => {
+    finishedData.forEach((item, index) => {
         allStudents.push({ 
             ...item, 
-            uid: item.uid || ('f-' + item.studentNo + '-' + item.name), // fallback สำหรับข้อมูลเก่า
+            uid: (item.uid || ('f-' + item.studentNo + '-' + item.name)) + '-fin' + index, // บังคับให้ UID ไม่ซ้ำกันเด็ดขาด
             status: 'finished', 
             no: item.studentNo, 
             risk: getScoreValue(item),
@@ -93,6 +93,31 @@ function updateDashboard() {
         // ตรวจสอบพฤติกรรมใหม่เพื่อแสดง Toast
         checkNewViolations(item);
     });
+
+    // กำหนด ID ให้แต่ละรายชื่อ (เช่น 000001) โดยเรียงตามเวลาที่เริ่มทำข้อสอบ
+    const getStartTime = (s) => {
+        if (s.uid && s.uid.startsWith('u-')) {
+            const parts = s.uid.split('-');
+            if (parts[1]) return parseInt(parts[1], 10);
+        }
+        return s.sortTime || 0;
+    };
+    const sortedForId = [...allStudents].sort((a, b) => getStartTime(a) - getStartTime(b));
+    sortedForId.forEach((s, index) => {
+        s.displayId = String(index + 1).padStart(6, '0');
+    });
+
+    // อัปเดตตัวเลือกห้องเรียนใน Dropdown อัตโนมัติ
+    const uniqueClasses = [...new Set(allStudents.map(s => s.class || s.studentClass).filter(c => c))].sort();
+    const classFilterEl = document.getElementById('classFilter');
+    if (classFilterEl) {
+        const currentValue = classFilterEl.value;
+        classFilterEl.innerHTML = '<option value="all">🏫 แสดงทุกห้องเรียน</option>' + 
+            uniqueClasses.map(c => `<option value="${c}">ห้อง ${c}</option>`).join('');
+        if (uniqueClasses.includes(currentValue) || currentValue === 'all') {
+            classFilterEl.value = currentValue;
+        }
+    }
 
     updateSummaryStats(allStudents);
     renderStudentList(allStudents);
@@ -256,25 +281,36 @@ function renderStudentList(students) {
     const list = document.getElementById('studentList');
     const search = document.getElementById('searchInput').value.toLowerCase();
     const filter = document.getElementById('riskFilter').value;
+    const classFilter = document.getElementById('classFilter') ? document.getElementById('classFilter').value : 'all';
 
     const newListHTML = students
         .filter(s => {
             const matchSearch = (s.name || '').toLowerCase().includes(search) || (s.no || '').includes(search);
-            if (filter === 'high') return matchSearch && s.risk > 60;
-            if (filter === 'medium') return matchSearch && s.risk > 30 && s.risk <= 60;
-            if (filter === 'low') return matchSearch && s.risk <= 30;
-            return matchSearch;
+            const sClass = String(s.class || s.studentClass || '');
+            const matchClass = classFilter === 'all' || sClass === classFilter;
+
+            let matchRisk = true;
+            if (filter === 'high') matchRisk = s.risk > 60;
+            if (filter === 'medium') matchRisk = s.risk > 30 && s.risk <= 60;
+            if (filter === 'low') matchRisk = s.risk <= 30;
+
+            return matchSearch && matchRisk && matchClass;
         })
         .sort((a, b) => {
-            // 1. คนที่สอบเสร็จ (finished) อยู่บนสุด
-            if (a.status !== b.status) {
-                return a.status === 'finished' ? -1 : 1;
-            }
-            // 2. ในกลุ่มที่สอบเสร็จ เรียงตามเวลาที่เสร็จ (ใครเสร็จก่อนขึ้นก่อน - น้อยไปมาก)
-            if (a.status === 'finished') {
-                return a.sortTime - b.sortTime;
-            }
-            // 3. ในกลุ่มที่กำลังทำ เรียงตามความเสี่ยง (เสี่ยงสูงขึ้นก่อน)
+            // 1. เรียงตามห้องเรียนก่อน (Class)
+            const classA = String(a.class || a.studentClass || '').toLowerCase();
+            const classB = String(b.class || b.studentClass || '').toLowerCase();
+            if (classA < classB) return -1;
+            if (classA > classB) return 1;
+            
+            // 2. ถ้าอยู่ห้องเดียวกัน ให้เรียงตามเลขที่จากน้อยไปมาก (Number)
+            const noA = parseInt(a.no || a.studentNo || 0) || 0;
+            const noB = parseInt(b.no || b.studentNo || 0) || 0;
+            if (noA !== noB) return noA - noB;
+
+            // 3. ถ้าอยู่ห้องเดียวกัน เลขที่เดียวกัน ให้คนที่ทำเสร็จแล้วขึ้นก่อน
+            if (a.status !== b.status) return a.status === 'finished' ? -1 : 1;
+            
             return b.risk - a.risk;
         })
         .map((s) => `
@@ -285,7 +321,7 @@ function renderStudentList(students) {
                           : 'bg-white/40 backdrop-blur-md border-rose-100/40 hover:bg-white/80 hover:border-rose-200 hover:translate-x-1 shadow-sm'}">
                 <div class="flex justify-between items-start mb-1.5">
                     <div class="font-medium text-slate-800 truncate pr-2 text-sm">
-                        ${s.name || 'ไม่ระบุชื่อ'} 
+                        ${s.name || 'ไม่ระบุชื่อ'}
                     </div>
                     ${s.status === 'live' 
                         ? `
@@ -395,17 +431,42 @@ function updateDetailView(students) {
     // ลำดับเหตุการณ์ (Event List)
     const eventLogList = document.getElementById('eventList');
     if (violations.length > 0) {
-        eventLogList.innerHTML = [...violations].reverse().map(v => `
-            <li class="py-3 flex justify-between items-start">
-                <div class="pr-4">
-                    <div class="text-sm font-bold text-slate-800">${v.description}</div>
-                    <div class="text-xs text-slate-500">${v.time || ''} • ${v.category}</div>
-                </div>
-                <span class="text-xs font-bold px-2 py-1 rounded ${v.points >= 25 ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'}">+${v.points}</span>
-            </li>
-        `).join('');
+        eventLogList.innerHTML = [...violations].reverse().map(v => {
+            const isHigh = v.points >= 25;
+            const iconColor = isHigh ? 'text-rose-500' : 'text-amber-500';
+            const bgColor = isHigh ? 'bg-rose-50' : 'bg-amber-50';
+            const borderColor = isHigh ? 'border-rose-100' : 'border-amber-100';
+            const badgeColor = isHigh ? 'bg-gradient-to-r from-rose-500 to-rose-400 text-white' : 'bg-gradient-to-r from-amber-500 to-amber-400 text-white';
+            
+            return `
+                        <li class="p-3 rounded-xl border ${borderColor} ${bgColor} flex items-start gap-3 transition-transform hover:-translate-y-0.5 shadow-sm mb-1">
+                            <div class="mt-0.5 ${iconColor}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="font-bold text-slate-800 text-sm">${v.category}</span>
+                                    <span class="text-xs text-slate-500 font-medium">${v.time || '00:00:00'}</span>
+                                </div>
+                                <div class="text-xs text-slate-600">${v.description}</div>
+                            </div>
+                            <div class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${badgeColor} flex-shrink-0">
+                                +${v.points}
+                            </div>
+                        </li>
+            `;
+        }).join('');
     } else {
-        eventLogList.innerHTML = '<li class="py-10 text-center text-slate-400">ไม่มีประวัติเหตุการณ์ที่ผิดปกติ</li>';
+        eventLogList.innerHTML = `
+                    <li class="flex flex-col items-center justify-center text-slate-400 h-full gap-2 opacity-60">
+                        <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">ไม่พบเหตุการณ์ผิดปกติ</span>
+                    </li>
+        `;
     }
 }
 
