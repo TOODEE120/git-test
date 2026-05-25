@@ -3,750 +3,1023 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MATTEP</title>
-
+  <title>MATTEP — สอบ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rose:   #f43f5e;
+      --rose-l: #fb7185;
+      --rose-xl:#fecdd3;
+      --ink:    #1a1a2e;
+      --muted:  #64748b;
+      --bg:     #fff5f6;
+      --card:   #ffffff;
     }
 
     body {
-      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+      font-family: 'Khwan Thong', 'Sarabun', sans-serif;
+      font-weight: 300;
+      background: var(--bg);
       min-height: 100vh;
-      color: #1e293b;
-      padding: 40px 20px;
+      color: var(--ink);
+      padding: 32px 20px 60px;
+      user-select: none;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 950px;
-      margin: auto;
-    }
+    .container { max-width: 760px; width: 100%; margin: auto; }
 
-    .header {
-      position: relative;
-      overflow: hidden;
-      background: #ffffff;
-      backdrop-filter: blur(14px);
-      border: 1px solid #f3d7e6;
-      border-radius: 28px;
-      padding: 35px;
-      margin-bottom: 30px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    }
-
-    .header::before {
-      content: '';
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      background: rgba(244,63,94,0.10);
-      border-radius: 50%;
-      top: -80px;
-      right: -80px;
-    }
-
-    .header h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header p {
-      color: #475569;
-      font-size: 18px;
-      position: relative;
-      z-index: 1;
-      display: inline-block;
-      padding: 8px 24px;
-      background: rgba(255, 255, 255, 0.7);
-      border: 2px solid #e9d5ff; /* ขอบสีม่วงอ่อน */
-      border-radius: 999px;
-      box-shadow: 0 0 15px rgba(233, 213, 255, 0.6); /* เอฟเฟกต์เรืองแสง */
-      font-weight: 500;
-      margin-bottom: 5px;
-    }
-
-    .top-info {
-      display: flex;
-      gap: 15px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-    }
-
-    .badge {
-      background: #fff1f2;
-      border: 1px solid #fecdd3;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .timer-badge {
-      background: #fee2e2;
-      color: #dc2626;
-      border-color: #fca5a5;
-      font-weight: bold;
-    }
-
-    .student-form {
-      background: #ffffff;
-      border: 1px solid #f3d7e6;
+    /* ===== HEADER BANNER ===== */
+    .exam-banner {
+      background: linear-gradient(135deg, var(--rose) 0%, var(--rose-l) 100%);
       border-radius: 24px;
-      padding: 28px;
+      padding: 28px 32px;
       margin-bottom: 24px;
-      box-shadow: 0 10px 25px rgba(244,63,94,0.08);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 12px 32px rgba(244,63,94,.32);
+      flex-wrap: wrap;
     }
+    .banner-left .brand {
+      font-family: 'Khwan Thong', 'Outfit', sans-serif;
+      font-size: 36px;
+      line-height: 1;
+      font-weight: 600;
+    }
+    .banner-left .subtitle { font-size: 13px; opacity: .85; margin-top: 4px; }
+    .banner-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
 
-    .form-title {
+    .timer {
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 14px;
+      padding: 10px 20px;
       font-size: 22px;
       font-weight: 600;
-      margin-bottom: 20px;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 1px;
+      backdrop-filter: blur(4px);
+      transition: background .3s;
+    }
+    .timer.warn { background: rgba(0,0,0,.25); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:.7; } }
+
+    .badge-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .badge {
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
     }
 
+    /* ===== STUDENT FORM ===== */
+    .student-card {
+      background: var(--card);
+      border: 1px solid #f1f5f9;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.03);
+    }
+    .student-card h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--rose);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
     }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .input-group label {
-      font-size: 15px;
-      font-weight: 500;
-      color: #475569;
-    }
-
-    .input-group input {
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      font-size: 15px;
-      outline: none;
-      transition: 0.2s;
-    }
-
-    .input-group input:focus {
-      border-color: #f43f5e;
-      box-shadow: 0 0 0 4px rgba(244,63,94,0.12);
-    }
-
-    .question-card {
-      background: #ffffff;
-      border: 1px solid #f3d7e6;
-      backdrop-filter: blur(12px);
-      border-radius: 24px;
-      padding: 28px;
-      margin-bottom: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      transition: 0.25s ease;
-    }
-
-    .question-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(236,72,153,0.35);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    }
-
-    .question-number {
-      width: 42px;
-      height: 42px;
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--muted); }
+    .field input {
+      padding: 12px 16px;
       border-radius: 12px;
+      border: 1px solid #f1f5f9;
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 300;
+      outline: none;
+      transition: all .2s;
+      user-select: text;
+    }
+    .field input:focus {
+      background: #fff;
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(244,63,94,.12);
+    }
+    .field input.invalid {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239,68,68,.12);
+    }
+    .form-error {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .form-error.show { display: block; }
+
+    /* ===== QUESTION CARD ===== */
+    .q-card {
+      background: var(--card);
+      border: 1.5px solid #f1f5f9;
+      border-radius: 22px;
+      padding: 26px 28px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.04);
+      transition: border-color .2s, box-shadow .3s, transform .3s;
+    }
+    .q-card:has(input:checked) {
+      border-color: var(--rose-xl);
+      box-shadow: 0 4px 18px rgba(244,63,94,.1);
+    }
+    /* เพิ่มเอฟเฟกต์สำหรับข้อที่กำลังทำ (Active Question) */
+    .q-card:focus-within {
+      border-color: var(--rose-l);
+      box-shadow: 0 12px 30px rgba(244,63,94, 0.15);
+    }
+
+    .q-header {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      color: white;
-      font-weight: bold;
+      align-items: flex-start;
+      gap: 14px;
       margin-bottom: 18px;
-      font-size: 18px;
     }
-
-    .question-title {
-      font-size: 20px;
-      margin-bottom: 20px;
-      font-weight: 500;
+    .q-num {
+      min-width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      color: #fff;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
+    .q-text { font-size: 16px; font-weight: 600; line-height: 1.55; color: var(--ink); }
 
-    .choices {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .choices label {
+    .choices { display: flex; flex-direction: column; gap: 8px; }
+    .choice-label {
       display: flex;
       align-items: center;
       gap: 12px;
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-weight: 300;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 15px;
+      color: #475569;
+      min-width: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    }
+    .radio-text { min-width: 0; overflow-wrap: anywhere; }
+    .choice-label:hover { 
+      border-color: var(--rose-xl); 
+      background: rgba(255, 245, 246, 0.8); 
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0,0,0, 0.02);
+    }
+    .choice-label input[type=radio] { display: none; }
+    .choice-label .radio-dot {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(203, 213, 225, 0.8);
+      background: rgba(255, 255, 255, 0.4);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .choice-label input[type=radio]:checked ~ .radio-text { color: var(--ink); font-weight: 500; }
+    .choice-label:has(input:checked) {
+      border-color: var(--rose);
+      background: rgba(244, 63, 94, 0.05);
+      box-shadow: 0 8px 20px rgba(244, 63, 94, 0.08);
+    }
+    .choice-label:has(input:checked) .radio-dot {
+      border-color: var(--rose);
+      background: var(--rose);
+      box-shadow: none;
+      transform: scale(1.1);
+    }
+    .choice-label:has(input:checked) .radio-dot::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    /* ===== ESSAY ===== */
+    .essay-wrap textarea {
+      width: 100%;
+      min-height: 130px;
       padding: 16px;
       border-radius: 16px;
-      background: #fffafc;
-      border: 1px solid #dbe4ee;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 16px;
-    }
-
-    .choices label:hover {
-      background: #fff1f2;
-      border-color: rgba(236,72,153,0.35);
-    }
-
-    input[type="radio"] {
-      transform: scale(1.2);
-      accent-color: #f43f5e;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      border-radius: 18px;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      color: #0f172a;
-      padding: 18px;
-      resize: vertical;
-      font-size: 16px;
+      border: 1px solid #f1f5f9;
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 300;
       outline: none;
-      transition: 0.2s;
+      resize: vertical;
+      line-height: 1.7;
+      color: var(--ink);
+      transition: all .2s;
+      user-select: text;
+    }
+    .essay-wrap textarea:focus {
+      background: #fff;
+      border-color: var(--rose);
+      box-shadow: 0 0 0 3px rgba(244,63,94,.12);
     }
 
-    textarea:focus {
-      border-color: #f43f5e;
-      box-shadow: 0 0 0 4px rgba(244,63,94,0.15);
+    /* ===== PROGRESS ===== */
+    .progress-bar-wrap {
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 999px;
+      height: 10px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
-
-    textarea::placeholder {
-      color: #94a3b8;
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--rose), var(--rose-l));
+      border-radius: 999px;
+      transition: width .4s cubic-bezier(.22,1,.36,1);
+      position: relative;
+      box-shadow: none;
+      overflow: hidden;
     }
+    /* Removed shine and glossy effects */
+    .progress-bar-fill::after,
+    .progress-bar-fill::before { display: none; }
 
+    /* ===== SUBMIT ===== */
     .submit-btn {
+      display: block;
       width: 100%;
-      padding: 18px;
+      padding: 19px;
       border: none;
       border-radius: 20px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      color: white;
-      font-size: 20px;
-      font-weight: bold;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      color: #fff;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 500;
       cursor: pointer;
-      transition: 0.25s;
-      box-shadow: 0 10px 25px rgba(236,72,153,0.25);
+      box-shadow: 0 12px 32px rgba(244,63,94,.35);
+      transition: all 0.4s cubic-bezier(.22, 1, .36, 1);
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .submit-btn:hover { 
+      transform: translateY(-5px) scale(1.01); 
+      box-shadow: 0 16px 40px rgba(244, 63, 94, 0.3);
+      letter-spacing: 1px;
+    }
+    /* Removed shine effect */
+    .submit-btn::after { display: none; }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .ripple {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      border-radius: 50%;
+      animation: rippleEffect 0.6s linear;
+    }
+    @keyframes rippleEffect {
+      from { width: 0; height: 0; opacity: 1; }
+      to { width: 800px; height: 800px; opacity: 0; }
     }
 
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 35px rgba(244,63,94,0.40);
-    }
-
-    .submit-btn:disabled {
-      background: #cbd5e1;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .result {
-      margin-top: 30px;
-      background: #ffffff;
-      backdrop-filter: blur(12px);
-      border: 1px solid #f3d7e6;
-      border-radius: 24px;
-      padding: 30px;
+    /* ===== CONFIRM MODAL ===== */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,15,30,.55);
+      backdrop-filter: blur(6px);
       display: none;
-      animation: fade 0.5s ease;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
     }
-
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    .overlay.open { display: flex; }
+    @keyframes modalBounce {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
     }
-
-    .score {
-      font-size: 34px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #f43f5e, #fb7185);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .modal {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0,0,0,.25);
     }
-
-    .essay-box {
-      margin-top: 18px;
-      padding: 18px;
-      border-radius: 18px;
-      background: #fffafc;
-      line-height: 1.8;
-      border: 1px solid #fecdd3;
+    .overlay.open .modal {
+      animation: modalBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
-
-    hr {
+    
+    .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: var(--ink); }
+    .modal p  { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+    .modal-btns button {
+      padding: 12px 28px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
       border: none;
-      height: 1px;
-      background: #f1f5f9;
-      margin: 20px 0;
+      transition: transform .15s;
     }
+    .modal-btns button:hover { transform: translateY(-1px); }
+    .modal-btns .cancel { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .modal-btns .confirm { background: linear-gradient(135deg, var(--rose), var(--rose-l)); color: #fff; }
 
-    @media(max-width: 768px) {
-      .header h1 { font-size: 30px; }
-      .question-title { font-size: 18px; }
-      .submit-btn { font-size: 18px; }
+    .pc-only-message {
+      display: none;
+      max-width: 560px;
+      margin: 10vh auto 0;
+      background: #fff;
+      border: 1px solid #fecaca;
+      border-radius: 24px;
+      padding: 34px 26px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(15,23,42,.12);
+    }
+    .pc-only-message h1 { font-size: 24px; color: #dc2626; margin-bottom: 10px; }
+    .pc-only-message p { color: var(--muted); line-height: 1.7; }
+    .pc-only-message a {
+      display: inline-block;
+      margin-top: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 12px 20px;
+      font-weight: 800;
+    }
+    body.pc-only-blocked .container,
+    body.pc-only-blocked .overlay,
+    body.pc-only-blocked #antiCheatStatus { display: none !important; }
+    body.pc-only-blocked .pc-only-message { display: block; }
+
+    @media (max-width: 560px) {
+      body { padding: 16px 12px 36px; }
+      .exam-banner {
+        padding: 20px;
+        border-radius: 20px;
+        align-items: flex-start;
+      }
+      .banner-right { align-items: flex-start; width: 100%; }
+      .badge-row { justify-content: flex-start; }
+      .banner-left .brand { font-size: 28px; }
+      .timer { font-size: 18px; }
+      .student-card, .q-card { padding: 18px; border-radius: 18px; }
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .q-header { gap: 10px; }
+      .q-num { min-width: 32px; height: 32px; }
+      .choice-label { align-items: flex-start; padding: 12px; }
+      .modal { padding: 24px 18px; border-radius: 22px; }
+      .modal-btns { flex-direction: column-reverse; }
+      .modal-btns button { width: 100%; }
+      .submit-btn { border-radius: 16px; font-size: 16px; }
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <div class="student-form">
-      <div class="form-title">ข้อมูลนักเรียน</div>
-      <div class="form-grid">
-        <div class="input-group">
-          <label>ชื่อ - นามสกุล <span style="color:red">*</span></label>
-          <input type="text" id="studentName" placeholder="กรอกชื่อ - นามสกุล">
-        </div>
-        <div class="input-group">
-          <label>เลขที่ <span style="color:red">*</span></label>
-          <input type="number" id="studentNo" placeholder="กรอกเลขที่">
-        </div>
-        <div class="input-group">
-          <label>ชั้นเรียน <span style="color:red">*</span></label>
-          <input type="text" id="studentClass" placeholder="เช่น ม.5/11">
-        </div>
-      </div>
-    </div>
-
-    <div class="header">
-      <h1>MATTEP</h1>
-      <p>ระบบทำข้อสอบออนไลน์</p>
-      <div class="top-info">
-        <div class="badge">วิชา: Web Technology</div>
-        <div class="badge timer-badge" id="timerDisplay">เวลา: 60:00</div>
-      </div>
-    </div>
-
-    <div id="examForm">
-      <div class="question-card">
-        <div class="question-number">1</div>
-        <div class="question-title">ภาษา HTML ใช้ทำอะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q1" value="0"> ใช้ตัดต่อวิดีโอ</label>
-          <label><input type="radio" name="q1" value="1"> ใช้สร้างหน้าเว็บไซต์</label>
-          <label><input type="radio" name="q1" value="0"> ใช้ทำเพลง</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">2</div>
-        <div class="question-title">CSS มีหน้าที่อะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q2" value="1"> ตกแต่งเว็บไซต์</label>
-          <label><input type="radio" name="q2" value="0"> เก็บฐานข้อมูล</label>
-          <label><input type="radio" name="q2" value="0"> สร้างไวรัส</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">3</div>
-        <div class="question-title">JavaScript ใช้ในการทำอะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q3" value="1"> ทำให้หน้าเว็บมีความโต้ตอบ</label>
-          <label><input type="radio" name="q3" value="0"> จัดเก็บข้อมูล</label>
-          <label><input type="radio" name="q3" value="0"> ตัดต่อวิดีโอ</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">4</div>
-        <div class="question-title">ตัวแปร (Variable) คืออะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q4" value="1"> ที่เก็บค่าข้อมูลในโปรแกรม</label>
-          <label><input type="radio" name="q4" value="0"> ชนิดของปุ่มเมาส์</label>
-          <label><input type="radio" name="q4" value="0"> ระบบปฏิบัติการ</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">5</div>
-        <div class="question-title">Loop ใช้สำหรับการทำอะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q5" value="1"> ทำซ้ำรหัสหลายครั้ง</label>
-          <label><input type="radio" name="q5" value="0"> ลบข้อมูล</label>
-          <label><input type="radio" name="q5" value="0"> เปลี่ยนแบบอักษร</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">6</div>
-        <div class="question-title">Function มีประโยชน์อะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q6" value="1"> เก็บรหัสและใช้ซ้ำได้</label>
-          <label><input type="radio" name="q6" value="0"> สร้างตารางข้อมูล</label>
-          <label><input type="radio" name="q6" value="0"> เชื่อมต่ออินเทอร์เน็ต</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">7</div>
-        <div class="question-title">Database ใช้เพื่อการอะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q7" value="0"> วาดรูปภาพ</label>
-          <label><input type="radio" name="q7" value="1"> เก็บและจัดการข้อมูล</label>
-          <label><input type="radio" name="q7" value="0"> สร้างเสียง</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">8</div>
-        <div class="question-title">API ในการเขียนโปรแกรมคืออะไร? <span style="color:red">*</span></div>
-        <div class="choices">
-          <label><input type="radio" name="q8" value="1"> อินเตอร์เฟซสำหรับเชื่อมต่อซอฟต์แวร์</label>
-          <label><input type="radio" name="q8" value="0"> ชนิดของเกม</label>
-          <label><input type="radio" name="q8" value="0"> อุปกรณ์คอมพิวเตอร์</label>
-        </div>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">9</div>
-        <div class="question-title">อธิบายว่า JavaScript ใช้ทำอะไร</div>
-        <textarea id="essay1" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
-      </div>
-
-      <div class="question-card">
-        <div class="question-number">10</div>
-        <div class="question-title">ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง?</div>
-        <textarea id="essay2" placeholder="พิมพ์คำตอบของคุณ..."></textarea>
-      </div>
-    </div>
-
-    <button class="submit-btn" id="submitBtn" onclick="validateAndConfirm()">
-      ส่งข้อสอบ
-    </button>
-
+  <div class="pc-only-message" id="pcOnlyMessage">
+    <h1>หน้านี้ใช้บน PC เท่านั้น</h1>
+    <p>เพื่อความถูกต้องของระบบสอบและการตรวจจับพฤติกรรม กรุณาเปิดข้อสอบด้วยคอมพิวเตอร์หรือ Notebook ที่มีหน้าจอกว้างอย่างน้อย 900px</p>
+    <a href="home.html">กลับหน้าหลัก</a>
   </div>
 
+  <div class="container">
+
+    <!-- Header Banner -->
+    <div class="exam-banner">
+      <div class="banner-left">
+        <div class="brand">MATTEP</div>
+        <div class="subtitle">ระบบทำข้อสอบออนไลน์ • พร้อม AI Anti-Cheat</div>
+      </div>
+      <div class="banner-right">
+        <div class="timer" id="timerDisplay">60:00</div>
+        <div class="badge-row">
+          <div class="badge">📚 Web Technology</div>
+          <div class="badge">10 ข้อ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; padding: 0 2px;">
+      <span style="font-size: 13px; font-weight: 700; color: var(--rose);">ความคืบหน้าการทำข้อสอบ</span>
+      <span id="progressText" style="font-size: 13px; font-weight: 600; color: var(--muted);">ทำไปแล้ว 0 จาก 13 ส่วน</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+
+    <!-- Student Info -->
+    <div class="student-card">
+      <h2>
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        ข้อมูลนักเรียน
+      </h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>ชื่อ - นามสกุล <span style="color:var(--rose)">*</span></label>
+          <input type="text" id="studentName" placeholder="กรอกชื่อ - นามสกุล" autocomplete="off" required />
+        </div>
+        <div class="field">
+          <label>เลขที่ <span style="color:var(--rose)">*</span></label>
+          <input type="number" id="studentNo" placeholder="เลขที่" min="1" required />
+        </div>
+        <div class="field">
+          <label>ชั้นเรียน <span style="color:var(--rose)">*</span></label>
+          <input type="text" id="studentClass" placeholder="เช่น ม.5/11" required />
+        </div>
+      </div>
+      <div class="form-error" id="studentError">กรุณากรอกข้อมูลนักเรียนให้ครบก่อนส่งข้อสอบ</div>
+    </div>
+
+    <!-- Questions 1-8: Objective -->
+    <div id="examForm">
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">1</div><div class="q-text">ภาษา HTML ใช้ทำอะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q1" value="A"><div class="radio-dot"></div><span class="radio-text">ใช้ตัดต่อวิดีโอ</span></label>
+          <label class="choice-label"><input type="radio" name="q1" value="B"><div class="radio-dot"></div><span class="radio-text">ใช้สร้างหน้าเว็บไซต์</span></label>
+          <label class="choice-label"><input type="radio" name="q1" value="C"><div class="radio-dot"></div><span class="radio-text">ใช้ทำเพลง</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">2</div><div class="q-text">CSS มีหน้าที่อะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q2" value="A"><div class="radio-dot"></div><span class="radio-text">ตกแต่งเว็บไซต์</span></label>
+          <label class="choice-label"><input type="radio" name="q2" value="B"><div class="radio-dot"></div><span class="radio-text">เก็บฐานข้อมูล</span></label>
+          <label class="choice-label"><input type="radio" name="q2" value="C"><div class="radio-dot"></div><span class="radio-text">สร้างไวรัส</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">3</div><div class="q-text">JavaScript ใช้ในการทำอะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q3" value="A"><div class="radio-dot"></div><span class="radio-text">ทำให้หน้าเว็บมีความโต้ตอบ</span></label>
+          <label class="choice-label"><input type="radio" name="q3" value="B"><div class="radio-dot"></div><span class="radio-text">จัดเก็บข้อมูล</span></label>
+          <label class="choice-label"><input type="radio" name="q3" value="C"><div class="radio-dot"></div><span class="radio-text">ตัดต่อวิดีโอ</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">4</div><div class="q-text">ตัวแปร (Variable) คืออะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q4" value="A"><div class="radio-dot"></div><span class="radio-text">ที่เก็บค่าข้อมูลในโปรแกรม</span></label>
+          <label class="choice-label"><input type="radio" name="q4" value="B"><div class="radio-dot"></div><span class="radio-text">ชนิดของปุ่มเมาส์</span></label>
+          <label class="choice-label"><input type="radio" name="q4" value="C"><div class="radio-dot"></div><span class="radio-text">ระบบปฏิบัติการ</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">5</div><div class="q-text">Loop ใช้สำหรับการทำอะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q5" value="A"><div class="radio-dot"></div><span class="radio-text">ทำซ้ำรหัสหลายครั้ง</span></label>
+          <label class="choice-label"><input type="radio" name="q5" value="B"><div class="radio-dot"></div><span class="radio-text">ลบข้อมูล</span></label>
+          <label class="choice-label"><input type="radio" name="q5" value="C"><div class="radio-dot"></div><span class="radio-text">เปลี่ยนแบบอักษร</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">6</div><div class="q-text">Function มีประโยชน์อะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q6" value="A"><div class="radio-dot"></div><span class="radio-text">เก็บรหัสและใช้ซ้ำได้</span></label>
+          <label class="choice-label"><input type="radio" name="q6" value="B"><div class="radio-dot"></div><span class="radio-text">สร้างตารางข้อมูล</span></label>
+          <label class="choice-label"><input type="radio" name="q6" value="C"><div class="radio-dot"></div><span class="radio-text">เชื่อมต่ออินเทอร์เน็ต</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">7</div><div class="q-text">Database ใช้เพื่อการอะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q7" value="A"><div class="radio-dot"></div><span class="radio-text">วาดรูปภาพ</span></label>
+          <label class="choice-label"><input type="radio" name="q7" value="B"><div class="radio-dot"></div><span class="radio-text">เก็บและจัดการข้อมูล</span></label>
+          <label class="choice-label"><input type="radio" name="q7" value="C"><div class="radio-dot"></div><span class="radio-text">สร้างเสียง</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">8</div><div class="q-text">API ในการเขียนโปรแกรมคืออะไร? <span style="color:var(--rose)">*</span></div></div>
+        <div class="choices">
+          <label class="choice-label"><input type="radio" name="q8" value="A"><div class="radio-dot"></div><span class="radio-text">อินเตอร์เฟซสำหรับเชื่อมต่อซอฟต์แวร์</span></label>
+          <label class="choice-label"><input type="radio" name="q8" value="B"><div class="radio-dot"></div><span class="radio-text">ชนิดของเกม</span></label>
+          <label class="choice-label"><input type="radio" name="q8" value="C"><div class="radio-dot"></div><span class="radio-text">อุปกรณ์คอมพิวเตอร์</span></label>
+        </div>
+      </div>
+
+      <!-- Essay Questions -->
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">9</div><div class="q-text">อธิบายว่า JavaScript ใช้ทำอะไร (บรรยาย)</div></div>
+        <div class="essay-wrap">
+          <textarea id="essay1" placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-header"><div class="q-num">10</div><div class="q-text">ถ้าออกแบบระบบกันโกงสอบ คุณจะทำยังไง? (บรรยาย)</div></div>
+        <div class="essay-wrap">
+          <textarea id="essay2" placeholder="พิมพ์คำตอบของคุณที่นี่..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="confirmSubmit()">
+      ส่งข้อสอบ
+    </button>
+  </div>
+
+  <!-- Anti-Cheat Warning Modal -->
+  <div class="overlay" id="antiCheatWarningModal" style="z-index: 9999;">
+    <div class="modal" style="border-top: 6px solid #ef4444; padding-top: 32px;">
+      <div style="width: 64px; height: 64px; background: #fef2f2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.1);">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <h3 style="color: #ef4444; font-size: 22px; font-weight: 700; margin-bottom: 8px;">คำเตือนจากระบบป้องกันทุจริต</h3>
+      <p id="acWarningText" style="font-size: 15px; color: var(--muted); margin-bottom: 24px; line-height: 1.6;">ตรวจพบพฤติกรรมผิดปกติ</p>
+      <div class="modal-btns">
+        <button id="acWarningBtn" class="confirm" style="width: 100%; background: linear-gradient(135deg, #ef4444, #f43f5e);" onclick="closeAcWarning()">รับทราบและกลับไปทำข้อสอบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="overlay" id="confirmModal">
+    <div class="modal">
+      <h3>ยืนยันส่งข้อสอบ?</h3>
+      <p id="confirmText">คุณยังไม่ได้ตอบ <span id="unansweredCount">0</span> ข้อ<br>ต้องการส่งข้อสอบใช่หรือไม่?</p>
+      <div class="modal-btns">
+        <button class="cancel" onclick="closeConfirm()">ยกเลิก</button>
+        <button class="confirm" onclick="doSubmit()">ส่งเลย</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.__mattepPcOnlyBlocked = window.innerWidth < 900
+      || window.matchMedia('(pointer: coarse)').matches
+      || /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+  </script>
   <script src="antiCheat.js"></script>
   <script>
-    // --- ระบบจัดการเวลา (Timer) ---
-    let timeInSeconds = 60 * 60; // 60 นาที
-    let timerInterval;
+    // ดักฟังเหตุการณ์จาก AI ทันทีเพื่อส่งข้อมูลไป Dashboard (Real-time connection)
+    window.addEventListener('keydown', (e) => {
+      // ตรวจสอบ F12 หรือ Ctrl+Shift+I/J/C
+      const isDevToolsShortcut = e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key));
+      
+      if (isDevToolsShortcut) {
+        e.preventDefault(); // บล็อกการเปิดหน้าต่าง DevTools
+        e.stopPropagation(); // ป้องกันไม่ให้ Event ทำงานต่อ
+        document.dispatchEvent(new CustomEvent('antiCheatViolation')); // ส่งสัญญาณให้ระบบคำนวณความเสี่ยง
+      }
+    }, true); // ใช้ Capture Phase เพื่อดักจับเป็นลำดับแรก
 
-    function startTimer() {
+    document.addEventListener('antiCheatViolation', () => {
+      checkRiskLevel();
+    });
+
+    // ใส่ Delay ให้แอนิเมชันของแต่ละ Q-Card ดูลื่นไหล
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.q-card').forEach((card, i) => {
+        card.style.animationDelay = (i * 0.08) + 's';
+      });
+    });
+
+    function isPcOnlyAllowed() {
+      const isSmallScreen = window.innerWidth < 900;
+      const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+      const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+      return !isSmallScreen && !isTouchPrimary && !isMobileUA;
+    }
+
+    function enforcePcOnly() {
+      const allowed = isPcOnlyAllowed();
+      document.body.classList.toggle('pc-only-blocked', !allowed);
+      return allowed;
+    }
+
+    const pcModeAllowed = enforcePcOnly();
+
+    // ===== CLEAN UP OLD EXAM DATA ON PAGE LOAD =====
+    function clearExamData() {
+      const keys = Object.keys(sessionStorage);
+      keys.forEach(key => {
+        if (key.startsWith('mattep_saved_')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      sessionStorage.removeItem('mattep_timer_end');
+      sessionStorage.removeItem('mattep_exam_started');
+    }
+
+    // ===== PREVENT BACK NAVIGATION ONCE EXAM STARTED =====
+    const examStarted = sessionStorage.getItem('mattep_exam_started') === 'true';
+    
+    // เมื่อเข้าสู่หน้าสอบใหม่ ให้ลบข้อมูลเก่า
+    if (!examStarted) {
+      clearExamData();
+    } else {
+      // ป้องกัน History Stack หลบหนี
+      history.pushState(null, null, window.location.href);
+      
+      // ดักจับการกดปุ่ม Back ของ Browser - ลบข้อมูลทันที
+      window.addEventListener('popstate', (e) => {
+        clearExamData();
+        history.pushState(null, null, window.location.href);
+      });
+    }
+
+    // ===== EXIT EXAM FUNCTION (REMOVED - Exit button removed) =====
+
+    window.addEventListener('resize', () => {
+      if (!enforcePcOnly()) {
+        clearInterval(timerInterval);
+        document.getElementById('submitBtn').disabled = true;
+      }
+    });
+
+    const ANSWER_KEY_PAYLOAD = 'WyJCIiwiQSIsIkEiLCJBIiwiQSIsIkEiLCJCIiwiQSJd';
+    const ANSWER_KEY_SALT = 'mattep-v4-local-signature';
+
+    function getAnswerKey() {
+      try { return JSON.parse(atob(ANSWER_KEY_PAYLOAD)); }
+      catch(e) { return ['B','A','A','A','A','A','B','A']; }
+    }
+
+    function stableStringify(value) {
+      if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+      if (value && typeof value === 'object') {
+        return '{' + Object.keys(value).filter(k => k !== 'integrity').sort().map(k => JSON.stringify(k) + ':' + stableStringify(value[k])).join(',') + '}';
+      }
+      return JSON.stringify(value);
+    }
+
+    function createIntegrityHash(record) {
+      const text = stableStringify(record) + ANSWER_KEY_SALT;
+      let hash = 2166136261;
+      for (let i = 0; i < text.length; i++) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16).padStart(8, '0');
+    }
+
+    // ===== TIMER =====
+    let timeLeft = 60 * 60;
+    const timerEl = document.getElementById('timerDisplay');
+
+    // เชื่อมต่อเวลา (จำเวลาเดิมแม้รีเฟรชหน้า)
+    const savedEndTime = sessionStorage.getItem('mattep_timer_end');
+    let endTime;
+    if (savedEndTime) {
+      endTime = parseInt(savedEndTime);
+    } else {
+      endTime = Date.now() + (timeLeft * 1000);
+      sessionStorage.setItem('mattep_timer_end', endTime);
+    }
+
+    let timerInterval = null;
+    if (pcModeAllowed) {
       timerInterval = setInterval(() => {
-        timeInSeconds--;
-        let minutes = Math.floor(timeInSeconds / 60);
-        let seconds = timeInSeconds % 60;
-        
-        // เติมเลข 0 ข้างหน้าถ้าวินาทีน้อยกว่า 10
-        let displaySeconds = seconds < 10 ? "0" + seconds : seconds;
-        document.getElementById('timerDisplay').innerText = `เวลา: ${minutes}:${displaySeconds}`;
+        const now = Date.now();
+        timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
 
-        if (timeInSeconds <= 0) {
-          clearInterval(timerInterval);
-          showModal("หมดเวลา", "หมดเวลาทำข้อสอบ! ระบบจะส่งคำตอบโดยอัตโนมัติ", false, submitExam);
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        timerEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+        if (timeLeft <= 300) timerEl.classList.add('warn');
+        if (timeLeft <= 0) { 
+          clearInterval(timerInterval); 
+          doSubmit(); 
         }
       }, 1000);
     }
 
-    // เริ่มจับเวลาทันทีที่เปิดหน้าเว็บ
-    window.onload = startTimer;
+    function updateProgress() {
+      let answered = 0;
+      // 1. ตรวจสอบข้อมูลนักเรียน (3 ส่วน)
+      ['studentName', 'studentNo', 'studentClass'].forEach(id => {
+        const val = document.getElementById(id).value.trim();
+        if (val && (id !== 'studentNo' || Number(val) > 0)) answered++;
+      });
+      // 2. ตรวจสอบข้อสอบปรนัย (8 ข้อ)
+      for (let i = 1; i <= 8; i++) {
+        if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
+      }
+      // 3. ตรวจสอบข้อสอบอัตนัย (2 ข้อ)
+      if (document.getElementById('essay1').value.trim()) answered++;
+      if (document.getElementById('essay2').value.trim()) answered++;
 
+      // คำนวณความคืบหน้าจากทั้งหมด 13 ส่วน เพื่อให้แถบสีขยับตั้งแต่เริ่มกรอกชื่อ
+      const barFill = document.getElementById('progressBar');
+      barFill.style.width = (answered / 13 * 100) + '%';
+      document.getElementById('progressText').textContent = `ทำไปแล้ว ${answered} จาก 13 ส่วน`;
 
-    // --- ระบบ Modal สำหรับแสดงข้อความ ---
-    function showModal(title, message, isConfirm, callback) {
-      const modal = document.createElement('div');
-      modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        animation: fadeIn 0.3s ease;
-      `;
+      // เชื่อมต่อสีแถบความคืบหน้ากับเวลา (เหลือ < 5 นาที เปลี่ยนเป็นสีส้มเตือน)
+      if (timeLeft <= 300) {
+        barFill.style.background = 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+      }
+    }
 
-      const modalContent = document.createElement('div');
-      modalContent.style.cssText = `
-        background: white;
-        border-radius: 24px;
-        padding: 30px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.3s ease;
-      `;
+    // ===== SESSION & SYNC =====
+    let hasWarnedThreshold = false;
 
-      const titleElement = document.createElement('h2');
-      titleElement.innerText = title;
-      titleElement.style.cssText = `
-        color: #f43f5e;
-        margin-bottom: 15px;
-        font-size: 20px;
-      `;
+    /**
+     * ฟังก์ชันสำหรับกรองรายงาน Anti-Cheat 
+     * เพื่อยกเว้นบทลงโทษจากการตอบเร็ว (Answer Timing)
+     */
+    function processAntiCheatReport(report) {
+      if (!report || !report.violations) return report;
+      
+      // 1. คำนวณคะแนนที่ถูกหักจากเรื่องการตอบเร็ว (Category: answerTiming)
+      const timingPoints = report.violations
+        .filter(v => v.category === 'answerTiming')
+        .reduce((sum, v) => sum + (v.points || 0), 0);
 
-      const messageElement = document.createElement('p');
-      messageElement.innerText = message;
-      messageElement.style.cssText = `
-        color: #475569;
-        margin-bottom: 25px;
-        line-height: 1.6;
-      `;
+      // 2. กรองเอารายการทำผิดเรื่องตอบเร็วออกจากประวัติ
+      report.violations = report.violations.filter(v => v.category !== 'answerTiming');
+      
+      // 3. ปรับคะแนนความสงสัย (Risk Score) ลงตามสัดส่วนที่หักออก
+      report.suspicionScore = Math.max(0, report.suspicionScore - timingPoints);
+      report.violationCount = report.violations.length;
 
-      const buttonsContainer = document.createElement('div');
-      buttonsContainer.style.cssText = `
-        display: flex;
-        gap: 12px;
-        justify-content: flex-end;
-      `;
+      // 4. ล้างค่าสถิติในหมวดการตอบเร็วให้เป็น 0 เพื่อความสะอาดของข้อมูล
+      if (report.statistics) report.statistics.answerTiming = 0;
+      
+      return report;
+    }
 
-      if (isConfirm) {
-        const cancelBtn = document.createElement('button');
-        cancelBtn.innerText = 'ยกเลิก';
-        cancelBtn.style.cssText = `
-          padding: 10px 24px;
-          border: 1px solid #cbd5e1;
-          background: #f1f5f9;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          color: #475569;
-          transition: 0.2s;
-        `;
-        cancelBtn.onmouseover = () => { cancelBtn.style.background = '#e2e8f0'; };
-        cancelBtn.onmouseout = () => { cancelBtn.style.background = '#f1f5f9'; };
-        cancelBtn.onclick = () => { modal.remove(); };
+    // สร้างรหัส ID เฉพาะตัวสำหรับเซสชันนี้ เพื่อแยกคนกรณีชื่อ/เลขที่ซ้ำกัน
+    let sessionUID = sessionStorage.getItem('mattep_session_uid');
+    if (!sessionUID) {
+      sessionUID = 'u-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      sessionStorage.setItem('mattep_session_uid', sessionUID);
+    }
 
-        const confirmBtn = document.createElement('button');
-        confirmBtn.innerText = 'ยืนยัน';
-        confirmBtn.style.cssText = `
-          padding: 10px 24px;
-          background: linear-gradient(135deg, #f43f5e, #fb7185);
-          color: white;
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          transition: 0.2s;
-          box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        `;
-        confirmBtn.onmouseover = () => { confirmBtn.style.transform = 'translateY(-2px)'; confirmBtn.style.boxShadow = '0 6px 20px rgba(244, 63, 94, 0.4)'; };
-        confirmBtn.onmouseout = () => { confirmBtn.style.transform = 'translateY(0)'; confirmBtn.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.3)'; };
-        confirmBtn.onclick = () => { modal.remove(); callback(); };
-
-        buttonsContainer.appendChild(cancelBtn);
-        buttonsContainer.appendChild(confirmBtn);
+    function showAcWarning(msg, autoSubmit = false) {
+      document.getElementById('acWarningText').innerHTML = msg;
+      const btn = document.getElementById('acWarningBtn');
+      if (autoSubmit) {
+        btn.textContent = "ตกลง (ระบบกำลังส่งข้อสอบ...)";
+        btn.onclick = doSubmit;
       } else {
-        const okBtn = document.createElement('button');
-        okBtn.innerText = 'ตกลง';
-        okBtn.style.cssText = `
-          padding: 10px 24px;
-          background: linear-gradient(135deg, #f43f5e, #fb7185);
-          color: white;
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          transition: 0.2s;
-          box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        `;
-        okBtn.onmouseover = () => { okBtn.style.transform = 'translateY(-2px)'; okBtn.style.boxShadow = '0 6px 20px rgba(244, 63, 94, 0.4)'; };
-        okBtn.onmouseout = () => { okBtn.style.transform = 'translateY(0)'; okBtn.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.3)'; };
-        okBtn.onclick = () => { modal.remove(); callback(); };
-
-        buttonsContainer.appendChild(okBtn);
+        btn.textContent = "รับทราบและกลับไปทำข้อสอบ";
+        btn.onclick = () => document.getElementById('antiCheatWarningModal').classList.remove('open');
       }
-
-      modalContent.appendChild(titleElement);
-      modalContent.appendChild(messageElement);
-      modalContent.appendChild(buttonsContainer);
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
+      document.getElementById('antiCheatWarningModal').classList.add('open');
     }
 
-    // --- ฟังก์ชันตรวจสอบและยืนยัน ---
-    function validateAndConfirm() {
-      const name = document.getElementById('studentName').value.trim();
-      const studentNo = document.getElementById('studentNo').value.trim();
-      const studentClass = document.getElementById('studentClass').value.trim();
-
-      if (!name || !studentNo || !studentClass) {
-        showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อ เลขที่ และชั้นเรียนก่อนส่งข้อสอบ", false, () => {});
-        return;
+    function checkRiskLevel() {
+      if (hasSubmitted) return;
+      let acReport = {};
+      if (window.antiCheat?.getAnalysisReport) {
+        try { acReport = processAntiCheatReport(window.antiCheat.getAnalysisReport()); } catch(e) {}
       }
 
-      const studentId = studentNo + '-' + studentClass;
-
-      // ตั้งรหัสนักเรียนสำหรับระบบ anti-cheat
-      antiCheat.setStudentId(studentId);
-
-      // ตรวจเวลาและข้อที่ยังไม่ตอบ
-      const q1 = document.querySelector('input[name="q1"]:checked');
-      const q2 = document.querySelector('input[name="q2"]:checked');
-      const q3 = document.querySelector('input[name="q3"]:checked');
-      const q4 = document.querySelector('input[name="q4"]:checked');
-      const q5 = document.querySelector('input[name="q5"]:checked');
-      const q6 = document.querySelector('input[name="q6"]:checked');
-      const q7 = document.querySelector('input[name="q7"]:checked');
-      const q8 = document.querySelector('input[name="q8"]:checked');
-      const essay1 = document.getElementById('essay1').value.trim();
-      const essay2 = document.getElementById('essay2').value.trim();
+      const currentRisk = Math.round(acReport.suspicionScore || 0);
       
-      const timeMinutes = Math.floor(timeInSeconds / 60);
-      const timeSeconds = timeInSeconds % 60;
-      
-      let uncheckedQuestions = [];
-      if (!q1) uncheckedQuestions.push('ข้อ 1');
-      if (!q2) uncheckedQuestions.push('ข้อ 2');
-      if (!q3) uncheckedQuestions.push('ข้อ 3');
-      if (!q4) uncheckedQuestions.push('ข้อ 4');
-      if (!q5) uncheckedQuestions.push('ข้อ 5');
-      if (!q6) uncheckedQuestions.push('ข้อ 6');
-      if (!q7) uncheckedQuestions.push('ข้อ 7');
-      if (!q8) uncheckedQuestions.push('ข้อ 8');
-      if (!essay1) uncheckedQuestions.push('ข้อ 9');
-      if (!essay2) uncheckedQuestions.push('ข้อ 10');
-
-      let warningMessage = `เวลาคงเหลือ: ${timeMinutes}:${timeSeconds < 10 ? '0' + timeSeconds : timeSeconds}`;
-      
-      if (uncheckedQuestions.length > 0) {
-        warningMessage += `\n\nข้อที่ยังไม่ได้ตอบ:\n${uncheckedQuestions.join('\n')}`;
+      if (currentRisk >= 50 && !hasWarnedThreshold) {
+        hasWarnedThreshold = true;
+        showAcWarning(`คำเตือน: ระบบตรวจพบพฤติกรรมน่าสงสัย (ระดับความเสี่ยง: ${currentRisk}%)<br>ข้อมูลพฤติกรรมนี้จะถูกบันทึกและส่งไปยังคณะกรรมการผู้ควบคุมการสอบโดยอัตโนมัติ`);
       }
-
-      warningMessage += `\n\nท่านยืนยันที่จะนำส่งคำตอบและสิ้นสุดการทดสอบหรือไม่?`;
-
-      showModal("ยืนยันการส่ง", warningMessage, true, submitExam);
     }
 
+    // ===== SUBMIT =====
+    let hasSubmitted = false;
+    let triedToSubmit = false; // เชื่อมโยงสถานะการกดปุ่มส่ง
 
-    // --- ระบบตรวจและส่งข้อสอบ ---
-    function submitExam() {
-      const studentName = document.getElementById('studentName').value.trim();
-      const studentNo = document.getElementById('studentNo').value.trim();
-      const studentClass = document.getElementById('studentClass').value.trim();
-
-      if (!studentName || !studentNo || !studentClass) {
-        showModal("ข้อมูลไม่ครบ", "กรุณากรอกชื่อ เลขที่ และชั้นเรียนให้ครบก่อนส่งข้อสอบ", false, () => {});
-        return;
+    function validateStudentInfo(doFocus = false) {
+      const fields = ['studentName', 'studentNo', 'studentClass'].map(id => document.getElementById(id));
+      let valid = true;
+      fields.forEach(field => {
+        const ok = field.value.trim().length > 0 && (field.id !== 'studentNo' || Number(field.value) > 0);
+        // แสดงสีแดงเฉพาะตอนจะส่ง หรือเคยพยายามส่งไปแล้วเท่านั้น
+        if (triedToSubmit || doFocus) field.classList.toggle('invalid', !ok);
+        if (!ok) valid = false;
+      });
+      if (triedToSubmit || doFocus) document.getElementById('studentError').classList.toggle('show', !valid);
+      if (!valid && doFocus === true) {
+        triedToSubmit = true;
+        fields.find(field => field.classList.contains('invalid'))?.focus();
       }
+      return valid;
+    }
 
-      const q1 = document.querySelector('input[name="q1"]:checked');
-      const q2 = document.querySelector('input[name="q2"]:checked');
-      const q3 = document.querySelector('input[name="q3"]:checked');
-      const q4 = document.querySelector('input[name="q4"]:checked');
-      const q5 = document.querySelector('input[name="q5"]:checked');
-      const q6 = document.querySelector('input[name="q6"]:checked');
-      const q7 = document.querySelector('input[name="q7"]:checked');
-      const q8 = document.querySelector('input[name="q8"]:checked');
+    // ===== PERSISTENCE & AUTO-SAVE (เชื่อมโยงข้อมูลทั้งหมด) =====
+    function initExamSync() {
+      // 1. จัดการข้อมูล Text (ชื่อ, เลขที่, ชั้น, ข้อเขียน)
+      const textFields = ['studentName', 'studentNo', 'studentClass', 'essay1', 'essay2'];
+      textFields.forEach(id => {
+        const el = document.getElementById(id);
+        const saved = sessionStorage.getItem('mattep_saved_' + id);
+        if (saved) el.value = saved;
 
-      // ตรวจสอบคำตอบข้อปรนัย
-      if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || !q8) {
-        showModal("ข้อมูลไม่ครบ", "กรุณาตอบคำถามปรนัยให้ครบทุกข้อ", false, () => {});
-        return;
-      }
+        el.addEventListener('input', (e) => {
+          sessionStorage.setItem('mattep_saved_' + id, e.target.value);
+          if (id.startsWith('student')) validateStudentInfo(false);
+          updateProgress(); // อัปเดต Progress ทันทีที่พิมพ์
+        });
+      });
 
-      // หยุดเวลา
-      clearInterval(timerInterval);
-
-      // คำนวณคะแนน
-      let score = 0;
-      if (q1) score += Number(q1.value);
-      if (q2) score += Number(q2.value);
-      if (q3) score += Number(q3.value);
-      if (q4) score += Number(q4.value);
-      if (q5) score += Number(q5.value);
-      if (q6) score += Number(q6.value);
-      if (q7) score += Number(q7.value);
-      if (q8) score += Number(q8.value);
-
-      const objectiveAnswers = [q1, q2, q3, q4, q5, q6, q7, q8].map((choice) => Number(choice.value));
-      const essay1 = document.getElementById('essay1').value.trim();
-      const essay2 = document.getElementById('essay2').value.trim();
-
-      // บันทึกข้อมูลในเวลาปัจจุบัน
-      const now = new Date();
-      const submitTime = now.toLocaleTimeString('th-TH');
-
-      // รับข้อมูล anti-cheat analysis
-      const antiCheatReport = antiCheat.getAnalysisReport();
-
-      const examSubmission = {
-        name: studentName,
-        studentNo: studentNo,
-        studentClass: studentClass,
-        id: studentNo + '-' + studentClass,
-        score: score,
-        scoreMax: 8,
-        objectiveAnswers: objectiveAnswers,
-        essays: {
-          essay1: essay1,
-          essay2: essay2,
-        },
-        submitTime: submitTime,
-        submittedAtISO: now.toISOString(),
-        antiCheatReport: antiCheatReport,
-      };
-
-      // เก็บข้อมูลผลสอบใน sessionStorage (รองรับทั้งรูปแบบใหม่และเดิม)
-      sessionStorage.setItem('examSubmission', JSON.stringify(examSubmission));
-      sessionStorage.setItem('studentName', studentName);
-      sessionStorage.setItem('studentNo', studentNo);
-      sessionStorage.setItem('studentClass', studentClass);
-      sessionStorage.setItem('score', score);
-      sessionStorage.setItem('essay1', essay1);
-      sessionStorage.setItem('essay2', essay2);
-      sessionStorage.setItem('submitTime', submitTime);
-      sessionStorage.setItem('antiCheatReport', JSON.stringify(antiCheatReport));
-
-      // เก็บข้อมูลลงใน localStorage สำหรับแดชบอร์ด admin
-      const examRecord = {
-        ...examSubmission,
-        suspicionScore: antiCheatReport.suspicionScore,
-        violations: antiCheatReport.violations,
-        totalTabSwitches: antiCheatReport.statistics.tabSwitches,
-        totalPastes: antiCheatReport.statistics.pastes,
-        totalDevtoolsDetections: antiCheatReport.statistics.devtoolsAttempts,
-        timestamp: new Date().toLocaleString('th-TH'),
-      };
-
-      // อ่านข้อมูลผลสอบที่มีอยู่หรือสร้างใหม่
-      let examData = [];
-      const storedData = localStorage.getItem('mattepExamRecords') || localStorage.getItem('examData');
-      if (storedData) {
-        try {
-          const parsed = JSON.parse(storedData);
-          examData = Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-          examData = [];
+      // 2. จัดการข้อกา (Radio Buttons)
+      for (let i = 1; i <= 8; i++) {
+        const qName = 'q' + i;
+        const saved = sessionStorage.getItem('mattep_saved_' + qName);
+        if (saved) {
+          const radio = document.querySelector(`input[name="${qName}"][value="${saved}"]`);
+          if (radio) radio.checked = true;
         }
+
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              sessionStorage.setItem('mattep_saved_' + qName, e.target.value);
+              updateProgress(); // อัปเดต Progress ทันทีที่เลือก
+            }
+          });
+        });
+      }
+      updateProgress(); // ตรวจสอบความคืบหน้าเบื้องต้น
+    }
+
+    initExamSync();
+
+    function confirmSubmit() {
+      if (!enforcePcOnly()) return;
+      if (hasSubmitted) return;
+      if (!validateStudentInfo(true)) return;
+      let unanswered = 0;
+      for (let i = 1; i <= 8; i++) {
+        if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered++;
+      }
+      // Always show confirmation, regardless of unanswered questions
+      if (unanswered > 0) {
+        document.getElementById('unansweredCount').textContent = unanswered;
+        document.getElementById('confirmText').innerHTML = `คุณยังไม่ได้ตอบ <strong>${unanswered} ข้อ</strong><br>ต้องการส่งข้อสอบใช่หรือไม่?`;
+      } else {
+        document.getElementById('confirmText').innerHTML = `คุณตอบแล้ว <strong>ทั้งหมด ${8} ข้อ</strong><br>ต้องการส่งข้อสอบใช่หรือไม่?`;
+      }
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirmModal').classList.remove('open');
+    }
+
+    async function doSubmit() {
+      if (!enforcePcOnly()) return;
+      if (hasSubmitted) return;
+      if (!validateStudentInfo(true)) {
+        closeConfirm();
+        return;
+      }
+      hasSubmitted = true;
+      closeConfirm();
+      clearInterval(timerInterval);
+      const name  = document.getElementById('studentName').value.trim();
+      const no    = document.getElementById('studentNo').value.trim();
+      const cls   = document.getElementById('studentClass').value.trim();
+
+      let score = 0;
+      const objAnswers = [];
+      const chosenAnswers = [];
+      const answerKey = getAnswerKey();
+      for (let i = 1; i <= 8; i++) {
+        const a = document.querySelector(`input[name="q${i}"]:checked`);
+        const selected = a ? a.value : '';
+        
+        let v = null; // ค่าเริ่มต้นคือ "ไม่ได้ทำ"
+        if (selected) {
+          v = (selected === answerKey[i - 1]) ? 1 : 0;
+        }
+        
+        if (v === 1) score += 1;
+        objAnswers.push(v);
+        chosenAnswers.push(selected || '-');
+      }
+      // ดึงข้อมูล AI
+
+      // Get AntiCheat report
+      let acReport = {
+        suspicionScore: 0, riskLevel: 'SAFE', runtime: '0:00',
+        violations: [], violationCount: 0,
+        statistics: {
+          devtools:0, tabSwitch:0, paste:0, copy:0, cut:0, rightClick:0, screenshot:0,
+          typing:0, mouse:0, answerTiming:0, pattern:0, fullscreen:0, storage:0, print:0, search:0,
+        },
+        typingStats: {},
+        mouseStats: { moves:0, clicks:0, distance:0 },
+        answerTiming: { rapidAnswers:0, answeredCount:0, averageInterval:null },
+        timeline: [], timestamp: new Date().toLocaleString('th-TH')
+      };
+      if (window.antiCheat?.getAnalysisReport) {
+        try { acReport = processAntiCheatReport(window.antiCheat.getAnalysisReport()); } catch(e) { console.error(e); }
       }
 
-      // เพิ่มบันทึกใหม่
-      examData.push(examRecord);
-      localStorage.setItem('mattepExamRecords', JSON.stringify(examData));
-      localStorage.setItem('examData', JSON.stringify(examData));
+      const record = {
+        uid: sessionUID,
+        name, studentNo: no, studentClass: cls,
+        score, scoreMax: 8, objectiveAnswers: objAnswers, chosenAnswers,
+        essays: {
+          essay1: document.getElementById('essay1').value,
+          essay2: document.getElementById('essay2').value,
+        },
+        submitTime: new Date().toLocaleTimeString('th-TH'),
+        timestamp: new Date().toLocaleString('th-TH'),
+        submitTimestamp: Date.now(), // เพิ่มเพื่อการเรียงลำดับที่แม่นยำ
+        antiCheatReport: acReport,
+        suspicionScore: acReport.suspicionScore,
+        riskLevel: acReport.riskLevel,
+        violations: acReport.violations,
+        violationCount: acReport.violationCount,
+      };
+      // บันทึกและสร้างลายเซ็น
 
-      // เปลี่ยนไปหน้าแสดงผลลัพธ์
+      record.integrity = createIntegrityHash(record);
+
+      let all = [];
+      window.__mattepSubmitting = true;
+      try {
+        sessionStorage.setItem('examSubmission', JSON.stringify(record));
+        all = JSON.parse(localStorage.getItem('mattepExamRecords') || '[]');
+        all.push(record);
+        if (all.length > 200) all = all.slice(-200);
+        localStorage.setItem('mattepExamRecords', JSON.stringify(all));
+      } finally {
+        window.__mattepSubmitting = false;
+      }
+
+      // ล้างข้อมูลที่จำไว้เมื่อส่งข้อสอบเรียบร้อยแล้ว
+      ['studentName', 'studentNo', 'studentClass', 'essay1', 'essay2', 'timer_end'].forEach(id => {
+        sessionStorage.removeItem('mattep_saved_' + id);
+        if (id === 'timer_end') sessionStorage.removeItem('mattep_timer_end');
+      });
+      sessionStorage.removeItem('mattep_session_uid'); // ล้างรหัส UID ประจำเซสชันเมื่อส่งข้อสอบเสร็จ
+      for (let i = 1; i <= 8; i++) {
+        sessionStorage.removeItem('mattep_saved_q' + i);
+      }
+
+      document.getElementById('submitBtn').disabled = true;
       window.location.href = 'results.html';
     }
-  </script>
 
+    // Ripple effect for submit button
+    document.getElementById('submitBtn').addEventListener('mousedown', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    });
+  </script>
 </body>
 </html>

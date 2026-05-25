@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบการสอบ AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Khwan Thong', 'Sarabun', sans-serif;
+            font-weight: 300;
+        }
+        
         /* Custom Scrollbar styling for a cleaner look */
         ::-webkit-scrollbar {
             width: 8px;
@@ -53,38 +59,69 @@
             display: none !important;
         }
 
-        /* Pulse animation for high-risk CCTV borders */
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        /* เอฟเฟกต์เรืองแสงเมื่อมีการอัปเดตตัวเลขสถิติ */
+        @keyframes glow-update {
+            0% { text-shadow: 0 0 0 rgba(244, 63, 94, 0); transform: scale(1); }
+            50% { text-shadow: 0 0 20px rgba(244, 63, 94, 0.5); transform: scale(1.1); }
+            100% { text-shadow: 0 0 0 rgba(244, 63, 94, 0); transform: scale(1); }
         }
-        .cctv-high-risk {
-            border-color: #ef4444;
-            animation: pulse-red 2s infinite;
+        .animate-glow {
+            display: inline-block;
+            animation: glow-update 0.6s ease-out;
+        }
+
+        /* เอฟเฟกต์กระพริบพื้นหลัง Card เมื่อมีการอัปเดต */
+        @keyframes bg-flash-update {
+            0% { background-color: white; }
+            50% { background-color: rgba(244, 63, 94, 0.05); }
+            100% { background-color: white; }
+        }
+        .animate-bg-flash {
+            animation: bg-flash-update 0.6s ease-out;
         }
     </style>
+    <script src="dashboard-sync.js" defer></script>
+    <script src="dashboard-app.js" defer></script>
 </head>
 <body class="bg-gradient-to-br from-rose-50 to-white text-slate-800 font-sans h-screen flex flex-col overflow-hidden" style="background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);">
 
-    <header class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center relative z-20" style="box-shadow: 0 15px 40px rgba(0,0,0,0.3);"
+    <header class="bg-white border-b border-rose-100 px-6 py-4 flex justify-between items-center relative z-20" style="box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
         <div class="flex items-center gap-4">
             <!-- Back button, initially hidden -->
             <button id="backButton" class="hidden-view bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="showDashboard()">
                 <span>←</span> ย้อนกลับ
             </button>
             <div class="text-2xl font-bold flex items-center gap-2 text-slate-800">
-                <span>📚</span> ระบบตรวจสอบการสอบ AI
+                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                ระบบตรวจสอบการสอบ AI
             </div>
         </div>
         
         <div class="flex items-center gap-4">
-            <!-- Toggle button for CCTV mode -->
-            <button id="btnToggleCCTV" class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(244,63,94,0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 35px rgba(244,63,94,0.40)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(244,63,94,0.25)';" onclick="toggleCCTV()">
-                <span>👁️</span> โหมดกล้องสด (CCTV)
+            <button class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(100,116,139,0.25);" onclick="clearAllData()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                ลบข้อมูล
             </button>
-            <div class="flex items-center gap-2">
-                <span class="text-xl">⏱</span>
+            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all" style="box-shadow: 0 10px 25px rgba(239,68,68,0.25);" onclick="logout()">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                ออกจากระบบ
+            </button>
+            <div class="flex items-center gap-2 hidden">
+                <!-- ตัวบ่งชี้สถานะ Sync -->
+                <div class="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 mr-2 shadow-sm">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Sync Active</span>
+                    <span id="syncTimeText" class="text-[9px] font-medium opacity-60 border-l border-emerald-200 pl-2">--:--:--</span>
+                </div>
+                <!-- sidebar controls stay here (student list remains in sidebar) -->
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
                 <div id="timer" class="bg-gradient-to-r from-rose-500 to-rose-400 text-white px-4 py-2 rounded-xl font-mono font-bold min-w-[120px] text-center" style="box-shadow: 0 10px 25px rgba(244,63,94,0.3);">
                     00:00:00
                 </div>
@@ -99,22 +136,40 @@
         <aside id="sidebar" class="w-full md:w-1/3 lg:w-1/4 border-r border-rose-100 flex flex-col transition-all duration-300 z-10" style="background: linear-gradient(135deg, rgba(255,241,242,0.5) 0%, rgba(255,255,255,0.5) 100%);">
             <div class="p-6 flex-1 flex flex-col overflow-hidden">
                 <!-- Search and Filter Section -->
-                <div class="bg-white p-4 rounded-xl border border-rose-100 mb-4 flex flex-col gap-3" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                <div class="bg-white/40 backdrop-blur-xl p-4 rounded-2xl border border-rose-100/50 mb-6 flex flex-col gap-3 shadow-[0_8px_32px_rgba(244,63,94,0.05)]">
                     <div class="relative">
-                        <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
-                        <input type="text" id="searchInput" placeholder="ค้นหาชื่อนักเรียน..." class="w-full pl-10 pr-4 py-2 border border-rose-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors" oninput="filterStudents()">
+                        <span class="absolute left-3 top-2.5 text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="ค้นหาชื่อนักเรียน..." class="w-full pl-10 pr-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light" oninput="filterStudents()">
                     </div>
-                    <select id="riskFilter" class="w-full px-4 py-2 border border-rose-200 rounded-lg focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors appearance-none bg-white" onchange="filterStudents()">
-                        <option value="all">📊 แสดงทุกระดับความเสี่ยง</option>
-                        <option value="high">🔴 ความเสี่ยงสูง (61-100)</option>
-                        <option value="medium">🟡 ความเสี่ยงปานกลาง (31-60)</option>
-                        <option value="low">🟢 ความเสี่ยงต่ำ (0-30)</option>
-                    </select>
+                    <div class="relative">
+                        <select id="riskFilter" class="w-full px-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light appearance-none" onchange="filterStudents()">
+                            <option value="all">📊 แสดงทุกระดับความเสี่ยง</option>
+                            <option value="high">🔴 ความเสี่ยงสูง (61-100)</option>
+                            <option value="medium">🟡 ความเสี่ยงปานกลาง (31-60)</option>
+                            <option value="low">🟢 ความเสี่ยงต่ำ (0-30)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <select id="classFilter" class="w-full px-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light appearance-none" onchange="filterStudents()">
+                            <option value="all">🏫 แสดงทุกห้องเรียน</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Student List Header -->
                 <h3 class="text-lg font-semibold mb-3 flex items-center gap-2 text-slate-700">
-                    <span>👥</span> รายชื่อนักเรียน (<span id="studentCount">0</span>)
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    รายชื่อนักเรียน (<span id="studentCount">0</span>)
                 </h3>
                 
                 <!-- Scrollable list of students -->
@@ -129,24 +184,32 @@
             <section id="dashboardView" class="animate-slide-in-up">
                 <!-- Overview Stats Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
-                        <div class="text-4xl mb-2">👥</div>
-                        <div id="totalStudents" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                    <div class="bg-white rounded-2xl p-4 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex justify-center mb-2">
+                            <svg class="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                        <div id="totalStudents" class="text-3xl font-bold text-slate-300 mb-1">0</div>
                         <div class="text-sm font-medium text-slate-500">นักเรียนทั้งหมด</div>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
-                        <div class="text-4xl mb-2">✅</div>
-                        <div id="avgScore" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                    <div class="bg-white rounded-2xl p-4 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex justify-center mb-2">
+                            <svg class="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div id="avgScore" class="text-3xl font-bold text-slate-300 mb-1">0</div>
                         <div class="text-sm font-medium text-slate-500">คะแนนเฉลี่ยห้อง</div>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
-                        <div class="text-4xl mb-2">⚠️</div>
-                        <div id="avgRisk" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                    <div class="bg-white rounded-2xl p-4 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex justify-center mb-2">
+                            <svg class="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div id="avgRisk" class="text-3xl font-bold text-slate-300 mb-1">0</div>
                         <div class="text-sm font-medium text-slate-500">ความเสี่ยงเฉลี่ย</div>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
-                        <div class="text-4xl mb-2">🎯</div>
-                        <div id="riskHigh" class="text-3xl font-bold text-rose-500 mb-1">0</div>
+                    <div class="bg-white rounded-2xl p-4 border border-rose-100 text-center hover:-translate-y-1 transition-transform" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="flex justify-center mb-2">
+                            <svg class="w-8 h-8 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <div id="riskHigh" class="text-3xl font-bold text-slate-300 mb-1">0</div>
                         <div class="text-sm font-medium text-slate-500">นักเรียนเสี่ยงสูง</div>
                     </div>
                 </div>
@@ -154,51 +217,57 @@
                 <!-- Detailed Stats Layout -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <!-- Correct/Wrong Questions Analysis -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:col-span-2">
-                        <div class="bg-white rounded-2xl p-6 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                    <div id="analysisContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:col-span-2 hidden">
+                        <div class="bg-white rounded-2xl p-5 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
                             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
-                                <span>🟢</span> ข้อที่ตอบถูกเยอะที่สุด
+                                <span class="w-3 h-3 bg-emerald-500 rounded-full"></span>
+                                ข้อที่ตอบถูกเยอะที่สุด
                             </h3>
                             <div id="mostCorrectQuestions" class="flex flex-col"></div>
                         </div>
-                        <div class="bg-white rounded-2xl p-6 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                        <div class="bg-white rounded-2xl p-5 border border-rose-100" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
                             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
-                                <span>🔴</span> ข้อที่ตอบผิดเยอะที่สุด
+                                <span class="w-3 h-3 bg-rose-500 rounded-full"></span>
+                                ข้อที่ตอบผิดเยอะที่สุด
                             </h3>
                             <div id="mostWrongQuestions" class="flex flex-col"></div>
                         </div>
                     </div>
 
-                    <!-- Time Analysis Chart -->
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 lg:col-span-2" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
-                        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-slate-700">
-                            <span>⏳</span> สถิติเวลาตอบแต่ละข้อ (วินาที)
-                        </h3>
-                        <div id="timeChart" class="flex justify-around items-end h-40 gap-4"></div>
-                    </div>
-                    
                     <!-- Risk Distribution Progress Bars -->
-                    <div class="bg-white rounded-2xl p-6 border border-rose-100 lg:col-span-2" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
+                    <div class="bg-white rounded-2xl p-5 border border-rose-100 lg:col-span-2" style="box-shadow: 0 10px 25px rgba(244,63,94,0.08);">
                         <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-slate-700">
-                            <span>📊</span> การกระจายความเสี่ยง
+                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            การกระจายความเสี่ยง
                         </h3>
                         <div class="flex flex-col gap-4">
                             <div class="flex items-center gap-4">
-                                <div class="w-32 text-sm font-medium text-slate-600">🟢 ต่ำ (0-30)</div>
-                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
-                                    <div id="riskLowBar" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-300 flex items-center justify-end px-3 text-white font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                <div class="w-40 text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-wider">
+                                    <span class="risk-dot w-2.5 h-2.5 rounded-full bg-emerald-500 transition-all"></span>
+                                    ระดับต่ำ (0-30)
+                                </div>
+                                <div class="flex-1 h-5 bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                                    <div id="riskLowBar" class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 flex items-center justify-end px-3 text-white font-bold text-[10px] transition-all duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1)" style="width: 0%"></div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4">
-                                <div class="w-32 text-sm font-medium text-slate-600">🟡 ปานกลาง (31-60)</div>
-                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
-                                    <div id="riskMediumBar" class="h-full bg-gradient-to-r from-amber-400 to-amber-300 flex items-center justify-end px-3 text-slate-800 font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                <div class="w-40 text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-wider">
+                                    <span class="risk-dot w-2.5 h-2.5 rounded-full bg-amber-500 transition-all"></span>
+                                    ปานกลาง (31-60)
+                                </div>
+                                <div class="flex-1 h-5 bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                                    <div id="riskMediumBar" class="h-full bg-gradient-to-r from-amber-500 to-amber-400 flex items-center justify-end px-3 text-white font-bold text-[10px] transition-all duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1)" style="width: 0%"></div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4">
-                                <div class="w-32 text-sm font-medium text-slate-600">🔴 สูง (61-100)</div>
-                                <div class="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden">
-                                    <div id="riskHighBar" class="h-full bg-gradient-to-r from-rose-500 to-rose-400 flex items-center justify-end px-3 text-white font-semibold text-sm transition-all duration-500" style="width: 0%">0 คน</div>
+                                <div class="w-40 text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-wider">
+                                    <span class="risk-dot w-2.5 h-2.5 rounded-full bg-rose-500 transition-all"></span>
+                                    เสี่ยงสูง (61-100)
+                                </div>
+                                <div class="flex-1 h-5 bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                                    <div id="riskHighBar" class="h-full bg-gradient-to-r from-rose-600 to-rose-500 flex items-center justify-end px-3 text-white font-bold text-[10px] transition-all duration-1000 cubic-bezier(0.34, 1.56, 0.64, 1)" style="width: 0%"></div>
                                 </div>
                             </div>
                         </div>
@@ -211,27 +280,60 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h2 class="text-2xl font-bold text-slate-800">รายละเอียดการสอบ: <span id="detailNameTitle" class="text-rose-600">-</span></h2>
                     <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2" style="box-shadow: 0 10px 25px rgba(16,185,129,0.2);" onclick="exportReport()">
-                        <span>📥</span> Export Report (PDF)
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Export Report (PDF)
                     </button>
                 </div>
 
                 <!-- Core Information Grid -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">👤 ชื่อผู้สอบ</span>
+                        <span class="text-base font-bold text-slate-700 mb-1">ชื่อผู้สอบ</span>
                         <span id="detailName" class="text-lg font-bold text-slate-800">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">🏫 เลขที่ / ห้อง</span>
+                        <span class="text-base font-bold text-slate-700 mb-1">เลขที่</span>
+                        <span id="detailNo" class="text-lg font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
+                        <span class="text-base font-bold text-slate-700 mb-1">ห้องเรียน</span>
                         <span id="detailClass" class="text-lg font-bold text-slate-800">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">📚 คะแนนสอบ</span>
+                        <span class="text-base font-bold text-slate-700 mb-1">คะแนนสอบ</span>
                         <span id="detailScore" class="text-lg font-bold text-slate-800">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col items-start">
-                        <span class="text-sm font-medium text-slate-500 mb-1">⚠️ ระดับความเสี่ยง</span>
+                        <span class="text-base font-bold text-slate-700 mb-1">ระดับความเสี่ยง</span>
                         <div id="detailRisk" class="text-2xl font-black">-</div>
+                    </div>
+                </div>
+
+                <!-- Live Answer Sheet Section -->
+                <div class="bg-white rounded-2xl p-6 border border-rose-100 shadow-sm mb-6 animate-slide-in-up">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
+                        กระดาษคำตอบ (Answer Sheet)
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">ส่วนที่ 1: ปรนัย</span>
+                            <div id="liveObjectiveGrid" class="grid grid-cols-4 gap-2">
+                                <!-- Dynamic Objective Answers -->
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block">ส่วนที่ 2: อัตนัย</span>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="text-[11px] font-bold text-slate-500 mb-1">ข้อ 9: JavaScript</div>
+                                    <div id="liveEssay1" class="text-sm p-3 bg-slate-50 rounded-lg border border-slate-100 min-h-[60px] text-slate-700 whitespace-pre-wrap italic"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] font-bold text-slate-500 mb-1">ข้อ 10: การออกแบบระบบ</div>
+                                    <div id="liveEssay2" class="text-sm p-3 bg-slate-50 rounded-lg border border-slate-100 min-h-[60px] text-slate-700 whitespace-pre-wrap italic"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -241,34 +343,25 @@
                     <div class="flex flex-col gap-6">
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100">
                             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
-                                <span>📊</span> สรุปกิจกรรมน่าสงสัย
+                                สรุปกิจกรรมน่าสงสัย
                             </h3>
                             <ul id="activityList" class="flex flex-col gap-3"></ul>
                         </div>
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100">
                             <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
-                                <span>🤖</span> สถานะ AI (แบบเรียลไทม์)
+                                สถานะ AI
                             </h3>
                             <ul id="statusList" class="flex flex-col gap-3"></ul>
                         </div>
                     </div>
                     
-                    <!-- Event Log List -->
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col max-h-[600px]">
+                    <!-- Event Log List (Clean Theme) -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col h-[500px]">
                         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
-                            <span>📋</span> ลำดับเหตุการณ์ (Event Log)
+                            บันทึกเหตุการณ์ (Event Log)
                         </h3>
-                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-0 divide-y divide-slate-100"></ul>
+                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-2"></ul>
                     </div>
-                </div>
-            </section>
-
-            <section id="cctvView" class="hidden-view animate-slide-in-up h-full flex flex-col">
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <span>👁️</span> โหมดกล้องสด (Live Feed)
-                </h2>
-                <div id="cctvGrid" class="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 overflow-y-auto pb-6 pr-2 content-start">
-                    <!-- CCTV items will be dynamically inserted here -->
                 </div>
             </section>
 
@@ -276,7 +369,7 @@
     </div>
 
     <div id="evidenceModal" class="fixed inset-0 z-[100] hidden-view flex items-center justify-center p-4 backdrop-blur-sm transition-opacity" style="background: rgba(0,0,0,0.5);">
-        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalContentBlock" style="box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden transform scale-90 opacity-0 transition-all duration-500" id="modalContentBlock" style="box-shadow: 0 20px 60px rgba(0,0,0,0.3); transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);">
             <div class="p-6">
                 <div class="flex justify-between items-start mb-4">
                     <h3 id="modalTitle" class="text-xl font-bold text-slate-800 pr-8 leading-tight">-</h3>
@@ -285,17 +378,25 @@
                     </button>
                 </div>
                 
-                <div id="modalImage" class="w-full h-48 bg-slate-100 rounded-xl mb-6 flex items-center justify-center text-6xl border-2 border-dashed border-slate-300 shadow-inner">
-                    📷
+                <div id="modalImage" class="w-full h-48 bg-slate-100 rounded-xl mb-6 flex items-center justify-center border-2 border-dashed border-slate-300 shadow-inner">
+                    <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
                 
                 <div class="space-y-3">
-                    <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                        <span class="text-slate-500 font-medium text-sm">🕐 เวลา</span>
-                        <span id="modalTime" class="text-slate-800 font-bold">-</span>
-                    </div>
                     <div class="flex justify-between items-center py-2">
-                        <span class="text-slate-500 font-medium text-sm">📝 คำอธิบาย</span>
+                        <span class="text-slate-500 font-medium text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            คำอธิบาย
+                        </span>
                         <span id="modalDescription" class="text-slate-800 font-semibold text-right max-w-[70%]">-</span>
                     </div>
                 </div>
+
+                <!-- พื้นที่สำหรับแสดงรายชื่อนักเรียนที่ตอบผิด -->
+                <div id="modalExtraContent" class="mt-4 border-t border-slate-100 pt-4"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

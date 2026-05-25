@@ -3,310 +3,461 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เริ่มทำข้อสอบ - MATTEP</title>
-
+  <title>MATTEP — ระบบประเมินผลสอบออนไลน์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rose:   #f43f5e;
+      --rose-l: #fb7185;
+      --rose-xl:#fecdd3;
+      --ink:    #1a1a2e;
+      --muted:  #64748b;
+      --card:   #ffffff;
+      --bg:     #fff5f6;
     }
 
     body {
-      background: linear-gradient(135deg, #fff1f2 0%, #fff5f5 100%);
+      font-family: 'Khwan Thong', 'Sarabun', sans-serif;
+      font-weight: 300;
+      background: var(--bg);
       min-height: 100vh;
-      color: #1e293b;
-      padding: 40px 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .container {
-      max-width: 600px;
-      width: 100%;
-    }
-
-    .start-exam-card {
-      background: #ffffff;
-      backdrop-filter: blur(14px);
-      border: 1px solid #f3d7e6;
-      border-radius: 28px;
-      padding: 50px 40px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      overflow-x: hidden;
       position: relative;
-      overflow: hidden;
     }
 
-    .start-exam-card::before {
+    /* Decorative blobs */
+    body::before, body::after {
       content: '';
-      position: absolute;
-      width: 280px;
-      height: 280px;
-      background: rgba(244, 63, 94, 0.08);
+      position: fixed;
       border-radius: 50%;
-      top: -100px;
-      right: -100px;
+      filter: blur(80px);
+      opacity: .35;
+      pointer-events: none;
+      transition: transform 1s ease-out;
+    }
+    body::before {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, #fda4af, #fb7185);
+      top: -180px; right: -160px;
+      animation: blobFloat 20s infinite alternate;
+    }
+    body::after {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, #fecdd3, #ffe4e6);
+      bottom: -120px; left: -100px;
+      animation: blobFloat 25s infinite alternate-reverse;
     }
 
-    .start-exam-card::after {
-      content: '';
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      background: rgba(244, 63, 94, 0.05);
-      border-radius: 50%;
-      bottom: -80px;
-      left: -80px;
+    @keyframes blobFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, -60px) scale(1.05); }
+      100% { transform: translate(-20px, 30px) scale(1); }
     }
 
-    .content {
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(244,63,94,.15);
+      border-radius: 32px;
+      padding: 56px 48px 48px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 32px 72px rgba(244,63,94,.12), 0 0 0 1px rgba(255,255,255,.8) inset;
       position: relative;
       z-index: 1;
       text-align: center;
+      animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
     }
 
-    .logo-section {
-      margin-bottom: 30px;
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
-    .logo-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      border-radius: 24px;
-      display: flex;
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.92); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .logo-mark {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 40px;
-      box-shadow: 0 10px 30px rgba(244, 63, 94, 0.2);
+      width: 100px; height: 100px;
+      background: linear-gradient(145deg, var(--rose) 0%, #fb7185 100%);
+      border-radius: 30px;
+      margin-bottom: 28px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 28px rgba(244,63,94,.2);
+      animation: float 5s ease-in-out infinite;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+    .logo-mark:hover {
+      transform: translateY(-10px) scale(1.08);
+      box-shadow: 0 15px 35px rgba(244, 63, 94, 0.25);
+    }
+    .logo-mark svg {
+      width: 50px;
+      height: 50px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
 
-    h1 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 35px;
-      color: #1e293b;
-    }
-
-    .mattep-header {
-      font-size: 42px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
+    .brand {
+      font-family: 'Khwan Thong', 'Outfit', sans-serif;
+      font-size: 48px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-l));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      display: inline-block;
-      padding: 15px 40px;
-      background: rgba(244, 63, 94, 0.15);
-      border: 2px solid rgba(244, 63, 94, 0.3);
-      border-radius: 16px;
-      color: #f43f5e;
-      -webkit-text-fill-color: unset;
-      -webkit-background-clip: unset;
-      background-clip: unset;
-    }
-
-    .subtitle {
-      font-size: 16px;
-      color: #64748b;
-      margin-bottom: 30px;
-      font-weight: 500;
-    }
-
-    .details-section {
-      background: #fffafc;
-      border: 1px solid #f3d7e6;
-      border-radius: 18px;
-      padding: 25px;
-      margin-bottom: 35px;
-      text-align: left;
-    }
-
-    .detail-item {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 16px;
-      align-items: flex-start;
-    }
-
-    .detail-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .detail-icon {
-      width: 36px;
-      height: 36px;
-      background: rgba(244, 63, 94, 0.15);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      color: #f43f5e;
-      font-weight: 600;
-      counter-increment: item-counter;
-    }
-
-    .detail-content {
-      flex: 1;
-    }
-
-    .detail-title {
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 4px;
-      font-size: 15px;
-    }
-
-    .detail-text {
-      color: #475569;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .instructions {
-      background: #fff1f2;
-      border-left: 4px solid #f43f5e;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 30px;
-      text-align: left;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #475569;
-    }
-
-    .instructions strong {
-      color: #1e293b;
-      display: block;
+      line-height: 1;
       margin-bottom: 8px;
     }
 
-    .start-btn {
+    .tagline {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 36px;
+      padding: 0 8px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--rose-xl);
+    }
+    .divider span {
+      font-size: 12px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       width: 100%;
-      padding: 18px;
+      padding: 14px 24px;
       border: none;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #f43f5e, #fb7185);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 500;
       cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.3);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+    .btn:hover  { transform: translateY(-3px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(244, 63, 94, 0.25);
+      margin-bottom: 12px;
       position: relative;
       overflow: hidden;
     }
+    .btn-primary:hover { 
+      box-shadow: 0 12px 24px rgba(244, 63, 94, 0.3);
+    }
 
-    .start-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
+    /* Removed shine effect */
+    .btn-primary::after { display: none; }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #475569;
+      border: 1.5px solid rgba(244, 63, 94, 0.25);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    .btn-secondary:hover { 
+      background: #fff; 
+      border-color: var(--rose); 
+      color: var(--rose);
+      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.12);
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .feat {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .feat .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+    /* ===== Modal ===== */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,15,30,.55);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 32px;
+      padding: 42px 36px;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px -12px rgba(244, 63, 94, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+      animation: fadeUp .45s cubic-bezier(.22,1,.36,1) both;
+      position: relative;
+    }
+    .modal h2 { font-size: 24px; font-weight: 500; margin-bottom: 4px; color: var(--ink); letter-spacing: -0.5px; }
+    .modal p  { font-size: 13px; color: var(--muted); margin-bottom: 28px; font-weight: 300; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+    .field input {
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      background: rgba(248, 250, 252, 0.5);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 300;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .field input:focus { 
+      border-color: var(--rose); 
+      background: #ffffff; 
+      box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1); 
+    }
+
+    .err { color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none; }
+
+    .modal-footer {
+      display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px;
+    }
+    .modal-footer .btn { 
+      width: auto; 
+      padding: 10px 28px; 
+      font-size: 14px; 
+      border-radius: 999px; 
+      margin-bottom: 0; 
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05);
+    }
+
+    .pc-only-message {
+      display: none;
+      max-width: 520px;
       width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.2);
-      transition: 0.3s;
+      background: #fff;
+      border: 1px solid #fecaca;
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--ink);
+      box-shadow: 0 24px 60px rgba(15,23,42,.12);
+      position: relative;
+      z-index: 2;
     }
+    .pc-only-message h1 { font-size: 24px; margin-bottom: 10px; color: #dc2626; }
+    .pc-only-message p { color: var(--muted); line-height: 1.7; }
+    body.pc-only-blocked .card,
+    body.pc-only-blocked .overlay { display: none !important; }
+    body.pc-only-blocked .pc-only-message { display: block; }
 
-    .start-btn:hover::before {
-      left: 100%;
-    }
-
-    .start-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 35px rgba(244, 63, 94, 0.4);
-    }
-
-    .start-btn:active {
-      transform: translateY(0);
-    }
-
-    @media (max-width: 600px) {
-      .start-exam-card {
-        padding: 35px 25px;
+    @media (max-width: 560px) {
+      body {
+        align-items: flex-start;
+        padding: 16px 12px 32px;
       }
-
-      .mattep-header {
-        font-size: 32px;
+      body::before, body::after { display: none; }
+      .card {
+        padding: 32px 18px 24px;
+        border-radius: 22px;
+        margin: auto 0;
       }
-
-      h1 {
-        font-size: 20px;
-      }
-
-      .logo-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 30px;
-      }
-
-      .details-section {
-        padding: 18px;
-      }
+      .logo-mark { width: 80px; height: 80px; border-radius: 24px; border-width: 3px; }
+      .logo-mark svg { width: 40px; height: 40px; }
+      .brand { font-size: 38px; letter-spacing: 0; }
+      .tagline { margin-bottom: 24px; }
+      .btn { padding: 14px 16px; border-radius: 14px; font-size: 15px; }
+      .features { gap: 10px; margin-top: 22px; padding-top: 18px; }
+      .feat { flex: 1 1 42%; }
+      .modal { width: calc(100% - 24px); padding: 24px 18px; border-radius: 22px; }
+      .modal-footer { flex-direction: column-reverse; }
+      .modal-footer .btn { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="start-exam-card">
-      <div class="content">
-        <div class="logo-section">
-         
-        </div>
 
-        <div class="mattep-header">MATTEP</div>
-        <p class="subtitle">ระบบประเมินผลสอบออนไลน์</p>
+  <div class="pc-only-message" id="pcOnlyMessage">
+    <h1>ใช้บนคอมพิวเตอร์เท่านั้น</h1>
+    <p>ระบบสอบนี้ถูกตั้งค่าให้ใช้งานบน PC หรือ Notebook เท่านั้น กรุณาเปิดด้วยหน้าจออย่างน้อย 900px เพื่อเริ่มใช้งาน</p>
+  </div>
 
-        <h1>เริ่มทำข้อสอบ</h1>
+  <div class="card">
+    <div class="logo-mark">
+        <svg class="w-10 h-10" fill="none" stroke="white" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+    </div>
+    <div class="brand">MATTEP</div>
+    <p class="tagline">ระบบประเมินผลสอบออนไลน์</p>
 
-        <div class="details-section">
-          <div class="detail-item">
-            <div class="detail-icon">1</div>
-            <div class="detail-content">
-              <div class="detail-title">เวลาสอบ</div>
-              <div class="detail-text">ทำข้อสอบได้ตามที่กำหนด คุณสามารถจัดการเวลาของตัวเองได้</div>
-            </div>
-          </div>
+    <div class="divider"><span>เลือกโหมดการใช้งาน</span></div>
 
-          <div class="detail-item">
-            <div class="detail-icon">2</div>
-            <div class="detail-content">
-              <div class="detail-title">จำนวนข้อสอบ</div>
-              <div class="detail-text">ตอบคำถามหลากหลายประเภทตั้งแต่ปรนัยไปจนถึงอัตนัย</div>
-            </div>
-          </div>
+    <button class="btn btn-primary" onclick="goExam()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.052 0 0012 20.055a11.952 11.052 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
+      เริ่มทำข้อสอบ (สำหรับนักเรียน)
+    </button>
+    <button class="btn btn-secondary" onclick="openLogin()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+      เข้าสู่ระบบครูผู้สอน
+    </button>
 
-          <div class="detail-item">
-            <div class="detail-icon">3</div>
-            <div class="detail-content">
-              <div class="detail-title">การตรวจสอบ</div>
-              <div class="detail-text">ระบบจะประเมินผลของคุณอย่างถูกต้องและแสดงคะแนนสุดท้าย</div>
-            </div>
-          </div>
-        </div>
+    <div class="features">
+      <div class="feat">Anti-Cheat AI</div>
+      <div class="feat">Dashboard</div>
+      <div class="feat">จับเวลา</div>
+      <div class="feat">รายงานผล</div>
+    </div>
+  </div>
 
-        <div class="instructions">
-          <strong>⚠️ ข้อสำคัญ</strong>
-          อย่าปิดหน้าเว็บระหว่างการสอบ หากปิดอาจทำให้การสอบไม่สมบูรณ์
-        </div>
+  <!-- Login Modal -->
+  <!-- Warning Modal before starting exam -->
+  <div class="overlay" id="warningModal">
+    <div class="modal">
+      <h2>⚠️ คำเตือนสำคัญ</h2>
+      <p>หลังจากเริ่มทำข้อสอบแล้ว:</p>
+      <div style="background: rgba(244, 63, 94, 0.1); padding: 14px; border-radius: 12px; margin: 16px 0; font-size: 13px; color: var(--ink); line-height: 1.6;">
+        ✓ ไม่สามารถกดย้อนกลับได้<br>
+        ✓ ไม่สามารถออกจากข้อสอบ<br>
+        ✓ ระบบจะตรวจจับพฤติกรรมกลายตัว<br>
+        ✓ การทำข้อสอบจะใช้เวลา 60 นาที
+      </div>
+      <p style="font-weight: 500; color: var(--ink);">คุณยืนยันว่าพร้อมเริ่มข้อสอบหรือไม่?</p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeWarning()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="confirmExam()">เริ่มสอบ</button>
+      </div>
+    </div>
+  </div>
 
-        <button class="start-btn" onclick="startExam()">เริ่มทำข้อสอบ</button>
+  <div class="overlay" id="loginModal">
+    <div class="modal">
+      <h2>เข้าสู่ระบบครูผู้สอน</h2>
+      <p>ทดสอบ: Username <strong>admin</strong> / Password <strong>1234</strong></p>
+      <div class="field">
+        <label>ชื่อผู้ใช้งาน</label>
+        <input type="text" id="username" placeholder="admin" />
+      </div>
+      <div class="field">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')attemptLogin()" />
+      </div>
+      <div class="err" id="loginError">⚠️ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeLogin()">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="attemptLogin()">เข้าสู่ระบบ</button>
       </div>
     </div>
   </div>
 
   <script>
-    function startExam() {
-      // เปลี่ยนไปยังหน้าข้อสอบ
+    function isPcOnlyAllowed() {
+      const isSmallScreen = window.innerWidth < 900;
+      const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches;
+      const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+      return !isSmallScreen && !isTouchPrimary && !isMobileUA;
+    }
+
+    function enforcePcOnly() {
+      document.body.classList.toggle('pc-only-blocked', !isPcOnlyAllowed());
+      return isPcOnlyAllowed();
+    }
+
+    enforcePcOnly();
+    window.addEventListener('resize', enforcePcOnly);
+
+    function goExam() {
+      if (!enforcePcOnly()) return;
+      openWarning();
+    }
+
+    function openWarning() {
+      document.getElementById('warningModal').classList.add('open');
+    }
+
+    function closeWarning() {
+      document.getElementById('warningModal').classList.remove('open');
+    }
+
+    function confirmExam() {
+      closeWarning();
+      sessionStorage.setItem('mattep_exam_started', 'true');
       window.location.href = 'index.html';
     }
+
+    function openLogin() {
+      if (!enforcePcOnly()) return;
+      document.getElementById('loginModal').classList.add('open');
+      document.getElementById('loginError').style.display = 'none';
+      setTimeout(() => document.getElementById('username').focus(), 450); // รอให้แอนิเมชัน fadeUp เสร็จสิ้นก่อน (450ms)
+    }
+
+    function closeLogin() {
+      document.getElementById('loginModal').classList.remove('open');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    function attemptLogin() {
+      if (!enforcePcOnly()) return;
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      if (user === 'admin' && pass === '1234') {
+        sessionStorage.setItem('isTeacherLoggedIn', 'true');
+        window.location.href = 'AntiCheatDashboard.html';
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('warningModal').addEventListener('click', function(e) {
+      if (e.target === this) closeWarning();
+    });
+
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+      if (e.target === this) closeLogin();
+    });
   </script>
 </body>
 </html>
