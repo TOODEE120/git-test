@@ -34,7 +34,9 @@ export function getGazeDirection(landmarks) {
   const rEye = getEyeRatio(rightIris, rightOuter, rightInner, rightTop, rightBottom);
 
   // Filter out eye blinks: if eyelid gap is too narrow (closing eyes), skip processing
-  if ((lEye.ear + rEye.ear) / 2 < 0.15) return 'center';
+  const avgEAR = (lEye.ear + rEye.ear) / 2;
+  if (avgEAR < 0.12 || isNaN(avgEAR)) return 'center';
+  if (avgEAR > 0.5) return 'center'; // Eyes too open (glitches)
 
   let avgHRatio = (lEye.hRatio + rEye.hRatio) / 2;
   let avgVRatio = (lEye.vRatio + rEye.vRatio) / 2;
@@ -50,17 +52,19 @@ export function getGazeDirection(landmarks) {
       const yaw = (noseTip.x - faceCenterX) / faceWidth;
       const pitch = (noseTip.y - faceCenterY) / faceHeight;
       
-      // Apply head pose compensation with balanced 3D calibration
-      avgHRatio += (yaw * 0.7);
-      avgVRatio += (pitch * 0.7);
+      // Apply head pose compensation with enhanced 3D calibration
+      const clampedYaw = Math.max(-0.3, Math.min(0.3, yaw));
+      const clampedPitch = Math.max(-0.3, Math.min(0.3, pitch));
+      avgHRatio += (clampedYaw * 0.65);
+      avgVRatio += (clampedPitch * 0.65);
     }
   }
 
-  // Adjusted thresholds for better sensitivity
-  if (avgHRatio < 0.35) return 'left';
-  if (avgHRatio > 0.65) return 'right';
-  if (avgVRatio < 0.30) return 'up';
-  if (avgVRatio > 0.70) return 'down';
+  // Adjusted thresholds for better sensitivity with hysteresis
+  if (avgHRatio < 0.32) return 'left';
+  if (avgHRatio > 0.68) return 'right';
+  if (avgVRatio < 0.28) return 'up';
+  if (avgVRatio > 0.72) return 'down';
   return 'center';
 }
 
@@ -84,13 +88,17 @@ export function getHeadDirection(landmarks) {
   const faceCenterX = (leftFace.x + rightFace.x) / 2;
   const faceCenterY = (forehead.y + chin.y) / 2;
 
-  const yawRatio = (noseTip.x - faceCenterX) / faceWidth;
-  const pitchRatio = (noseTip.y - faceCenterY) / faceHeight;
+  let yawRatio = (noseTip.x - faceCenterX) / faceWidth;
+  let pitchRatio = (noseTip.y - faceCenterY) / faceHeight;
+  
+  // Clamp to realistic ranges to prevent glitches
+  yawRatio = Math.max(-0.5, Math.min(0.5, yawRatio));
+  pitchRatio = Math.max(-0.4, Math.min(0.4, pitchRatio));
 
-  if (yawRatio > 0.12) return 'right';
-  if (yawRatio < -0.12) return 'left';
-  if (pitchRatio < -0.10) return 'up';
-  if (pitchRatio > 0.15) return 'down';
+  if (yawRatio > 0.13) return 'right';
+  if (yawRatio < -0.13) return 'left';
+  if (pitchRatio < -0.12) return 'up';
+  if (pitchRatio > 0.17) return 'down';
   return 'center';
 }
 

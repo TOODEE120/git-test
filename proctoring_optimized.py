@@ -211,9 +211,9 @@ while True:
 
 cap.stop()
 cv2.destroyAllWindows()
-# สำหรับเครื่องที่มีการ์ดจอ NVIDIA
-model = YOLO('yolov8n.pt') 
-results = model(frame, imgsz=480, verbose=False, device='0') 
-
-# หรือสำหรับ Mac ชิป M1/M2/M3 (Apple Silicon) ให้ใช้ 'mps'
-results = model(frame, imgsz=480, verbose=False, device='mps')
+# # สำหรับเครื่องที่มีการ์ดจอ NVIDIA
+# model = YOLO('yolov8n.pt') 
+# results = model(frame, imgsz=480, verbose=False, device='0') 
+# 
+# # หรือสำหรับ Mac ชิป M1/M2/M3 (Apple Silicon) ให้ใช้ 'mps'
+# results = model(frame, imgsz=480, verbose=False, device='mps')

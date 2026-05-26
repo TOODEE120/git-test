@@ -108,7 +108,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 ออกจากระบบ
             </button>
-            <div class="flex items-center gap-2 hidden">
+            <div class="hidden-view flex items-center gap-2">
                 <!-- ตัวบ่งชี้สถานะ Sync -->
                 <div class="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 mr-2 shadow-sm">
                     <span class="relative flex h-2 w-2">
@@ -144,18 +144,10 @@
                     </div>
                     <div class="relative">
                         <select id="riskFilter" class="w-full px-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light appearance-none" onchange="filterStudents()">
-                            <option value="all">📊 แสดงทุกระดับความเสี่ยง</option>
-                            <option value="high">🔴 ความเสี่ยงสูง (61-100)</option>
-                            <option value="medium">🟡 ความเสี่ยงปานกลาง (31-60)</option>
-                            <option value="low">🟢 ความเสี่ยงต่ำ (0-30)</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <select id="classFilter" class="w-full px-4 py-2 bg-white/50 border border-rose-200/50 rounded-xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all text-sm font-light appearance-none" onchange="filterStudents()">
-                            <option value="all">🏫 แสดงทุกห้องเรียน</option>
+                            <option value="all">แสดงทุกระดับความเสี่ยง</option>
+                            <option value="high">ความเสี่ยงสูง (61-100)</option>
+                            <option value="medium">ความเสี่ยงปานกลาง (31-60)</option>
+                            <option value="low">ความเสี่ยงต่ำ (0-30)</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
@@ -298,19 +290,43 @@
                 <!-- Core Information Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">👤 ชื่อผู้สอบ</span>
+                        <span class="text-sm font-medium text-slate-500 mb-1 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            ชื่อผู้สอบ
+                        </span>
                         <span id="detailName" class="text-lg font-bold text-slate-800">-</span>
                     </div>
-                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">🏫 เลขที่ / ห้อง</span>
-                        <span id="detailClass" class="text-lg font-bold text-slate-800">-</span>
+                    <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col justify-center">
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                                    เลขที่
+                                </span>
+                                <span id="detailNo" class="text-lg font-bold text-slate-800">-</span>
+                            </div>
+                            <div class="h-8 w-px bg-slate-200"></div>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                    ห้อง
+                                </span>
+                                <span id="detailClass" class="text-lg font-bold text-slate-800">-</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col">
-                        <span class="text-sm font-medium text-slate-500 mb-1">📚 คะแนนสอบ</span>
+                        <span class="text-sm font-medium text-slate-500 mb-1 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"></path></svg>
+                            คะแนนสอบ
+                        </span>
                         <span id="detailScore" class="text-lg font-bold text-slate-800">-</span>
                     </div>
                     <div class="bg-white p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col items-start">
-                        <span class="text-sm font-medium text-slate-500 mb-1">⚠️ ระดับความเสี่ยง</span>
+                        <span class="text-sm font-medium text-slate-500 mb-1 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            ระดับความเสี่ยง
+                        </span>
                         <div id="detailRisk" class="text-2xl font-black">-</div>
                     </div>
                 </div>
@@ -370,15 +386,22 @@
                         </div>
                     </div>
                     
-                    <!-- Event Log List (Clean Theme) -->
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col h-[500px]">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700 border-b border-slate-100 pb-2">
-                            <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            บันทึกเหตุการณ์ (Event Log)
-                        </h3>
-                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-2"></ul>
+                    <!-- Event Log List -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-100 flex flex-col max-h-[600px]">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b border-slate-100 pb-2 gap-2">
+                            <h3 class="text-lg font-semibold flex items-center gap-2 text-slate-700">
+                                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2"></path>
+                                </svg>
+                                ลำดับเหตุการณ์ (Event Log)
+                            </h3>
+                            <select id="eventFilterSelect" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-rose-400 bg-slate-50 text-slate-600 transition-colors cursor-pointer hover:bg-slate-100">
+                                <option value="all">แสดงทั้งหมด</option>
+                                <option value="system">ระบบเครื่อง (Anti-Cheat)</option>
+                                <option value="camera">กล้อง AI ตรวจจับ</option>
+                            </select>
+                        </div>
+                        <ul id="eventList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-0 divide-y divide-slate-100"></ul>
                     </div>
                 </div>
             </section>
@@ -396,7 +419,7 @@
                     </button>
                 </div>
                 
-                <div id="modalImage" class="w-full h-48 bg-slate-100 rounded-xl mb-6 flex items-center justify-center border-2 border-dashed border-slate-300 shadow-inner">
+                <div id="modalImage" class="w-full min-h-[12rem] bg-slate-100 rounded-xl mb-6 flex items-center justify-center border-2 border-dashed border-slate-300 shadow-inner overflow-hidden">
                     <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
                 
@@ -415,10 +438,124 @@
                         </span>
                         <span id="modalDescription" class="text-slate-800 font-semibold text-right max-w-[70%]">-</span>
                     </div>
+                    
+                    <!-- ส่วนแสดงรายชื่อนักเรียนที่ตอบผิด -->
+                    <div class="flex flex-col py-2 border-t border-slate-100 mt-2">
+                        <span class="text-slate-500 font-medium text-sm flex items-center gap-1 mb-2">
+                            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            รายชื่อนักเรียนที่ตอบผิด
+                        </span>
+                        <div id="modalWrongStudents" class="text-sm bg-rose-50 border border-rose-100 p-3 rounded-lg max-h-[120px] overflow-y-auto">
+                            -
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script สำหรับตัวกรอง Event Log -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterSelect = document.getElementById('eventFilterSelect');
+            const eventList = document.getElementById('eventList');
+            
+            if (!filterSelect || !eventList) return;
+
+            // ฟังก์ชันสำหรับกรองข้อมูลเมื่อมีการเปลี่ยนตัวเลือกหรือมีข้อมูลใหม่เข้ามา
+            function applyEventFilter() {
+                const filterValue = filterSelect.value;
+                const items = eventList.children;
+                
+                // คำค้นหาที่เกี่ยวข้องกับกล้อง AI
+                const cameraKeywords = ['หันหน้า', 'ตาดำ', 'ชำเลือง', 'หลับตา', 'โทรศัพท์', 'กล้อง', 'ai', 'ai detection', 'ไม่พบใบหน้า', 'บุคคลอื่น'];
+
+                Array.from(items).forEach(li => {
+                    const text = li.textContent.toLowerCase();
+                    const isCameraEvent = cameraKeywords.some(keyword => text.includes(keyword));
+
+                    if (filterValue === 'all') {
+                        li.style.display = '';
+                    } else if (filterValue === 'camera') {
+                        li.style.display = isCameraEvent ? '' : 'none';
+                    } else if (filterValue === 'system') {
+                        li.style.display = !isCameraEvent ? '' : 'none';
+                    }
+                });
+            }
+
+            // ดักจับการเปลี่ยนแปลงค่าใน dropdown
+            filterSelect.addEventListener('change', applyEventFilter);
+
+            // ใช้ MutationObserver เพื่อดักจับเวลาที่ dashboard-app.js อัปเดตรายการ Event Log แบบเรียลไทม์
+            const observer = new MutationObserver(applyEventFilter);
+            observer.observe(eventList, { childList: true });
+
+            // Observer สำหรับตกแต่งสีกระดาษคำตอบปรนัย (Live) แบบบังคับดึงข้อมูลจริงมาทับ
+            const objectiveGrid = document.getElementById('liveObjectiveGrid');
+            if (objectiveGrid) {
+                const gridObserver = new MutationObserver(() => {
+                    if (typeof selectedStudentUID === 'undefined' || !selectedStudentUID) return;
+
+                    // 1. ดึงข้อมูลจริงจาก LocalStorage เพื่อบังคับทับ '1' หรือ '-' ที่ระบบสร้างขึ้นมา
+                    let answersToDisplay = null;
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key.startsWith('mattep_live_user_')) {
+                            try {
+                                const data = JSON.parse(localStorage.getItem(key));
+                                if (data.uid === selectedStudentUID) {
+                                    answersToDisplay = data.objectiveAnswers;
+                                    break;
+                                }
+                            } catch(e) {}
+                        }
+                    }
+
+                    // 2. ถ้าไม่เจอใน Live (ส่งข้อสอบไปแล้ว) ให้ดึงจากประวัติที่ส่งมาแปลงค่าใหม่
+                    if (!answersToDisplay) {
+                        try {
+                            const records = JSON.parse(localStorage.getItem('mattepExamRecords') || '[]');
+                            // รองรับทั้งแบบมี uid และแบบเก่า (fallback)
+                            const record = records.find(r => r.uid === selectedStudentUID || ('f-' + r.studentNo + '-' + r.name) === selectedStudentUID);
+                            if (record && record.chosenAnswers) {
+                                answersToDisplay = record.chosenAnswers.map((ans, idx) => {
+                                    if (ans === '-') return '⬜ ไม่ได้ตอบ';
+                                    return record.objectiveAnswers[idx] === 1 ? '✅ ถูก' : '❌ ผิด';
+                                });
+                            }
+                        } catch(e) {}
+                    }
+
+                    if (!answersToDisplay) return;
+
+                    Array.from(objectiveGrid.children).forEach((cell, index) => {
+                        const answerSpan = cell.querySelectorAll('span')[1]; // ดึงแท็ก span ตัวที่ 2 (บรรทัดคำตอบ)
+                        if (!answerSpan) return;
+                        const ans = answersToDisplay[index] || '⬜ ไม่ได้ตอบ';
+                        
+                        // ตรวจสอบจาก Dataset เพื่อป้องกันการเรนเดอร์ซ้ำซ้อนและลดกระตุก
+                        if (answerSpan.dataset.ans === ans) return;
+                        answerSpan.dataset.ans = ans;
+                        
+                        if (ans.includes('✅ ถูก')) {
+                            cell.className = 'cursor-pointer hover:scale-105 transition-transform flex flex-col items-center p-2 rounded-lg border bg-emerald-50 border-emerald-200';
+                            answerSpan.className = 'text-xs font-black text-emerald-600 flex flex-col items-center mt-1 gap-0.5';
+                            answerSpan.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ถูก';
+                        } else if (ans.includes('❌ ผิด')) {
+                            cell.className = 'cursor-pointer hover:scale-105 transition-transform flex flex-col items-center p-2 rounded-lg border bg-rose-50 border-rose-200';
+                            answerSpan.className = 'text-xs font-black text-rose-600 flex flex-col items-center mt-1 gap-0.5';
+                            answerSpan.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> ผิด';
+                        } else {
+                            cell.className = 'cursor-pointer hover:scale-105 transition-transform flex flex-col items-center p-2 rounded-lg border bg-slate-50 border-slate-200';
+                            answerSpan.className = 'text-[10px] font-black text-slate-400 flex flex-col items-center mt-1 gap-0.5';
+                            answerSpan.innerHTML = '<svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg> ว่าง';
+                        }
+                    });
+                });
+                gridObserver.observe(objectiveGrid, { childList: true, subtree: true });
+            }
+        });
+    </script>
 </body>
 </html>

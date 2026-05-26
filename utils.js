@@ -1,5 +1,5 @@
 // ─── SmoothBuffer ─────────────────────────────────────────────────────────────
-// Sliding window majority vote for temporal smoothing
+// Sliding window majority vote with exponential weighting for temporal smoothing
 export class SmoothBuffer {
   constructor(size = 12) {
     this.size = size;
@@ -13,11 +13,28 @@ export class SmoothBuffer {
 
   getMajority() {
     if (this.buffer.length === 0) return null;
+    
+    // Weighted majority voting - recent frames have more weight
     const counts = {};
-    for (const v of this.buffer) {
+    const weights = {};
+    
+    for (let i = 0; i < this.buffer.length; i++) {
+      const v = this.buffer[i];
+      const weight = Math.pow(0.95, this.buffer.length - 1 - i); // Exponential decay
       counts[v] = (counts[v] || 0) + 1;
+      weights[v] = (weights[v] || 0) + weight;
     }
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+    
+    // Return value with highest weighted count
+    let maxWeight = -1;
+    let result = null;
+    for (const [key, weight] of Object.entries(weights)) {
+      if (weight > maxWeight) {
+        maxWeight = weight;
+        result = key;
+      }
+    }
+    return result;
   }
 
   get length() {

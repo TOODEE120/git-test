@@ -5,12 +5,13 @@ import './App.css';
 import { getGazeDirection, getHeadDirection, drawOverlays } from './detection.js';
 import { AlertBuffer, SmoothBuffer, formatDuration, exportCSV, playAlertSound } from './utils.js';
 
-const SUSPICIOUS_CLASSES = new Set(['cell phone', 'book', 'laptop', 'remote', 'tablet']);
-const GAZE_THRESHOLD = 8;  // ลดจำนวนเฟรมเพื่อให้มีความไวมากขึ้น
-const HEAD_THRESHOLD = 8;
-const NOFACE_THRESHOLD = 12;  // ลดเพื่อเพิ่มการตอบสนอง
-const FRAME_SKIP_FACE_DETECTION = 3;  // ลดการประมวลผล face detection
-const FRAME_SKIP_OBJECT_DETECTION = 5;  // ลดการประมวลผล object detection
+const SUSPICIOUS_CLASSES = new Set(['cell phone', 'book', 'laptop', 'remote', 'tablet', 'keyboard', 'mouse']);
+const GAZE_THRESHOLD = 6;  // โหมดสูงกว่าเดิมเพื่อความแม่นยำ
+const HEAD_THRESHOLD = 6;
+const NOFACE_THRESHOLD = 10;  // เพิ่มการตอบสนอง
+const FRAME_SKIP_FACE_DETECTION = 2;  // ลดการประมวลผล face detection มากขึ้น
+const FRAME_SKIP_OBJECT_DETECTION = 4;  // ลดการประมวลผล object detection
+const ADAPTIVE_THRESHOLD = 0.3;  // Adaptive threshold สำหรับตรวจจับผิดปกติ
 
 function getOverallStatus(alerts) {
   const recent = alerts.slice(0, 5);
@@ -86,35 +87,40 @@ export default function App() {
     if (severity === 'danger' || severity === 'warn') {
       const video = videoRef.current;
       if (video && video.videoWidth > 0) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = video.videoWidth;
-        tempCanvas.height = video.videoHeight;
-        const ctx = tempCanvas.getContext('2d');
-        
-        ctx.save();
-        ctx.translate(tempCanvas.width, 0);
-        ctx.scale(-1, 1); // กลับซ้าย-ขวาภาพให้เหมือนที่เห็นบนหน้าจอเว็บ
-        ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height); // วาดภาพคน
-        ctx.restore();
-        
-        // ─── วาดลายน้ำ วันที่และเวลา ───
-        const now = new Date();
-        const timestampText = `${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH')}`;
-        const watermarkText = `PROCTOR.sys | ${timestampText}`;
-        
-        ctx.font = '18px "IBM Plex Mono", sans-serif';
-        const textWidth = ctx.measureText(watermarkText).width;
-        
-        // วาดพื้นหลังสีดำโปร่งแสง
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(tempCanvas.width - textWidth - 20, tempCanvas.height - 40, textWidth + 20, 40);
-        
-        // วาดตัวหนังสือสีขาว
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'right';
-        ctx.fillText(watermarkText, tempCanvas.width - 10, tempCanvas.height - 15);
+        try {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = video.videoWidth;
+          tempCanvas.height = video.videoHeight;
+          const ctx = tempCanvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas context unavailable');
+          
+          ctx.save();
+          ctx.translate(tempCanvas.width, 0);
+          ctx.scale(-1, 1); // กลับซ้าย-ขวาภาพให้เหมือนที่เห็นบนหน้าจอเว็บ
+          ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height); // วาดภาพคน
+          ctx.restore();
+          
+          // ─── วาดลายน้ำ วันที่และเวลา ───
+          const now = new Date();
+          const timestampText = `${now.toLocaleDateString('th-TH')} ${now.toLocaleTimeString('th-TH')}`;
+          const watermarkText = `PROCTOR.sys | ${timestampText}`;
+          
+          ctx.font = '18px "IBM Plex Mono", sans-serif';
+          const textWidth = ctx.measureText(watermarkText).width;
+          
+          // วาดพื้นหลังสีดำโปร่งแสง
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(tempCanvas.width - textWidth - 20, tempCanvas.height - 40, textWidth + 20, 40);
+          
+          // วาดตัวหนังสือสีขาว
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'right';
+          ctx.fillText(watermarkText, tempCanvas.width - 10, tempCanvas.height - 15);
 
-        image = tempCanvas.toDataURL('image/jpeg', 0.6); // บันทึกและบีบอัดเป็น JPEG 60%
+          image = tempCanvas.toDataURL('image/jpeg', 0.6); // บันทึกและบีบอัดเป็น JPEG 60%
+        } catch (err) {
+          console.error('Error capturing screenshot:', err);
+        }
       }
     }
 
@@ -140,7 +146,7 @@ export default function App() {
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      if (!video || !canvas || video.readyState < 2) {
+      if (!video || !canvas || !video.videoWidth || !video.videoHeight || video.readyState < 2) {
         rafRef.current = requestAnimationFrame(runLoop);
         return;
       }
@@ -153,36 +159,38 @@ export default function App() {
       const fc = frameCountRef.current;
 
       // Face Mesh: รันทุกเฟรมเพื่อให้ราบรื่น
-      if (faceMeshRef.current && !faceMeshBusyRef.current) {
+      if (faceMeshRef.current && !faceMeshBusyRef.current && typeof faceMeshRef.current.send === 'function') {
         faceMeshBusyRef.current = true;
         faceMeshRef.current.send({ image: video })
-          .catch(err => console.debug('FaceMesh error:', err.message))
+          .catch(err => console.debug('FaceMesh error:', err?.message || 'Unknown error'))
           .finally(() => { faceMeshBusyRef.current = false; });
       }
       
       // Face Detection: ลดความถี่
-      if (fc % FRAME_SKIP_FACE_DETECTION === 0 && faceDetectionRef.current && !faceDetectBusyRef.current) {
+      if (fc % FRAME_SKIP_FACE_DETECTION === 0 && faceDetectionRef.current && !faceDetectBusyRef.current && typeof faceDetectionRef.current.send === 'function') {
         faceDetectBusyRef.current = true;
         faceDetectionRef.current.send({ image: video })
-          .catch(err => console.debug('FaceDetection error:', err.message))
+          .catch(err => console.debug('FaceDetection error:', err?.message || 'Unknown error'))
           .finally(() => { faceDetectBusyRef.current = false; });
       }
       
       // Object Detection: ลดความถี่ + ปรับ confidence
-      if (fc % FRAME_SKIP_OBJECT_DETECTION === 0 && cocoRef.current && !cocoBusyRef.current) {
+      if (fc % FRAME_SKIP_OBJECT_DETECTION === 0 && cocoRef.current && !cocoBusyRef.current && typeof cocoRef.current.detect === 'function') {
         cocoBusyRef.current = true;
-        cocoRef.current.detect(video).then(preds => {
-          const susp = preds.filter(p => SUSPICIOUS_CLASSES.has(p.class) && p.score >= 0.50);
-          suspiciousObjRef.current = susp;
-          setSuspObjects(susp);
-          objAlertRef.current.update(susp.length > 0);
-          if (objAlertRef.current.shouldAlert() && susp.length > 0) {
-            const names = susp.map(s => s.class).join(', ');
-            addAlert('ตรวจพบวัตถุต้องสงสัย: ' + names, 'object', 'danger');
-          }
-        })
-        .catch(err => console.debug('COCO-SSD error:', err.message))
-        .finally(() => { cocoBusyRef.current = false; });
+        cocoRef.current.detect(video)
+          .then(preds => {
+            if (!Array.isArray(preds)) return;
+            const susp = preds.filter(p => SUSPICIOUS_CLASSES.has(p.class) && (p.score >= 0.50));
+            suspiciousObjRef.current = susp;
+            setSuspObjects(susp);
+            objAlertRef.current.update(susp.length > 0);
+            if (objAlertRef.current.shouldAlert() && susp.length > 0) {
+              const names = susp.map(s => s.class).join(', ');
+              addAlert('ตรวจพบวัตถุต้องสงสัย: ' + names, 'object', 'danger');
+            }
+          })
+          .catch(err => console.debug('COCO-SSD error:', err?.message || 'Unknown error'))
+          .finally(() => { cocoBusyRef.current = false; });
       }
       rafRef.current = requestAnimationFrame(runLoop);
     } catch (e) {

@@ -6,22 +6,43 @@ let updateScheduled = false; // ป้องกันการอัปเดต
 let lastViolationCount = {}; // จำจำนวนการทำผิดล่าสุดเพื่อแจ้งเตือน
 
 // รายการโจทย์ข้อสอบ (ดึงมาจาก index.html)
-const EXAM_QUESTIONS = [
-    "ภาษา HTML ใช้ทำอะไร?",
-    "CSS มีหน้าที่อะไร?",
-    "JavaScript ใช้ในการทำอะไร?",
-    "ตัวแปร (Variable) คืออะไร?",
-    "Loop ใช้สำหรับการทำอะไร?",
-    "Function มีประโยชน์อะไร?",
-    "Database ใช้เพื่อการอะไร?",
-    "API ในการเขียนโปรแกรมคืออะไร?"
-];
+let EXAM_QUESTIONS = [];
+let ANSWER_KEY = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchExamConfig(); // รอโหลดข้อมูล API ให้เสร็จก่อนเริ่มระบบ
     init();
 });
 
+async function fetchExamConfig() {
+    try {
+        // const response = await fetch('https://api.yourdomain.com/exam-config');
+        // const data = await response.json();
+        
+        // จำลองข้อมูลจาก API
+        const data = [
+            { text: "ภาษา HTML ใช้ทำอะไร?", correct: "B" },
+            { text: "CSS มีหน้าที่อะไร?", correct: "A" },
+            { text: "JavaScript ใช้ในการทำอะไร?", correct: "A" },
+            { text: "ตัวแปร (Variable) คืออะไร?", correct: "A" },
+            { text: "Loop ใช้สำหรับการทำอะไร?", correct: "A" },
+            { text: "Function มีประโยชน์อะไร?", correct: "A" },
+            { text: "Database ใช้เพื่อการอะไร?", correct: "B" },
+            { text: "API ในการเขียนโปรแกรมคืออะไร?", correct: "A" }
+        ];
+        
+        EXAM_QUESTIONS = data.map(q => q.text);
+        ANSWER_KEY = data.map(q => q.correct);
+    } catch (e) { console.error("Failed to load exam API", e); }
+}
+
 function init() {
+    // บังคับซ่อนกรอบ "สถิติเวลาตอบแต่ละข้อ" อัตโนมัติ (กรณีที่ยังไม่ได้ลบโค้ดออกจาก HTML)
+    const timeChartEl = document.getElementById('timeChart');
+    if (timeChartEl && timeChartEl.parentElement) {
+        timeChartEl.parentElement.style.display = 'none';
+    }
+
     updateDashboard();
     
     // ปรับปรุงการดักฟังเหตุการณ์ให้ทำงานทันใจผ่าน requestAnimationFrame (Real-time 60FPS)
@@ -65,60 +86,43 @@ function updateDashboard() {
     }
 
     const finishedData = JSON.parse(localStorage.getItem('mattepExamRecords') || '[]');
-    
-    let allStudents = [];
-    // 1. นำเข้าข้อมูลคนสอบเสร็จ
-    finishedData.forEach((item, index) => {
-        allStudents.push({ 
-            ...item, 
-            uid: (item.uid || ('f-' + item.studentNo + '-' + item.name)) + '-fin' + index, // บังคับให้ UID ไม่ซ้ำกันเด็ดขาด
-            status: 'finished', 
-            no: item.studentNo, 
+
+    // ใช้ Map เพื่อป้องกันข้อมูลนักเรียนซ้ำซ้อน (กรณี Live กับ Finished ชนกัน)
+    // และทำให้มั่นใจว่าข้อมูลเป็นของใครของมันจริงๆ
+    const studentMap = new Map();
+
+    // 1. ประมวลผลคนที่สอบเสร็จแล้วก่อน (สถานะสุดท้าย)
+    finishedData.forEach(item => {
+        const uid = item.uid || ('f-' + item.studentNo + '-' + item.name); // fallback สำหรับข้อมูลเก่า
+        studentMap.set(uid, {
+            ...item,
+            uid: uid,
+            status: 'finished',
+            no: item.studentNo,
             risk: getScoreValue(item),
             sortTime: item.submitTimestamp || 0
         });
     });
 
-    // 2. นำเข้าข้อมูลคนที่กำลังทำ
+    // 2. ประมวลผลคนที่กำลังสอบ (Live) โดยจะเพิ่มเข้าไปก็ต่อเมื่อยังไม่มีใน Map (ยังไม่สอบเสร็จ)
     liveStudents.forEach(item => {
-        allStudents.push({ 
-            ...item, 
-            uid: item.uid,
-            status: 'live', 
-            no: item.no, 
-            risk: getScoreValue(item),
-            sortTime: item.lastUpdate || Date.now()
-        });
-        
+        if (!studentMap.has(item.uid)) {
+            studentMap.set(item.uid, {
+                ...item,
+                uid: item.uid,
+                status: 'live',
+                no: item.no,
+                risk: getScoreValue(item),
+                sortTime: item.lastUpdate || Date.now()
+            });
+        }
         // ตรวจสอบพฤติกรรมใหม่เพื่อแสดง Toast
         checkNewViolations(item);
     });
 
-    // กำหนด ID ให้แต่ละรายชื่อ (เช่น 000001) โดยเรียงตามเวลาที่เริ่มทำข้อสอบ
-    const getStartTime = (s) => {
-        if (s.uid && s.uid.startsWith('u-')) {
-            const parts = s.uid.split('-');
-            if (parts[1]) return parseInt(parts[1], 10);
-        }
-        return s.sortTime || 0;
-    };
-    const sortedForId = [...allStudents].sort((a, b) => getStartTime(a) - getStartTime(b));
-    sortedForId.forEach((s, index) => {
-        s.displayId = String(index + 1).padStart(6, '0');
-    });
+    const allStudents = Array.from(studentMap.values());
 
-    // อัปเดตตัวเลือกห้องเรียนใน Dropdown อัตโนมัติ
-    const uniqueClasses = [...new Set(allStudents.map(s => s.class || s.studentClass).filter(c => c))].sort();
-    const classFilterEl = document.getElementById('classFilter');
-    if (classFilterEl) {
-        const currentValue = classFilterEl.value;
-        classFilterEl.innerHTML = '<option value="all">🏫 แสดงทุกห้องเรียน</option>' + 
-            uniqueClasses.map(c => `<option value="${c}">ห้อง ${c}</option>`).join('');
-        if (uniqueClasses.includes(currentValue) || currentValue === 'all') {
-            classFilterEl.value = currentValue;
-        }
-    }
-
+    analyzeAnomalies(allStudents); // ประมวลผลพฤติกรรมผิดปกติด้วยสถิติ
     updateSummaryStats(allStudents);
     renderStudentList(allStudents);
     
@@ -128,6 +132,43 @@ function updateDashboard() {
     
     if (selectedStudentUID) updateDetailView(allStudents);
     isInitialLoad = false; // ปลดล็อกให้แสดงแจ้งเตือนได้หลังจากโหลดข้อมูลรอบแรกเสร็จ
+}
+
+function analyzeAnomalies(students) {
+    const finished = students.filter(s => s.status === 'finished');
+    if (finished.length < 3) return; // ต้องมีข้อมูลห้องอย่างน้อย 3 คนเพื่อหา Base ค่าเฉลี่ย
+
+    // หา Mean และ SD ของ "เวลาทำข้อสอบ"
+    const times = finished.map(s => s.antiCheatReport?.runtime?.ms || 0).filter(t => t > 0);
+    const meanTime = times.reduce((a, b) => a + b, 0) / times.length;
+    const stdTime = Math.sqrt(times.reduce((a, b) => a + Math.pow(b - meanTime, 2), 0) / times.length) || 1;
+
+    // หา Mean และ SD ของ "ความถี่การหันหน้า/ชำเลืองตา"
+    const gazeCounts = finished.map(s => s.antiCheatReport?.statistics?.aiDetection || 0);
+    const meanGaze = gazeCounts.reduce((a, b) => a + b, 0) / gazeCounts.length;
+    const stdGaze = Math.sqrt(gazeCounts.reduce((a, b) => a + Math.pow(b - meanGaze, 2), 0) / gazeCounts.length) || 1;
+
+    finished.forEach(s => {
+        const report = s.antiCheatReport;
+        if (!report || s.anomalyProcessed) return;
+        
+        let anomalyScore = 0;
+        let reasons = [];
+
+        const zTime = ((report.runtime?.ms || 0) - meanTime) / stdTime;
+        if (zTime < -2.5) { anomalyScore += 30; reasons.push(`ทำข้อสอบเร็วผิดปกติ (Z-Score: ${zTime.toFixed(2)})`); }
+
+        const zGaze = ((report.statistics?.aiDetection || 0) - meanGaze) / stdGaze;
+        // เอาการเพิ่มคะแนนจากการหันหน้า/ชำเลืองตาออก (+0)
+        if (zGaze > 2.5) { anomalyScore += 0; reasons.push(`ความถี่การหันหน้าสูงกว่าเพื่อนในห้อง`); }
+
+        if (anomalyScore > 0) {
+            s.risk = Math.min(100, s.risk + anomalyScore);
+            s.anomalyProcessed = true;
+            // บันทึกลง Event Log ทันที
+            report.violations.push({ description: "ตรวจพบความผิดปกติทางสถิติ (Anomaly)", category: "System Anomaly", time: new Date().toLocaleTimeString('th-TH'), points: anomalyScore, details: reasons.join(", ") });
+        }
+    });
 }
 
 function updateSummaryStats(students) {
@@ -195,29 +236,39 @@ function updateSummaryStats(students) {
     
     // วิเคราะห์ข้อสอบ
     renderQuestionAnalysis(finished);
-    renderTimeChart(students);
 }
 
 function renderQuestionAnalysis(finishedStudents) {
     const correctEl = document.getElementById('mostCorrectQuestions');
     const wrongEl = document.getElementById('mostWrongQuestions');
 
+    const emptyPlaceholder = '<div class="text-xs text-slate-300 italic py-2">ยังไม่มีข้อมูลการส่งข้อสอบ</div>';
+    const noDataPlaceholder = '<div class="text-xs text-slate-300 italic py-2">ไม่มีข้อมูล</div>';
+
     if (finishedStudents.length === 0) {
-        const placeholder = '<div class="text-xs text-slate-300 italic py-2">ยังไม่มีข้อมูลการส่งข้อสอบ</div>';
-        correctEl.innerHTML = placeholder;
-        wrongEl.innerHTML = placeholder;
+        correctEl.innerHTML = emptyPlaceholder;
+        wrongEl.innerHTML = emptyPlaceholder;
         return;
     }
     
-    let correctCount = Array(8).fill(0);
+    let correctCount = Array(EXAM_QUESTIONS.length).fill(0);
+    let wrongCount = Array(EXAM_QUESTIONS.length).fill(0);
+    
     finishedStudents.forEach(s => {
         if (s.objectiveAnswers) {
-            s.objectiveAnswers.forEach((val, idx) => { if (val === 1) correctCount[idx]++; });
+            s.objectiveAnswers.forEach((val, idx) => { 
+                if (val === 1) {
+                    correctCount[idx]++; 
+                } else {
+                    wrongCount[idx]++;
+                }
+            });
         }
     });
 
-    const qStats = correctCount.map((count, i) => ({ q: i + 1, count }));
-    const sorted = [...qStats].sort((a, b) => b.count - a.count);
+    // กรองเฉพาะข้อที่มีคนตอบถูก/ผิด มากกว่า 0 คน และเรียงลำดับจากมากไปน้อย
+    const correctStats = correctCount.map((count, i) => ({ q: i + 1, count })).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
+    const wrongStats = wrongCount.map((count, i) => ({ q: i + 1, count })).filter(item => item.count > 0).sort((a, b) => b.count - a.count);
     
     const renderItem = (item) => `
         <div onclick="showQuestionDetail(${item.q})" class="flex justify-between items-center py-2 border-b border-slate-50 hover:bg-rose-50/30 cursor-pointer transition-all px-1 rounded group">
@@ -229,88 +280,33 @@ function renderQuestionAnalysis(finishedStudents) {
         </div>
     `;
 
-    document.getElementById('mostCorrectQuestions').innerHTML = sorted.slice(0, 3).map(renderItem).join('');
-    document.getElementById('mostWrongQuestions').innerHTML = sorted.slice(-3).reverse().map(renderItem).join('');
-}
-
-function renderTimeChart(students) {
-    const chartEl = document.getElementById('timeChart');
-    if (!chartEl) return;
-
-    if (students.length === 0) {
-        chartEl.innerHTML = '<div class="text-xs text-slate-300 italic self-center w-full text-center">ยังไม่มีข้อมูลเวลา</div>';
-        return;
-    }
-
-    let totalTimePerQuestion = Array(8).fill(0);
-    let countPerQuestion = Array(8).fill(0);
-
-    students.forEach(s => {
-        // รองรับทั้งโครงสร้างข้อมูลแบบ Live (antiCheat) และแบบส่งแล้ว (antiCheatReport)
-        const report = s.antiCheatReport || s.antiCheat;
-        const intervals = report?.answerTiming?.intervals || [];
-        intervals.forEach((ms, idx) => {
-            if (idx < 8) {
-                totalTimePerQuestion[idx] += ms;
-                countPerQuestion[idx]++;
-            }
-        });
-    });
-
-    const averages = totalTimePerQuestion.map((total, i) =>
-        countPerQuestion[i] ? parseFloat((total / countPerQuestion[i] / 1000).toFixed(1)) : 0
-    );
-
-    const maxSec = Math.max(...averages, 2); // ปรับ Scale ให้เห็นชัดขึ้น
-
-    chartEl.innerHTML = averages.map((sec, i) => {
-        const height = (sec / maxSec) * 100;
-        const barColor = sec > 0 && sec < 1.5 ? 'bg-red-500 hover:bg-red-600' : 'bg-rose-400 hover:bg-rose-500';
-        return `
-            <div class="flex-1 flex flex-col items-center gap-2 group relative">
-                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">${sec.toFixed(1)}s</div>
-                <div class="w-full bg-slate-50 rounded-t-sm flex items-end h-full overflow-hidden border-x border-t border-slate-100">
-                    <div class="w-full ${barColor} transition-all cursor-help" style="height: ${Math.max(height, sec > 0 ? 5 : 0)}%"></div>
-                </div>
-                <span class="text-[10px] font-bold text-slate-400">ข้อ ${i + 1}</span>
-            </div>`;
-    }).join('');
+    correctEl.innerHTML = correctStats.length > 0 ? correctStats.slice(0, 3).map(renderItem).join('') : noDataPlaceholder;
+    wrongEl.innerHTML = wrongStats.length > 0 ? wrongStats.slice(0, 3).map(renderItem).join('') : noDataPlaceholder;
 }
 
 function renderStudentList(students) {
     const list = document.getElementById('studentList');
     const search = document.getElementById('searchInput').value.toLowerCase();
     const filter = document.getElementById('riskFilter').value;
-    const classFilter = document.getElementById('classFilter') ? document.getElementById('classFilter').value : 'all';
 
     const newListHTML = students
         .filter(s => {
             const matchSearch = (s.name || '').toLowerCase().includes(search) || (s.no || '').includes(search);
-            const sClass = String(s.class || s.studentClass || '');
-            const matchClass = classFilter === 'all' || sClass === classFilter;
-
-            let matchRisk = true;
-            if (filter === 'high') matchRisk = s.risk > 60;
-            if (filter === 'medium') matchRisk = s.risk > 30 && s.risk <= 60;
-            if (filter === 'low') matchRisk = s.risk <= 30;
-
-            return matchSearch && matchRisk && matchClass;
+            if (filter === 'high') return matchSearch && s.risk > 60;
+            if (filter === 'medium') return matchSearch && s.risk > 30 && s.risk <= 60;
+            if (filter === 'low') return matchSearch && s.risk <= 30;
+            return matchSearch;
         })
         .sort((a, b) => {
-            // 1. เรียงตามห้องเรียนก่อน (Class)
-            const classA = String(a.class || a.studentClass || '').toLowerCase();
-            const classB = String(b.class || b.studentClass || '').toLowerCase();
-            if (classA < classB) return -1;
-            if (classA > classB) return 1;
-            
-            // 2. ถ้าอยู่ห้องเดียวกัน ให้เรียงตามเลขที่จากน้อยไปมาก (Number)
-            const noA = parseInt(a.no || a.studentNo || 0) || 0;
-            const noB = parseInt(b.no || b.studentNo || 0) || 0;
-            if (noA !== noB) return noA - noB;
-
-            // 3. ถ้าอยู่ห้องเดียวกัน เลขที่เดียวกัน ให้คนที่ทำเสร็จแล้วขึ้นก่อน
-            if (a.status !== b.status) return a.status === 'finished' ? -1 : 1;
-            
+            // 1. คนที่สอบเสร็จ (finished) อยู่บนสุด
+            if (a.status !== b.status) {
+                return a.status === 'finished' ? -1 : 1;
+            }
+            // 2. ในกลุ่มที่สอบเสร็จ เรียงตามเวลาที่เสร็จ (ใครเสร็จก่อนขึ้นก่อน - น้อยไปมาก)
+            if (a.status === 'finished') {
+                return a.sortTime - b.sortTime;
+            }
+            // 3. ในกลุ่มที่กำลังทำ เรียงตามความเสี่ยง (เสี่ยงสูงขึ้นก่อน)
             return b.risk - a.risk;
         })
         .map((s) => `
@@ -321,7 +317,7 @@ function renderStudentList(students) {
                           : 'bg-white/40 backdrop-blur-md border-rose-100/40 hover:bg-white/80 hover:border-rose-200 hover:translate-x-1 shadow-sm'}">
                 <div class="flex justify-between items-start mb-1.5">
                     <div class="font-medium text-slate-800 truncate pr-2 text-sm">
-                        ${s.name || 'ไม่ระบุชื่อ'}
+                        ${s.name || 'ไม่ระบุชื่อ'} <span class="hidden">${s.uid}</span>
                     </div>
                     ${s.status === 'live' 
                         ? `
@@ -335,8 +331,17 @@ function renderStudentList(students) {
                             ส่งแล้ว
                         </span>`}
                 </div>
-                <div class="flex justify-between items-center text-[11px]">
-                    <div class="text-slate-500 font-light">เลขที่ ${s.no} • ${s.class || s.studentClass || '-'}</div>
+                <div class="flex justify-between items-center w-full mt-2">
+                    <div class="flex items-center gap-2">
+                        <span class="flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[10px] font-medium border border-slate-200" title="เลขที่">
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                            ${s.no}
+                        </span>
+                        <span class="flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[10px] font-medium border border-slate-200" title="ห้อง">
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            ${s.class || s.studentClass || '-'}
+                        </span>
+                    </div>
                     <div class="flex items-center gap-1.5 font-bold ${s.risk > 60 ? 'text-rose-500' : s.risk > 30 ? 'text-amber-500' : 'text-emerald-500'}">
                         <span class="text-[9px] uppercase opacity-40 tracking-wider">Risk</span>
                         <span class="text-xs font-black">${s.risk}</span>
@@ -374,19 +379,19 @@ function updateDetailView(students) {
     if (!s) return;
 
     const displayName = s.name || 'ไม่ระบุชื่อ';
-    document.getElementById('detailNameTitle').textContent = displayName;
-    document.getElementById('detailName').textContent = displayName;
-    document.getElementById('detailClass').textContent = `เลขที่ ${s.no} / ${s.class || s.studentClass || '-'}`;
-    document.getElementById('detailScore').textContent = s.status === 'finished' ? `${s.score}/${s.scoreMax || 8}` : 'กำลังทำ...';
-    
+    document.getElementById('detailNameTitle').innerHTML = `${displayName} <span class="hidden">${s.uid}</span>`;
+    document.getElementById('detailName').innerHTML = `${displayName} <span class="hidden">${s.uid}</span>`;
+    document.getElementById('detailNo').textContent = s.no || '-';
+    document.getElementById('detailClass').textContent = s.class || s.studentClass || '-';
+    document.getElementById('detailScore').textContent = s.status === 'finished' ? `${s.score || 0}/${EXAM_QUESTIONS.length}` : '-';
     // แสดงคำตอบปรนัยแบบ Real-time
     const objGrid = document.getElementById('liveObjectiveGrid');
     const objAnswers = s.objectiveAnswers || [];
-    objGrid.innerHTML = Array(8).fill(0).map((_, i) => {
+    objGrid.innerHTML = Array(EXAM_QUESTIONS.length).fill(0).map((_, i) => {
         const ans = objAnswers[i] || '-';
         const isSelected = ans !== '-';
         return `
-            <div class="flex flex-col items-center p-2 rounded-lg border ${isSelected ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'}">
+            <div onclick="showQuestionDetail(${i+1})" class="cursor-pointer hover:scale-105 transition-transform flex flex-col items-center p-2 rounded-lg border ${isSelected ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'}">
                 <span class="text-[9px] font-bold text-slate-400 mb-1">${i+1}</span>
                 <span class="text-sm font-black ${isSelected ? 'text-rose-600' : 'text-slate-300'}">${ans}</span>
             </div>
@@ -431,43 +436,52 @@ function updateDetailView(students) {
     // ลำดับเหตุการณ์ (Event List)
     const eventLogList = document.getElementById('eventList');
     if (violations.length > 0) {
-        eventLogList.innerHTML = [...violations].reverse().map(v => {
-            const isHigh = v.points >= 25;
-            const iconColor = isHigh ? 'text-rose-500' : 'text-amber-500';
-            const bgColor = isHigh ? 'bg-rose-50' : 'bg-amber-50';
-            const borderColor = isHigh ? 'border-rose-100' : 'border-amber-100';
-            const badgeColor = isHigh ? 'bg-gradient-to-r from-rose-500 to-rose-400 text-white' : 'bg-gradient-to-r from-amber-500 to-amber-400 text-white';
-            
-            return `
-                        <li class="p-3 rounded-xl border ${borderColor} ${bgColor} flex items-start gap-3 transition-transform hover:-translate-y-0.5 shadow-sm mb-1">
-                            <div class="mt-0.5 ${iconColor}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start mb-1">
-                                    <span class="font-bold text-slate-800 text-sm">${v.category}</span>
-                                    <span class="text-xs text-slate-500 font-medium">${v.time || '00:00:00'}</span>
-                                </div>
-                                <div class="text-xs text-slate-600">${v.description}</div>
-                            </div>
-                            <div class="px-2.5 py-1 rounded-lg text-xs font-bold shadow-sm ${badgeColor} flex-shrink-0">
-                                +${v.points}
-                            </div>
-                        </li>
-            `;
-        }).join('');
+        eventLogList.innerHTML = [...violations].reverse().map(v => `
+            <li class="py-3 flex flex-col gap-2">
+                <div class="flex justify-between items-start w-full">
+                    <div class="pr-4">
+                        <div class="text-sm font-bold text-slate-800">${v.description}</div>
+                        <div class="text-xs text-slate-500">${v.time || ''} • ${v.category}</div>
+                    </div>
+                    <span class="text-xs font-bold px-2 py-1 rounded ${v.points >= 25 ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'}">+${v.points}</span>
+                </div>
+                ${v.image ? `
+                <button onclick="showImageModal('${v.image}', '${v.description}', '${v.time || ''}')" class="mt-1 flex items-center gap-2 text-xs font-semibold bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 hover:bg-rose-100 transition-colors w-fit">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    คลิกดูรูปหลักฐาน
+                </button>
+                ` : ''}
+            </li>
+        `).join('');
     } else {
-        eventLogList.innerHTML = `
-                    <li class="flex flex-col items-center justify-center text-slate-400 h-full gap-2 opacity-60">
-                        <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="text-sm font-medium">ไม่พบเหตุการณ์ผิดปกติ</span>
-                    </li>
-        `;
+        eventLogList.innerHTML = '<li class="py-3 text-sm text-slate-400 italic text-center">ไม่มีเหตุการณ์ผิดปกติ</li>';
     }
+}
+
+// ฟังก์ชันสำหรับเปิดรูปหลักฐานด้วยหน้าต่าง Modal
+function showImageModal(imgSrc, desc, time) {
+    const modal = document.getElementById('evidenceModal');
+    const content = document.getElementById('modalContentBlock');
+    
+    document.getElementById('modalTitle').textContent = 'หลักฐานการทุจริต';
+    document.getElementById('modalDescription').innerHTML = desc;
+    document.getElementById('modalTime').textContent = time;
+    
+    const imgContainer = document.getElementById('modalImage');
+    imgContainer.style.display = 'flex';
+    // เพิ่มฟังก์ชันคลิกเพื่อซูมขยายรูปภาพและจัดการ Cursor
+    imgContainer.innerHTML = `<img src="${imgSrc}" style="cursor: zoom-in; max-height: 350px; transition: max-height 0.3s ease;" class="w-full h-auto object-contain rounded-xl shadow-md" onclick="this.style.maxHeight = this.style.maxHeight === '80vh' ? '350px' : '80vh'; this.style.cursor = this.style.cursor === 'zoom-out' ? 'zoom-in' : 'zoom-out';" title="คลิกเพื่อซูม" alt="หลักฐาน" />`;
+
+    const wrongStudentsEl = document.getElementById('modalWrongStudents');
+    if (wrongStudentsEl && wrongStudentsEl.parentElement) {
+        wrongStudentsEl.parentElement.style.display = 'none'; // ซ่อนส่วนรายชื่อคนตอบผิดไปก่อน
+    }
+
+    modal.classList.remove('hidden-view');
+    setTimeout(() => {
+        content.classList.remove('scale-90', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
 }
 
 function exportReport() { alert('ฟีเจอร์การส่งออก PDF กำลังอยู่ในการพัฒนา'); }
@@ -478,7 +492,7 @@ function filterStudents() { updateDashboard(); }
 // ฟังก์ชันสำหรับแจ้งเตือนแบบ Real-time Toast
 function checkNewViolations(student) {
     const studentKey = student.uid;
-    const violations = student.antiCheat?.violations || [];
+    const violations = student.antiCheat?.violations || student.antiCheatReport?.violations || [];
     const currentCount = violations.length;
 
     // ถ้าเป็นการโหลดครั้งแรก ให้จำจำนวนไว้เฉยๆ ไม่ต้องแจ้งเตือน
@@ -490,32 +504,50 @@ function checkNewViolations(student) {
     // ถ้ามีเคสใหม่เพิ่มขึ้น ให้แสดง Toast
     if (currentCount > (lastViolationCount[studentKey] || 0)) {
         const newVio = violations[violations.length - 1];
-        showLiveToast(student.name, newVio.description, student.no);
+        if (newVio) showLiveToast(student.name, newVio.description, student.no, student.uid);
     }
     lastViolationCount[studentKey] = currentCount;
 }
 
-function showLiveToast(name, desc, no) {
+function showLiveToast(name, desc, no, uid) {
     const container = document.getElementById('toastContainer');
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = 'bg-white border-l-4 border-rose-500 shadow-2xl p-4 rounded-r-lg mb-3 animate-slide-in-right flex flex-col gap-1 min-w-[280px]';
+    toast.className = 'bg-white border border-rose-100 shadow-2xl p-4 rounded-2xl mb-3 animate-slide-in-right flex gap-3 min-w-[300px] max-w-[350px] cursor-pointer hover:bg-rose-50 transition-all hover:scale-[1.02]';
+    
+    // เมื่อคลิกที่แจ้งเตือน จะพาไปดูหน้ารายละเอียดของนักเรียนคนนั้นทันที
+    if (uid) {
+        toast.onclick = () => {
+            selectStudent(uid);
+            toast.classList.add('animate-fade-out-right');
+            setTimeout(() => toast.remove(), 300);
+        };
+    }
+
     toast.innerHTML = `
-        <div class="flex justify-between items-center">
-            <span class="font-bold text-rose-600 text-xs">ตรวจพบความผิดปกติ!</span>
-            <span class="text-[10px] text-slate-400">เมื่อครู่นี้</span>
+        <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-rose-100 text-rose-600 mt-0.5">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         </div>
-        <div class="text-sm font-bold text-slate-800">${name || 'ไม่ระบุชื่อ'} (เลขที่ ${no || '-'})</div>
-        <div class="text-xs text-slate-500">${desc}</div>
+        <div class="flex flex-col w-full">
+            <div class="flex justify-between items-start w-full mb-1">
+                <span class="font-bold text-rose-600 text-sm">แจ้งเตือนทุจริต!</span>
+                <span class="text-[10px] text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">เมื่อครู่</span>
+            </div>
+            <div class="text-sm font-bold text-slate-800">${name || 'ไม่ระบุชื่อ'} <span class="text-xs text-slate-500 font-normal ml-1">(เลขที่ ${no || '-'})</span></div>
+            <div class="text-xs text-slate-600 mt-1.5 bg-rose-50/50 p-2 rounded-lg border border-rose-100/50 leading-relaxed">${desc}</div>
+            ${uid ? '<div class="text-[10px] text-rose-500 font-semibold mt-2 flex items-center gap-1 opacity-80"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> คลิกเพื่อดูรายละเอียด</div>' : ''}
+        </div>
     `;
 
     container.appendChild(toast);
 
     setTimeout(() => {
-        toast.classList.add('animate-fade-out-right');
-        setTimeout(() => toast.remove(), 300);
-    }, 5000);
+        if (toast.parentElement) {
+            toast.classList.add('animate-fade-out-right');
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 6000);
 }
 
 /**
@@ -523,13 +555,29 @@ function showLiveToast(name, desc, no) {
  */
 function showQuestionDetail(qNum) {
     const text = EXAM_QUESTIONS[qNum - 1];
+    const correctAns = ANSWER_KEY[qNum - 1];
     const modal = document.getElementById('evidenceModal');
     const content = document.getElementById('modalContentBlock');
     
     document.getElementById('modalTitle').textContent = `โจทย์ปรนัยข้อที่ ${qNum}`;
-    document.getElementById('modalDescription').textContent = text;
+    document.getElementById('modalDescription').innerHTML = `${text}<br><br><span class="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg text-sm font-bold"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> เฉลย: ตัวเลือก ${correctAns}</span>`;
     document.getElementById('modalTime').textContent = "หมวด: ปรนัย";
     document.getElementById('modalImage').style.display = 'none'; // ซ่อนส่วนรูปภาพสำหรับโจทย์
+
+    const records = JSON.parse(localStorage.getItem('mattepExamRecords') || '[]');
+    const wrongStudents = records.filter(r => r.objectiveAnswers && r.objectiveAnswers[qNum - 1] === 0).map(r => `${r.name || 'ไม่ระบุชื่อ'} (เลขที่ ${r.studentNo || '-'})`);
+    
+    const wrongStudentsEl = document.getElementById('modalWrongStudents');
+    if (wrongStudentsEl) {
+        wrongStudentsEl.parentElement.style.display = 'flex'; // แสดงส่วนรายชื่อคนตอบผิดกลับมา
+        if (wrongStudents.length > 0) {
+            wrongStudentsEl.className = 'text-sm bg-rose-50 border border-rose-100 p-3 rounded-lg max-h-[120px] overflow-y-auto';
+            wrongStudentsEl.innerHTML = `<ul class="list-disc pl-5 space-y-1 text-rose-600 font-medium">${wrongStudents.map(name => `<li>${name}</li>`).join('')}</ul>`;
+        } else {
+            wrongStudentsEl.className = 'text-sm bg-emerald-50 border border-emerald-100 p-3 rounded-lg max-h-[120px] overflow-y-auto text-center';
+            wrongStudentsEl.innerHTML = '<div class="flex items-center justify-center gap-2 text-emerald-600 font-bold py-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ไม่มีนักเรียนที่ตอบผิด</div>';
+        }
+    }
 
     modal.classList.remove('hidden-view');
     setTimeout(() => {
@@ -544,6 +592,8 @@ function closeEvidenceModal() {
     content.classList.add('scale-90', 'opacity-0');
     setTimeout(() => {
         modal.classList.add('hidden-view');
-        document.getElementById('modalImage').style.display = 'flex'; // คืนค่าส่วนรูปภาพ
+        const imgContainer = document.getElementById('modalImage');
+        imgContainer.style.display = 'flex'; // คืนค่าส่วนรูปภาพ
+        imgContainer.innerHTML = '<svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
     }, 300);
 }

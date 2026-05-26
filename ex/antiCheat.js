@@ -1,3 +1,4 @@
+
 /**
  * MATTEP Anti-Cheat System v4.0
  * ระบบตรวจจับพฤติกรรมผิดปกติระหว่างการสอบแบบทำงานในเครื่องผู้ใช้
@@ -5,18 +6,23 @@
 
 class AntiCheat {
   constructor() {
-    this.suspicionScore = 0;
+    // สถานะพื้นฐานของการสอบ
+    this.suspicionScore = 0; // คะแนนสะสมความเสี่ยงการโกง
     this.violations = [];
     this.timeline = [];
     this.examStartTime = Date.now();
     this.lastEventTime = {};
     this.lastVisibilityHiddenAt = null;
     this.lastAnswerAt = null;
+
+    // สถิติการตอบคำถาม (ใช้หาคนที่ตอบเร็วผิดปกติ/บอท)
     this.answerTiming = {
       rapidAnswers: 0,
       answered: {},
       intervals: [],
     };
+
+    // สถิติการพิมพ์ (ใช้ตรวจจับการวางข้อความหรือมาโคร)
     this.typingStats = {
       keyCount: 0,
       pasteBursts: 0,
@@ -24,6 +30,8 @@ class AntiCheat {
       lastKeyAt: null,
       intervals: [],
     };
+
+    // สถิติการใช้เมาส์ (ตรวจจับบอทที่ไม่มีการขยับเมาส์)
     this.mouseStats = {
       moves: 0,
       clicks: 0,
@@ -32,6 +40,8 @@ class AntiCheat {
       lastY: null,
       lastMoveAt: 0,
     };
+
+    // ตัวนับจำนวนครั้งที่ทำผิดกฎในแต่ละหมวดหมู่
     this.eventCounts = {
       devtools: 0,
       tabSwitch: 0,
@@ -48,11 +58,15 @@ class AntiCheat {
       storage: 0,
       print: 0,
       search: 0,
+      aiDetection: 0, // เพิ่มหมวดหมู่สถิติสำหรับกล้อง AI
     };
-    this.thresholds = { warning: 40, highRisk: 65, cheating: 85 };
+    this.thresholds = Soer.thresholds;
     this.init();
   }
 
+  /**
+   * เริ่มต้นการทำงานของระบบ Anti-Cheat (ดักจับ Event ต่างๆ)
+   */
   init() {
     this._setupListeners();
     this._guardStorageApis();
@@ -61,6 +75,9 @@ class AntiCheat {
     this._showStatus();
   }
 
+  /**
+   * ผูก Event Listener เข้ากับ Window/Document เพื่อดักพฤติกรรม
+   */
   _setupListeners() {
     document.addEventListener('keydown', (e) => this._onKeyDown(e), true);
     document.addEventListener('visibilitychange', () => this._onVisibilityChange());
@@ -80,38 +97,52 @@ class AntiCheat {
     document.addEventListener('click', () => { this.mouseStats.clicks++; }, true);
   }
 
+  /**
+   * ตรวจสอบว่าเป้าหมายที่ผู้ใช้กำลังกระทำอยู่เป็นช่องกรอกข้อความหรือไม่
+   * (เพื่อป้องกันการแจ้งเตือนผิดพลาดเวลาผู้ใช้กดคีย์บอร์ดพิมพ์งานปกติ)
+   */
   _isEditableTarget(target) {
     return target && (target.matches?.('input, textarea, [contenteditable="true"]') || target.closest?.('input, textarea, [contenteditable="true"]'));
   }
 
-  _isRecent(key, ms = 1800) {
+  /**
+   * ป้องกันการบันทึกการโกงซ้ำซ้อนในช่วงเวลาสั้นๆ (Cooldown/Debounce)
+   * @returns {boolean} true ถ้ายกเว้น (พึ่งเกิดเหตุการณ์นี้ไป)
+   */
+  _isRecent(key, ms = Soer.timing.defaultRecentMs) {
     const now = Date.now();
     if (this.lastEventTime[key] && now - this.lastEventTime[key] < ms) return true;
     this.lastEventTime[key] = now;
     return false;
   }
 
+  /**
+   * ดักจับการกดคีย์บอร์ด (ป้องกันปุ่ม F12, PrintScreen, คีย์ลัดต่างๆ)
+   */
   _onKeyDown(e) {
     const key = e.key.toUpperCase();
+    // ตรวจจับการพยายามเปิด DevTools (F12, Ctrl+Shift+I/J/C, Ctrl+U)
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(key)) || (e.ctrlKey && key === 'U')) {
       e.preventDefault();
-      this._addViolation('DevTools Attempt', 30, 'devtools', `Key: ${e.key}`);
+      this._addViolation('DevTools Attempt', Soer.points.devtools, 'devtools', `Key: ${e.key}`);
       return;
     }
 
+    // ตรวจจับการแคปหน้าจอ (PrintScreen, Ctrl+Shift+S)
     if (e.key === 'PrintScreen' || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's')) {
       e.preventDefault();
-      this._addViolation('Screenshot Attempt', 30, 'screenshot', 'พยายามแคปหน้าจอ');
-      this._blackout(2500);
+      this._addViolation('Screenshot Attempt', Soer.points.screenshot, 'screenshot', 'พยายามแคปหน้าจอ');
+      this._blackout(Soer.timing.blackoutDuration);
       return;
     }
 
+    // ตรวจจับคีย์ลัดอื่นๆ เช่น Copy, Cut, Print, ค้นหา (Ctrl+F)
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
       const shortcuts = {
-        C: ['Copy Shortcut', 'copy', 6],
-        X: ['Cut Shortcut', 'cut', 8],
-        P: ['Print Shortcut', 'print', 20],
-        F: ['Search Shortcut', 'search', 12],
+        C: ['Copy Shortcut', 'copy', Soer.points.copyShortcut],
+        X: ['Cut Shortcut', 'cut', Soer.points.cutShortcut],
+        P: ['Print Shortcut', 'print', Soer.points.printShortcut],
+        F: ['Search Shortcut', 'search', Soer.points.searchShortcut],
       };
       const hit = shortcuts[key];
       if (hit) {
@@ -120,6 +151,7 @@ class AntiCheat {
       }
     }
 
+    // เก็บสถิติความเร็วการพิมพ์เพื่อหาพฤติกรรมผิดปกติ (พิมพ์เร็วเท่ากันเป๊ะๆ แบบมาโคร)
     if (this._isEditableTarget(e.target) && e.key.length === 1) {
       const now = Date.now();
       this.typingStats.keyCount++;
@@ -130,81 +162,111 @@ class AntiCheat {
     }
   }
 
+  /**
+   * ตรวจจับเมื่อผู้ใช้สลับไปแท็บอื่น หรือพับหน้าต่างเบราว์เซอร์
+   */
   _onVisibilityChange() {
     if (document.hidden) {
       this.lastVisibilityHiddenAt = Date.now();
-      this._addViolation('Tab Hidden', 12, 'tabSwitch', 'ออกจากหน้าเว็บสอบ');
+      this._addViolation('Tab Hidden', Soer.points.tabHidden, 'tabSwitch', 'ออกจากหน้าเว็บสอบ');
       return;
     }
 
     if (this.lastVisibilityHiddenAt) {
       const awayMs = Date.now() - this.lastVisibilityHiddenAt;
-      if (awayMs > 5000) {
-        this._addViolation('Away From Exam', 18, 'tabSwitch', `ออกจากหน้า ${Math.round(awayMs / 1000)} วินาที`);
+      if (awayMs > Soer.timing.awayFromExamMs) {
+        this._addViolation('Away From Exam', Soer.points.awayFromExam, 'tabSwitch', `ออกจากหน้า ${Math.round(awayMs / 1000)} วินาที`);
       }
       this.lastVisibilityHiddenAt = null;
     }
   }
 
+  /**
+   * ตรวจจับเมื่อหน้าต่างเบราว์เซอร์สูญเสียการโฟกัส (คลิกไปเปิดโปรแกรมอื่น)
+   */
   _onBlur() {
-    if (!window.__mattepSubmitting && !this._isRecent('blur', 2500)) {
-      this._addViolation('Window Blur', 8, 'tabSwitch', 'หน้าต่างสอบไม่ได้อยู่ด้านหน้า');
+    if (!window.__mattepSubmitting && !this._isRecent('blur', Soer.timing.blurCooldownMs)) {
+      this._addViolation('Window Blur', Soer.points.windowBlur, 'tabSwitch', 'หน้าต่างสอบไม่ได้อยู่ด้านหน้า');
     }
   }
 
+  /**
+   * ตรวจจับความพยายามคัดลอกข้อความ
+   */
   _onCopy(e) {
     if (this._isEditableTarget(e.target)) return;
     e.preventDefault();
-    this._addViolation('Copy Attempt', 8, 'copy', 'คัดลอกข้อความนอกช่องตอบ');
+    this._addViolation('Copy Attempt', Soer.points.copyAttempt, 'copy', 'คัดลอกข้อความนอกช่องตอบ');
   }
 
+  /**
+   * ตรวจจับการวางข้อความ (ป้องกันก๊อปปี้คำตอบมาแปะ)
+   */
   _onPaste(e) {
     if (!this._isEditableTarget(e.target)) {
       e.preventDefault();
-      this._addViolation('Paste Attempt', 12, 'paste', 'วางข้อความนอกช่องตอบ');
+      this._addViolation('Paste Attempt', Soer.points.pasteAttempt, 'paste', 'วางข้อความนอกช่องตอบ');
       return;
     }
 
     const text = e.clipboardData?.getData('text') || '';
     this.typingStats.pasteBursts++;
-    if (text.trim().length > 60) {
-      this._addViolation('Large Paste', 18, 'paste', `วางข้อความ ${text.trim().length} ตัวอักษร`);
+    if (text.trim().length > Soer.limits.largePasteLength) {
+      this._addViolation('Large Paste', Soer.points.largePaste, 'paste', `วางข้อความ ${text.trim().length} ตัวอักษร`);
     } else {
-      this._addViolation('Paste In Answer', 8, 'paste', 'มีการวางข้อความในคำตอบ');
+      this._addViolation('Paste In Answer', Soer.points.pasteInAnswer, 'paste', 'มีการวางข้อความในคำตอบ');
     }
   }
 
+  /**
+   * ตรวจจับการตัดข้อความ (Cut)
+   */
   _onCut(e) {
     if (this._isEditableTarget(e.target)) return;
     e.preventDefault();
-    this._addViolation('Cut Attempt', 8, 'cut', 'ตัดข้อความนอกช่องตอบ');
+    this._addViolation('Cut Attempt', Soer.points.cutAttempt, 'cut', 'ตัดข้อความนอกช่องตอบ');
   }
 
+  /**
+   * ดักการคลิกขวา เพื่อป้องกันการ Inspect Element หรือใช้ตัวช่วย
+   */
   _onContextMenu(e) {
     if (this._isEditableTarget(e.target)) return;
     e.preventDefault();
-    this._addViolation('Right Click', 5, 'rightClick', 'คลิกขวา');
+    this._addViolation('Right Click', Soer.points.rightClick, 'rightClick', 'คลิกขวา');
   }
 
+  /**
+   * ดักการสั่งพิมพ์หน้าจอ (Ctrl+P) หรือเซฟเป็น PDF
+   */
   _onBeforePrint(e) {
     e.preventDefault();
-    this._addViolation('Print Attempt', 22, 'print', 'พยายามพิมพ์หรือบันทึกเป็น PDF');
+    this._addViolation('Print Attempt', Soer.points.printAttempt, 'print', 'พยายามพิมพ์หรือบันทึกเป็น PDF');
   }
 
+  /**
+   * ตรวจจับการพยายามแฮ็กระบบผ่านการแก้ไข LocalStorage ของเบราว์เซอร์
+   */
   _onStorageChange(e) {
     if (e.key === 'mattepExamRecords' || e.key === 'examSubmission') {
-      this._addViolation('Storage Changed', 22, 'storage', 'ข้อมูลสอบในเครื่องถูกเปลี่ยนระหว่างสอบ');
+      this._addViolation('Storage Changed', Soer.points.storageChanged, 'storage', 'ข้อมูลสอบในเครื่องถูกเปลี่ยนระหว่างสอบ');
     }
   }
 
+  /**
+   * วิเคราะห์การกรอกข้อความยาวๆ อย่างรวดเร็ว (อาจใช้ Auto-fill หรือบอท)
+   */
   _analyzeInput(e) {
     if (!this._isEditableTarget(e.target)) return;
     const value = e.target.value || '';
-    if (value.length > 120 && this.typingStats.keyCount < 8 && !this._isRecent('bulk-input', 3000)) {
-      this._addViolation('Bulk Text Input', 16, 'typing', 'ข้อความยาวถูกใส่เร็วผิดปกติ');
+    if (value.length > Soer.limits.bulkInputLength && this.typingStats.keyCount < Soer.limits.bulkInputMaxKeys && !this._isRecent('bulk-input', Soer.timing.bulkInputCooldownMs)) {
+      this._addViolation('Bulk Text Input', Soer.points.bulkInput, 'typing', 'ข้อความยาวถูกใส่เร็วผิดปกติ');
     }
   }
 
+  /**
+   * วิเคราะห์ระยะเวลาการตอบข้อสอบ (หาคนที่ตอบเร็วผิดปกติเกินมนุษย์)
+   */
   _analyzeAnswerTiming(e) {
     if (!e.target?.matches?.('input[type="radio"]')) return;
     const name = e.target.name;
@@ -219,16 +281,19 @@ class AntiCheat {
     const qNum = parseInt(name.substring(1));
     if (qNum > 0) this.answerTiming.intervals[qNum - 1] = interval;
 
-    if (interval < 1200) {
+    if (interval < Soer.timing.rapidAnswerThresholdMs) {
       this.answerTiming.rapidAnswers++;
-      this._addViolation('Rapid Answer', 7, 'answerTiming', `ตอบห่างกัน ${Math.round(interval)} ms`);
+      this._addViolation('Rapid Answer', Soer.points.rapidAnswer, 'answerTiming', `ตอบห่างกัน ${Math.round(interval)} ms`);
     }
     this.lastAnswerAt = now;
   }
 
+  /**
+   * เก็บข้อมูลการเคลื่อนที่ของเมาส์ ใช้ยืนยันว่าเป็นคนใช้งานจริงหรือไม่
+   */
   _analyzeMouseMove(e) {
     const now = Date.now();
-    if (now - this.mouseStats.lastMoveAt < 140) return;
+    if (now - this.mouseStats.lastMoveAt < Soer.timing.mouseMoveThrottleMs) return;
     this.mouseStats.lastMoveAt = now;
     this.mouseStats.moves++;
 
@@ -241,40 +306,52 @@ class AntiCheat {
     this.mouseStats.lastY = e.clientY;
   }
 
+  /**
+   * ป้องกันการเขียนข้อมูลข้าม API ขัดขวางการแก้คะแนนหรือสคริปต์แก้ไขข้อสอบ
+   */
   _guardStorageApis() {
     const originalSetItem = Storage.prototype.setItem;
     const self = this;
     Storage.prototype.setItem = function(key, value) {
       if (!window.__mattepSubmitting && (key === 'mattepExamRecords' || key === 'examSubmission')) {
-        self._addViolation('Storage Write', 18, 'storage', `เขียนข้อมูล ${key}`);
+        self._addViolation('Storage Write', Soer.points.storageWrite, 'storage', `เขียนข้อมูล ${key}`);
       }
       return originalSetItem.apply(this, arguments);
     };
   }
 
+  /**
+   * ตรวจจับหน้าต่าง DevTools ที่เปิดแบบ Docking (ดูจากการลดลงของพื้นที่หน้าจอ)
+   */
   _monitorDevtoolsResize() {
     setInterval(() => {
       const widthGap = Math.abs(window.outerWidth - window.innerWidth);
       const heightGap = Math.abs(window.outerHeight - window.innerHeight);
-      if ((widthGap > 180 || heightGap > 220) && !this._isRecent('devtools-resize', 6000)) {
-        this._addViolation('Possible DevTools', 18, 'devtools', 'ขนาดหน้าต่างคล้ายเปิดเครื่องมือนักพัฒนา');
+      if ((widthGap > Soer.limits.devtoolsWidthGap || heightGap > Soer.limits.devtoolsHeightGap) && !this._isRecent('devtools-resize', Soer.timing.devtoolsResizeCooldownMs)) {
+        this._addViolation('Possible DevTools', Soer.points.possibleDevtools, 'devtools', 'ขนาดหน้าต่างคล้ายเปิดเครื่องมือนักพัฒนา');
       }
-    }, 4000);
+    }, Soer.timing.devtoolsResizeCheckIntervalMs);
   }
 
+  /**
+   * ลูปวิเคราะห์รูปแบบการพิมพ์ (Typing Pattern) อย่างต่อเนื่อง
+   */
   _startPatternLoop() {
     setInterval(() => {
-      const intervals = this.typingStats.intervals.slice(-20);
-      if (intervals.length >= 12) {
+      const intervals = this.typingStats.intervals.slice(-Soer.limits.typingIntervalSlice);
+      if (intervals.length >= Soer.limits.typingIntervalMinLength) {
         const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-        if (avg < 65 && !this._isRecent('typing-pattern', 8000)) {
+        if (avg < Soer.limits.typingAvgSpeedFast && !this._isRecent('typing-pattern', Soer.timing.typingPatternCooldownMs)) {
           this.typingStats.fastBursts++;
-          this._addViolation('Fast Typing Pattern', 10, 'typing', 'ความเร็วพิมพ์สม่ำเสมอผิดปกติ');
+          this._addViolation('Fast Typing Pattern', Soer.points.fastTypingPattern, 'typing', 'ความเร็วพิมพ์สม่ำเสมอผิดปกติ');
         }
       }
-    }, 5000);
+    }, Soer.timing.typingPatternCheckIntervalMs);
   }
 
+  /**
+   * แสดงหน้าจอสีดำบังข้อสอบชั่วคราว เมื่อมีการกดแคปหน้าจอ (รบกวนการถ่ายภาพ)
+   */
   _blackout(duration) {
     const cover = document.createElement('div');
     cover.style.cssText = 'position:fixed;inset:0;background:#020617;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font:700 18px sans-serif;z-index:9999;padding:24px;';
@@ -283,6 +360,9 @@ class AntiCheat {
     setTimeout(() => cover.remove(), duration);
   }
 
+  /**
+   * แสดงสถานะว่า Anti-Cheat ทำงานอยู่
+   */
   _showStatus() {
     const badge = document.createElement('div');
     badge.id = 'antiCheatStatus';
@@ -295,8 +375,11 @@ class AntiCheat {
     }
   }
 
-  _addViolation(type, points, category, details = '') {
-    if (this._isRecent(`${type}:${details}`, 1200)) return;
+  /**
+   * บันทึกความผิด เพิ่มคะแนนสะสม และยิง Event แจ้งเตือนไปยังระบบหลัก
+   */
+  _addViolation(type, points, category, details = '', image = null) {
+    if (this._isRecent(`${type}:${details}`, Soer.timing.violationCooldownMs)) return;
     this.eventCounts[category] = (this.eventCounts[category] || 0) + 1;
     this.suspicionScore = Math.min(100, this.suspicionScore + points);
 
@@ -304,6 +387,7 @@ class AntiCheat {
       type,
       category,
       details,
+      image,
       points,
       description: this._describe(type),
       time: new Date().toLocaleTimeString('th-TH'),
@@ -316,6 +400,14 @@ class AntiCheat {
     document.dispatchEvent(new CustomEvent('antiCheatViolation', { detail: event }));
   }
 
+  // เพิ่ม Public Method ให้ระบบ AI ของกล้องนำข้อมูลมาบันทึกลงใน Event Log
+  addViolation({ description, points, category, details = '', image = null }) {
+    this._addViolation(description, points, category, details, image);
+  }
+
+  /**
+   * แปลงประเภทความผิดเป็นคำอธิบายภาษาไทย เพื่อแสดงในรายงาน
+   */
   _describe(type) {
     const labels = {
       'DevTools Attempt': 'พยายามเปิดเครื่องมือนักพัฒนา',
@@ -340,6 +432,9 @@ class AntiCheat {
     return labels[type] || type;
   }
 
+  /**
+   * ประเมินระดับความเสี่ยงจากคะแนนสะสม
+   */
   _riskLevel() {
     if (this.suspicionScore >= this.thresholds.cheating) return 'CHEATING';
     if (this.suspicionScore >= this.thresholds.highRisk) return 'HIGH RISK';
@@ -347,6 +442,9 @@ class AntiCheat {
     return 'SAFE';
   }
 
+  /**
+   * สรุปรายงานการวิเคราะห์ (ดึงไปใช้ตอนส่งข้อสอบ)
+   */
   getAnalysisReport() {
     const runtimeMs = Date.now() - this.examStartTime;
     const minutes = Math.floor(runtimeMs / 60000);

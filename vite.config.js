@@ -1,1 +1,10 @@
-import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n  server: {\n    port: 5173,\n    strictPort: false,\n    open: true,\n    host: 'localhost',\n  },\n  build: {\n    outDir: 'dist',\n    sourcemap: false,\n    minify: 'terser',\n    terserOptions: {\n      compress: {\n        drop_console: true,\n      },\n    },\n    rollupOptions: {\n      output: {\n        manualChunks: {\n          'vendor-mediapipe': ['@mediapipe/tasks-vision'],\n        },\n      },\n    },\n  },\n  optimizeDeps: {\n    include: [\n      'react',\n      'react-dom',\n      '@tensorflow-models/coco-ssd',\n      '@tensorflow/tfjs',\n    ],\n  },\n});\n"
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: true, // อนุญาตให้เครื่องอื่นในเครือข่ายเดียวกัน (วง LAN/Wi-Fi) เข้าถึงหน้าเว็บนี้ได้
+    allowedHosts: true, // อนุญาตให้เชื่อมต่อผ่านโดเมนภายนอก (เช่น Cloudflare Tunnel หรือ Localtunnel) ได้โดยไม่ถูกบล็อก
+  }
+});
